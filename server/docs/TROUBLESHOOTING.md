@@ -82,7 +82,7 @@ npm ERR!     /Users/joe/.npm/_logs/2018-09-04T17_34_11_215Z-debug.log
 
 > **Solution:** You are most likely already running another instance of the server. Stop the other instance or application that uses port 3000 and try again.
 
-## MongoNetworkError: failed to connect to server [localhost:27017]
+## MongoNetworkError: failed to connect to server [127.0.0.1:27017]
 
 When trying to `npm start`
 
@@ -91,7 +91,7 @@ When trying to `npm start`
 > node ./server/app.js
 
 Express server listening on port 3000, in development mode
-(node:42678) UnhandledPromiseRejectionWarning: MongoNetworkError: failed to connect to server [localhost:27017] on first connect [MongoNetworkError: connect ECONNREFUSED 127.0.0.1:27017]
+(node:42678) UnhandledPromiseRejectionWarning: MongoNetworkError: failed to connect to server [127.0.0.1:27017] on first connect [MongoNetworkError: connect ECONNREFUSED 127.0.0.1:27017]
     at Pool.<anonymous> (/Users/joe/Projects/Web/express-template/node_modules/mongodb-core/lib/topologies/server.js:564:11)
     at Pool.emit (events.js:182:13)
     at Connection.<anonymous> (/Users/joe/Projects/Web/express-template/node_modules/mongodb-core/lib/connection/pool.js:317:12)
@@ -110,7 +110,7 @@ Express server listening on port 3000, in development mode
 > **Solution:** Your MongoDB server is not up and running. Start `mongod` and try again. You can go back to the Data Managment course and check your [dit032-setup](https://github.com/joe4dev/dit032-setup).
 
 
-## GET http://localhost:3000/api [errored] connect ECONNREFUSED 127.0.0.1:3000
+## GET http://127.0.0.1:3000/api [errored] connect ECONNREFUSED 127.0.0.1:3000
 
 When trying to `npm test`
 
@@ -123,13 +123,13 @@ newman
 
 express-template
 
-→ http://localhost:3000/api
-  GET http://localhost:3000/api [errored]
+→ http://127.0.0.1:3000/api
+  GET http://127.0.0.1:3000/api [errored]
      connect ECONNREFUSED 127.0.0.1:3000
   2⠄ JSONError in test-script
 
-→ http://localhost:3000/api/camels
-  GET http://localhost:3000/api/camels [errored]
+→ http://127.0.0.1:3000/api/camels
+  GET http://127.0.0.1:3000/api/camels [errored]
      connect ECONNREFUSED 127.0.0.1:3000
   4⠄ JSONError in test-script
 
@@ -157,19 +157,19 @@ express-template
 
  1.  Error                              connect ECONNREFUSED 127.0.0.1:3000
                                         at request
-                                        inside "http://localhost:3000/api"
+                                        inside "http://127.0.0.1:3000/api"
 
  2.  JSONError                          Unexpected token u in JSON at position 0
                                         at test-script
-                                        inside "http://localhost:3000/api"
+                                        inside "http://127.0.0.1:3000/api"
 
  3.  Error                              connect ECONNREFUSED 127.0.0.1:3000
                                         at request
-                                        inside "http://localhost:3000/api/camels"
+                                        inside "http://127.0.0.1:3000/api/camels"
 
  4.  JSONError                          Unexpected token u in JSON at position 0
                                         at test-script
-                                        inside "http://localhost:3000/api/camels"
+                                        inside "http://127.0.0.1:3000/api/camels"
 npm ERR! Test failed.  See above for more details.
 ```
 

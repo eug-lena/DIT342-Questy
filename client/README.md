@@ -27,7 +27,7 @@ Optional: Learn how to create such a project template in this [tutorial](https:/
 
 ## Requirements
 
-* [Server](../server/README.md) backend running on `http://localhost:3000`
+* [Server](../server/README.md) backend running on `http://127.0.0.1:3000`
 * [Node.js](https://nodejs.org/en/download/) (v18) => installation instructions for [Linux](https://github.com/nodesource/distributions)
 * [Visual Studio Code (VSCode)](https://code.visualstudio.com/) as IDE
   * [Vetur](https://marketplace.visualstudio.com/items?itemName=octref.vetur) plugin for Vue tooling

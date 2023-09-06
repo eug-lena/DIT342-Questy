@@ -67,7 +67,7 @@
 		{
 			"id": "cd185905-a834-4211-8030-583d17702534",
 			"key": "host",
-			"value": "http://localhost:3000",
+			"value": "http://127.0.0.1:3000",
 			"type": "string"
 		}
 	],

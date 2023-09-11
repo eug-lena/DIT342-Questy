@@ -24,7 +24,7 @@ These steps describe how you can deploy your app online for free (**NO** credit 
 10. Replace the placeholders `<password>` with your Database user password (created in step 6.) and the database name `<dbname>` with a sensible name for your application domain. Example:
 
     ```none
-    mongodb+srv://myUser:mySecurePassword@cluster0-a1bc2.mongodb.net/animalProductionDB?retryWrites=true&w=majority
+    mongodb+srv://myUser:mySecurePassword@cluster0-a1bc2.mongodb.net/gameReviewDB?retryWrites=true&w=majority
     ```
 
 Find a more detailed tutorial [here](https://developer.mozilla.org/en-US/docs/Learn/Server-side/Express_Nodejs/mongoose#Setting_up_the_MongoDB_database).
@@ -41,7 +41,7 @@ Install the [Heroku CLI](https://devcenter.heroku.com/articles/heroku-cli), logi
 cd group-00-web
 # Optional app name: heroku apps:create my-app-name --region eu
 heroku apps:create --region eu
-heroku config:set MONGODB_URI="mongodb+srv://myUser:mySecurePassword@cluster0-a1bc2.mongodb.net/animalProductionDB?retryWrites=true&w=majority"
+heroku config:set MONGODB_URI="mongodb+srv://myUser:mySecurePassword@cluster0-a1bc2.mongodb.net/gameReviewDB?retryWrites=true&w=majority"
 heroku config:set NODE_ENV="production"
 
 # MacOS, Linux

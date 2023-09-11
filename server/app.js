@@ -1,3 +1,5 @@
+"use strict";
+
 var express = require('express');
 var mongoose = require('mongoose');
 var morgan = require('morgan');
@@ -5,8 +7,14 @@ var path = require('path');
 var cors = require('cors');
 var history = require('connect-history-api-fallback');
 
+// Controllers
+var usersController = require('./controllers/users');
+var gamesController = require('./controllers/games');
+var reviewsController = require('./controllers/reviews');
+var commentsController = require('./controllers/comments');
+
 // Variables
-var mongoURI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/animalDevelopmentDB';
+var mongoURI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/gameReviewDB';
 var port = process.env.PORT || 3000;
 
 // Connect to MongoDB
@@ -35,13 +43,19 @@ app.get('/api', function(req, res) {
     res.json({'message': 'Welcome to your DIT342 backend ExpressJS project!'});
 });
 
+// Controllers usage
+app.use('/api/users', usersController); 
+app.use('/api/games', gamesController);
+app.use('/api/reviews', reviewsController);
+app.use('/api/comments', commentsController);
+
 // Catch all non-error handler for api (i.e., 404 Not Found)
 app.use('/api/*', function (req, res) {
     res.status(404).json({ 'message': 'Not Found' });
 });
 
 // Configuration for serving frontend in production mode
-// Support Vuejs HTML 5 history mode
+// Support Vue.js HTML 5 history mode
 app.use(history());
 // Serve static assets
 var root = path.normalize(__dirname + '/..');

@@ -15,8 +15,8 @@ These steps describe how you can deploy your app locally in production mode if y
     * macOS/Linux: `export NODE_ENV=production` (check with `echo $NODE_ENV`)
     * Windows: `set NODE_ENV "production"` (check with `echo %NODE_ENV%`)
 3. Set the environment variable `MONGODB_URI` for the server (change the database name "animals" according to your project):
-    * macOS/Linux: `export MONGODB_URI=mongodb://127.0.0.1:27017/animalProductionDB`
-    * Windows: `set MONGODB_URI "mongodb://127.0.0.1:27017/animalProductionDB"`
+    * macOS/Linux: `export MONGODB_URI=mongodb://127.0.0.1:27017/gameReviewDB`
+    * Windows: `set MONGODB_URI "mongodb://127.0.0.1:27017/gameReviewDB"`
 4. Set the environment variable `VUE_APP_API_ENDPOINT` for the client production build:
     * macOS/Linux: `export VUE_APP_API_ENDPOINT=http://127.0.0.1:3000/api`
     * Windows: `set VUE_APP_API_ENDPOINT "http://127.0.0.1:3000/api"`

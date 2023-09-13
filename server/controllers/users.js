@@ -6,7 +6,7 @@ var User = require('../models/user');
 
 /* 
 todo:
-get all comments 
+get all comments
 get all reviews
 */
 
@@ -14,24 +14,21 @@ get all reviews
 
 // Create a new user
 router.post('/', async function (req, res, next) {
-    // TODO: Check if following is an array of users
-
-    // TODO: Check if pinnedReview is a review
-
     var user = new User(req.body);
     try {
-        // Check if username already exists
-        const userExist = await User.exists({ username: req.body.username });
-        if (userExist) {
-            return res.status(400).send({ message: "User already exists" });
-        }
-
         await user.save();
         res.status(201).json(user);
     } catch (err) {
+        // ValidationError is thrown when a required field is missing or is invalid
         if (err.name === 'ValidationError') {
             return res.status(400).json({ "message": err.message });
         }
+
+        // MongoError with code 11000 is thrown when a duplicate key is found
+        if (err.name === 'MongoError' && err.code === 11000) {
+            return res.status(400).json({ "message": "User already exists" });
+        }
+
         next(err);
     }
 });
@@ -42,7 +39,7 @@ router.post('/', async function (req, res, next) {
 router.get('/', async function (req, res, next) {
     try {
         var users = await User.find();
-        res.status(200).json({ 'users': users });
+        res.status(200).json({ "users": users });
     } catch (err) {
         next(err);
     }
@@ -54,10 +51,15 @@ router.get('/id/:id', async function (req, res, next) {
     try {
         var user = await User.findById(id);
         if (user === null) {
-            return res.status(404).json({ 'message': 'User not found' });
+            return res.status(404).json({ "message": "User not found" });
         }
         res.status(200).json(user);
     } catch (err) {
+        // CastError is thrown when an invalid id is passed to findById
+        if (err.name === 'CastError') {
+            return res.status(400).json({ "message": "Invalid " + err.path });
+        }
+
         next(err);
     }
 });
@@ -68,7 +70,7 @@ router.get('/user/:username', async function (req, res, next) {
     try {
         var user = await User.findOne({ username: username });
         if (user === null) {
-            return res.status(404).json({ 'message': 'User not found' });
+            return res.status(404).json({ "message": "User not found" });
         }
         res.status(200).json(user);
     } catch (err) {
@@ -87,44 +89,40 @@ router.put('/id/:id', async function (req, res, next) {
             return res.status(404).json({ "message": "User not found" });
         }
 
-        if (req.body.username === null || req.body.password === null) {
-            return res.status(400).json({ "message": "Bad request: username and password are required" });
-        }
-
-        const userExist = await User.exists({ username: req.body.username });
-        if (userExist) {
-            if (user.username !== req.body.username) {
-                return res.status(400).send({ message: "User already exists" });
-            }
-        }
-
         user.username = req.body.username;
         user.password = req.body.password;
         user.bio = req.body.bio;
         user.following = req.body.following;
         user.pinnedReview = req.body.pinnedReview;
+
         await user.save();
         res.status(201).json(user);
     } catch (err) {
+        // ValidationError is thrown when a required field is missing or is invalid
+        if (err.name === 'ValidationError') {
+            return res.status(400).json({ "message": err.message });
+        }
+
+        // CastError is thrown when an invalid id is passed to findById
+        if (err.name === 'CastError') {
+            return res.status(400).json({ "message": "Invalid " + err.path });
+        }
+
+        // MongoServerError with code 11000 is thrown whenever you try to change a unique field to a value that already exists in the collection
+        if (err.name === 'MongoServerError' && err.code === 11000) {
+            return res.status(400).json({ "message": "User already exists" });
+        }
         next(err);
     }
 });
 
 // Update a user by id 
-// TODO: fix me, need to check values
 router.patch('/id/:id', async function (req, res, next) {
     var id = req.params.id;
     try {
         const user = await User.findById(id);
         if (user === null) {
             return res.status(404).json({ "message": "User not found" });
-        }
-
-        const userExist = await User.exists({ username: req.body.username });
-        if (userExist) {
-            if (user.username !== req.body.username) {
-                return res.status(400).send({ message: "User already exists" });
-            }
         }
 
         user.username = (req.body.username || user.username);
@@ -136,6 +134,21 @@ router.patch('/id/:id', async function (req, res, next) {
         await user.save();
         res.status(201).json(user);
     } catch (err) {
+        // ValidationError is thrown when a required field is missing or is invalid
+        if (err.name === 'ValidationError') {
+            return res.status(400).json({ "message": err.message });
+        }
+
+        // CastError is thrown when an invalid id is passed to findById
+        if (err.name === 'CastError') {
+            return res.status(400).json({ "message": "Invalid " + err.path });
+        }
+
+        // MongoServerError with code 11000 is thrown whenever you try to change a unique field to a value that already exists in the collection
+        if (err.name === 'MongoServerError' && err.code === 11000) {
+            return res.status(400).json({ "message": "User already exists" });
+        }
+
         next(err);
     }
 });
@@ -148,10 +161,14 @@ router.delete('/id/:id', async function (req, res, next) {
     try {
         var user = await User.findOneAndDelete({ _id: id });
         if (user === null) {
-            return res.status(404).json({ 'message': 'User not found' });
+            return res.status(404).json({ "message": "User not found" });
         }
         res.status(200).json(user);
     } catch (err) {
+        // CastError is thrown when an invalid id is passed to findById
+        if (err.name === 'CastError') {
+            return res.status(400).json({ "message": "Invalid " + err.path });
+        }
         next(err);
     }
 });
@@ -162,7 +179,7 @@ router.delete('/user/:username', async function (req, res, next) {
     try {
         var user = await User.findOneAndDelete({ username: username });
         if (user === null) {
-            return res.status(404).json({ 'message': 'User not found' });
+            return res.status(404).json({ "message": "User not found" });
         }
         res.status(200).json(user);
     } catch (err) {
@@ -173,7 +190,7 @@ router.delete('/user/:username', async function (req, res, next) {
 // Delete all users
 router.delete('/', async function (req, res, next) {
     try {
-        const user = await User.find().deleteMany().exec();
+        const user = await User.find().deleteMany();
         res.status(200).json("All users deleted");
     } catch (err) {
         next(err);

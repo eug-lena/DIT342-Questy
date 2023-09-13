@@ -44,10 +44,10 @@ app.get('/api', function(req, res) {
 });
 
 // Controllers usage
-app.use('/api/users', usersController); 
-app.use('/api/games', gamesController);
-app.use('/api/reviews', reviewsController);
-app.use('/api/comments', commentsController);
+app.use('/api/v1/users', usersController); 
+app.use('/api/v1/games', gamesController);
+app.use('/api/v1/reviews', reviewsController);
+app.use('/api/v1/comments', commentsController);
 
 // Catch all non-error handler for api (i.e., 404 Not Found)
 app.use('/api/*', function (req, res) {

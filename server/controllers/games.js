@@ -8,47 +8,22 @@ var Game = require('../models/game');
 
 // Create a new game
 router.post('/', async function (req, res, next) {
-    // Check name
-    if (typeof req.body.name !== 'string' || req.body.name === null || req.body.name.length < 1) {
-        return res.status(400).json({ "message": "Bad Request: name must be at least 1 character long" });
-    }
-
-    // Check author
-    if (typeof req.body.author !== 'string' || req.body.author === null || req.body.author.length < 1) {
-        return res.status(400).json({ "message": "Bad Request: name must be at least 1 character long" });
-    }
-
-    // Check that every element in tag is a string
-    if (!Array.isArray(req.body.tag)) {
-        return res.status(400).json({ "message": "Bad Request: tag must be an array of strings" });
-    }
-    for (var i = 0; i < req.body.tag.length; i++) {
-        if (typeof req.body.tag[i] !== 'string') {
-            return res.status(400).json({ "message": "Bad Request: tag must be an array of strings" });
-        }
-
-        if (req.body.tag === null || req.body.tag.length < 1 || req.body.tag.length > 25) {
-            return res.status(400).json({ "message": "Bad Request: every tag must be between 1 and 25 characters long. Tag: " + i + "is wrong" });
-        }
-    }
-
-    // Check if date is a valid date
-    const date = new Date(req.body.releaseDate);
-    if (Object.prototype.toString.call(date) !== '[object Date]' || isNaN(date.getTime())) {
-        return res.status(400).json({ "message": "Bad Request: releaseDate must be a date" });
-    }
-
     var game = new Game(req.body);
     try {
-        // Check if username already exists
-        const gameExist = await Game.exists({ name: req.body.name });
-        if (gameExist) {
-            return res.status(400).send({ message: "Game already exists" });
-        }
-
         await game.save();
         res.status(201).json(game);
+
     } catch (err) {
+        // MongoError with code 11000 is thrown when a duplicate key is found
+        if (err.name === 'MongoError' && err.code === 11000) {
+            return res.status(400).json({ "message": "A game with that name already exists" });
+        }
+
+        // ValidationError is thrown when a required field is missing or is invalid
+        if (err.name === 'ValidationError') {
+            res.status(400).json({ "message": err.message });
+        }
+
         next(err);
     }
 });
@@ -59,7 +34,7 @@ router.post('/', async function (req, res, next) {
 router.get('/', async function (req, res, next) {
     try {
         var games = await Game.find();
-        res.status(200).json({ 'games': games });
+        res.status(200).json({ "games": games });
     } catch (err) {
         next(err);
     }
@@ -71,10 +46,14 @@ router.get('/id/:id', async function (req, res, next) {
     try {
         var game = await Game.findById(id);
         if (game === null) {
-            return res.status(404).json({ 'message': 'Game not found' });
+            return res.status(404).json({ "message": "Game not found" });
         }
         res.status(200).json(game);
     } catch (err) {
+        // CastError is thrown when an invalid id is passed to findById
+        if (err.name === 'CastError') {
+            return res.status(400).json({ "message": "Invalid " + err.path });
+        }
         next(err);
     }
 });
@@ -85,7 +64,7 @@ router.get('/name/:name', async function (req, res, next) {
     try {
         var game = await Game.findOne({ name: name });
         if (game === null) {
-            return res.status(404).json({ 'message': 'User not found' });
+            return res.status(404).json({ "message": "Game not found" });
         }
         res.status(200).json(game);
     } catch (err) {
@@ -97,48 +76,11 @@ router.get('/name/:name', async function (req, res, next) {
 
 // Replace a game by id
 router.put('/id/:id', async function (req, res, next) {
-    // Check name
-    if (typeof req.body.name !== 'string' || req.body.name === null || req.body.name.length < 1) {
-        return res.status(400).json({ "message": "Bad Request: name must be at least 1 character long" });
-    }
-
-    // Check author
-    if (typeof req.body.author !== 'string' || req.body.author === null || req.body.author.length < 1) {
-        return res.status(400).json({ "message": "Bad Request: name must be at least 1 character long" });
-    }
-
-    // Check that every element in tag is a string
-    if (!Array.isArray(req.body.tag)) {
-        return res.status(400).json({ "message": "Bad Request: tag must be an array of strings" });
-    }
-    for (var i = 0; i < req.body.tag.length; i++) {
-        if (typeof req.body.tag[i] !== 'string') {
-            return res.status(400).json({ "message": "Bad Request: tag must be an array of strings" });
-        }
-
-        if (req.body.tag === null || req.body.tag.length < 1 || req.body.tag.length > 25) {
-            return res.status(400).json({ "message": "Bad Request: every tag must be between 1 and 25 characters long. Tag: " + i + "is wrong" });
-        }
-    }
-
-    // Check if date is a valid date
-    const date = new Date(req.body.releaseDate);
-    if (Object.prototype.toString.call(date) !== '[object Date]' || isNaN(date.getTime())) {
-        return res.status(400).json({ "message": "Bad Request: releaseDate must be a date" });
-    }
-
     var id = req.params.id;
     try {
         const game = await Game.findById(id);
         if (game === null) {
             return res.status(404).json({ "message": "Game not found" });
-        }
-
-        const gameExist = await Game.exists({ name: req.body.name });
-        if (gameExist) {
-            if (game.name !== req.body.name) {
-                return res.status(400).send({ message: "Game already exists" });
-            }
         }
 
         game.name = req.body.name;
@@ -149,55 +91,31 @@ router.put('/id/:id', async function (req, res, next) {
         await game.save();
         res.status(201).json(game);
     } catch (err) {
+        // ValidationError is thrown when a required field is missing or is invalid
+        if (err.name === 'ValidationError') {
+            return res.status(400).json({ "message": err.message });
+        }
+
+        // CastError is thrown when an invalid id is passed to findById
+        if (err.name === 'CastError') {
+            return res.status(400).json({ "message": "Invalid " + err.path });
+        }
+
+        // MongoServerError with code 11000 is thrown whenever you try to change a unique field to a value that already exists in the collection
+        if (err.name === 'MongoServerError' && err.code === 11000) {
+            return res.status(400).json({ "message": "A game with that name already exists" });
+        }
         next(err);
     }
 });
 
 // Update a game by id 
-// TODO: fix me, can only change all at a time
 router.patch('/id/:id', async function (req, res, next) {
-    // Check name
-    if (typeof req.body.name !== 'string' || req.body.name === null || req.body.name.length < 1) {
-        return res.status(400).json({ "message": "Bad Request: name must be at least 1 character long" });
-    }
-
-    // Check author
-    if (typeof req.body.author !== 'string' || req.body.author === null || req.body.author.length < 1) {
-        return res.status(400).json({ "message": "Bad Request: name must be at least 1 character long" });
-    }
-
-    // Check that every element in tag is a string
-    if (!Array.isArray(req.body.tag)) {
-        return res.status(400).json({ "message": "Bad Request: tag must be an array of strings" });
-    }
-    for (var i = 0; i < req.body.tag.length; i++) {
-        if (typeof req.body.tag[i] !== 'string') {
-            return res.status(400).json({ "message": "Bad Request: tag must be an array of strings. Tag: " + i + "is wrong" });
-        }
-
-        if (req.body.tag === null || req.body.tag.length < 1 || req.body.tag.length > 25) {
-            return res.status(400).json({ "message": "Bad Request: every tag must be between 1 and 25 characters long. Tag: " + i + "is wrong" });
-        }
-    }
-
-    // Check if date is a valid date
-    const date = new Date(req.body.releaseDate);
-    if (Object.prototype.toString.call(date) !== '[object Date]' || isNaN(date.getTime())) {
-        return res.status(400).json({ "message": "Bad Request: releaseDate must be a date" });
-    }
-
     var id = req.params.id;
     try {
         const game = await Game.findById(id);
         if (game === null) {
             return res.status(404).json({ "message": "Game not found" });
-        }
-
-        const gameExist = await Game.exists({ name: req.body.name });
-        if (gameExist) {
-            if (game.name !== req.body.name) {
-                return res.status(400).send({ message: "Game already exists" });
-            }
         }
 
         game.name = (req.body.name || game.name);
@@ -208,6 +126,20 @@ router.patch('/id/:id', async function (req, res, next) {
         await game.save();
         res.status(201).json(game);
     } catch (err) {
+        // ValidationError is thrown when a required field is missing or is invalid
+        if (err.name === 'ValidationError') {
+            return res.status(400).json({ "message": err.message });
+        }
+
+        // CastError is thrown when an invalid id is passed to findById
+        if (err.name === 'CastError') {
+            return res.status(400).json({ "message": "Invalid " + err.path });
+        }
+
+        // MongoServerError with code 11000 is thrown whenever you try to change a unique field to a value that already exists in the collection
+        if (err.name === 'MongoServerError' && err.code === 11000) {
+            return res.status(400).json({ "message": "A game with that name already exists" });
+        }
         next(err);
     }
 });
@@ -220,10 +152,14 @@ router.delete('/id/:id', async function (req, res, next) {
     try {
         var game = await Game.findOneAndDelete({ _id: id });
         if (game === null) {
-            return res.status(404).json({ 'message': 'Game not found' });
+            return res.status(404).json({ "message": "Game not found" });
         }
         res.status(200).json(game);
     } catch (err) {
+        // CastError is thrown when an invalid id is passed to findById
+        if (err.name === 'CastError') {
+            return res.status(400).json({ "message": "Invalid " + err.path });
+        }
         next(err);
     }
 });
@@ -234,7 +170,7 @@ router.delete('/name/:name', async function (req, res, next) {
     try {
         var game = await Game.findOneAndDelete({ name: name });
         if (game === null) {
-            return res.status(404).json({ 'message': 'Game not found' });
+            return res.status(404).json({ "message": "Game not found" });
         }
         res.status(200).json(game);
     } catch (err) {
@@ -245,7 +181,7 @@ router.delete('/name/:name', async function (req, res, next) {
 // Delete all games
 router.delete('/', async function (req, res, next) {
     try {
-        const game = await Game.find().deleteMany().exec();
+        const game = await Game.find().deleteMany();
         res.status(200).json("All games deleted");
     } catch (err) {
         next(err);

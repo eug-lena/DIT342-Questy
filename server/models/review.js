@@ -9,7 +9,10 @@ var reviewSchema = new Schema({
     title: { type: String, required: true, maxLength: 50, minLength: 1 },
     rating: { type: Number, required: true, min: 1, max: 10 },
     text: { type: String, maxLength: 2500 },
-    date: { type: Date, default: Date.now }
+    date: { type: Date, default: Date.now },
+    isEdited: { type: Boolean, default: false }
 });
+
+reviewSchema.index({ user: 1, game: 1 }, { unique: true })
 
 module.exports = mongoose.model('reviews', reviewSchema);

@@ -7,6 +7,9 @@ var path = require('path');
 var cors = require('cors');
 var history = require('connect-history-api-fallback');
 
+// HTTP Method Override
+var methodOverride = require('method-override');
+
 // Controllers
 var usersController = require('./controllers/users');
 var gamesController = require('./controllers/games');
@@ -29,6 +32,10 @@ mongoose.connect(mongoURI).catch(function(err) {
 
 // Create Express app
 var app = express();
+
+// HTTP Method Override
+app.use(methodOverride('_method'));
+
 // Parse requests of content-type 'application/json'
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());

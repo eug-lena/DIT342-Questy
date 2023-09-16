@@ -3,8 +3,6 @@
 var express = require('express');
 var router = express.Router();
 var Comment = require('../models/comment');
-var Review = require('../models/review');
-var User = require('../models/user');
 
 // ------------ CREATE ------------
 
@@ -61,24 +59,8 @@ router.get('/:id', async function (req, res, next) {
     }
 });
 
-// Get all comments for a review
-router.get('/review/:id', async function (req, res, next) {
-    try {
-        var comments = await Comment.find({ review: req.params.id });
-        res.status(200).json(comments);
-
-    } catch (err) {
-        // CastError is thrown when an invalid id is passed to find
-        if (err.name === 'CastError') {
-            return res.status(400).json({ "message": "Invalid " + err.path });
-        }
-
-        next(err);
-    }
-});
-
 // Get all comments for a review sorted by dates in descending order
-router.get('/review/:id/date', async function (req, res, next) {
+router.get('/review/:id', async function (req, res, next) {
     try {
         var comments = await Comment.find({ review: req.params.id }).sort({ date: -1 }); // -1 = descending order
         res.status(200).json(comments);
@@ -94,7 +76,7 @@ router.get('/review/:id/date', async function (req, res, next) {
 });
 
 // Get all comments for a review, based on the opinion, sorted by dates in descending order
-router.get('/review/:id/date/opinion/:opinion', async function (req, res, next) {
+router.get('/review/:id/opinion/:opinion', async function (req, res, next) {
     try {
         var comments = await Comment.find({ review: req.params.id, opinion: req.params.opinion }).sort({ date: -1 }); // -1 = descending order
         res.status(200).json(comments);

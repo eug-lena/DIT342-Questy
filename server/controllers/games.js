@@ -41,7 +41,7 @@ router.get('/', async function (req, res, next) {
 });
 
 // Get a game by id
-router.get('/id/:id', async function (req, res, next) {
+router.get('/:id', async function (req, res, next) {
     var id = req.params.id;
     try {
         var game = await Game.findById(id);
@@ -75,7 +75,7 @@ router.get('/name/:name', async function (req, res, next) {
 // ------------ UPDATE ------------
 
 // Replace a game by id
-router.put('/id/:id', async function (req, res, next) {
+router.put('/:id', async function (req, res, next) {
     var id = req.params.id;
     try {
         const game = await Game.findById(id);
@@ -110,7 +110,7 @@ router.put('/id/:id', async function (req, res, next) {
 });
 
 // Update a game by id 
-router.patch('/id/:id', async function (req, res, next) {
+router.patch('/:id', async function (req, res, next) {
     var id = req.params.id;
     try {
         const game = await Game.findById(id);
@@ -147,7 +147,7 @@ router.patch('/id/:id', async function (req, res, next) {
 // ------------ DELETE ------------
 
 // Delete a game by id
-router.delete('/id/:id', async function (req, res, next) {
+router.delete('/:id', async function (req, res, next) {
     var id = req.params.id;
     try {
         var game = await Game.findOneAndDelete({ _id: id });
@@ -182,7 +182,8 @@ router.delete('/name/:name', async function (req, res, next) {
 router.delete('/', async function (req, res, next) {
     try {
         const game = await Game.find().deleteMany();
-        res.status(200).json("All games deleted");
+        res.status(200).json(game);
+        
     } catch (err) {
         next(err);
     }

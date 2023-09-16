@@ -3,8 +3,6 @@
 var express = require('express');
 var router = express.Router();
 var Review = require('../models/review');
-var User = require('../models/user');
-var Game = require('../models/game');
 
 // ------------ CREATE ------------
 
@@ -29,6 +27,30 @@ router.post('/', async function (req, res, next) {
             return res.status(400).json({ "message": "Bad Request: A user can only have one review per game" });
         }
 
+        next(err);
+    }
+});
+
+// Create a new comment for specific review
+router.post('/:id/comment/', async function (req, res, next) {
+    var comment = new Comment(
+        {
+            user: req.body.user,
+            text: req.body.text,
+            opinion: req.body.opinion,
+            date: Date.now(),
+            isEdited: false,
+            review: req.params.id
+        }
+    );
+    try {
+        await comment.save();
+        res.status(201).json(comment);
+    } catch (err) {
+        // ValidationError is thrown when a required field is missing or is invalid
+        if (err.name === 'ValidationError') {
+            res.status(400).json({ "message": err.message });
+        }
         next(err);
     }
 });
@@ -171,13 +193,14 @@ router.patch('/:id', async function (req, res, next) {
 
 // Delete a review by id
 router.delete('/:id', async function (req, res, next) {
+    var id = req.params.id;
     try {
-        var review = await Review.findById(req.params.id);
+        var review = await Review.findOneAndDelete({ _id: id });
         if (review === null) {
             return res.status(404).json({ "message": "Review not found" });
         }
-        await review.remove();
-        res.status(200).json({ "message": "Review deleted" });
+        res.status(200).json(review);
+
     } catch (err) {
         // CastError is thrown when an invalid id is passed to findById
         if (err.name === 'CastError') {

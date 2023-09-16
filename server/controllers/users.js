@@ -4,12 +4,6 @@ var express = require('express');
 var router = express.Router();
 var User = require('../models/user');
 
-/* 
-todo:
-get all comments
-get all reviews
-*/
-
 // ------------ CREATE ------------
 
 // Create a new user
@@ -25,7 +19,7 @@ router.post('/', async function (req, res, next) {
         }
 
         // MongoError with code 11000 is thrown when a duplicate key is found
-        if (err.name === 'MongoError' && err.code === 11000) {
+        if (err.name === 'MongoServerError' && err.code === 11000) {
             return res.status(400).json({ "message": "User already exists" });
         }
 
@@ -38,7 +32,7 @@ router.post('/', async function (req, res, next) {
 // Get all users
 router.get('/', async function (req, res, next) {
     try {
-        var users = await User.find();
+        var users = await User.find(req.query);
         res.status(200).json({ "users": users });
     } catch (err) {
         next(err);
@@ -46,7 +40,7 @@ router.get('/', async function (req, res, next) {
 });
 
 // Get a user by id
-router.get('/id/:id', async function (req, res, next) {
+router.get('/:id', async function (req, res, next) {
     var id = req.params.id;
     try {
         var user = await User.findById(id);
@@ -65,7 +59,7 @@ router.get('/id/:id', async function (req, res, next) {
 });
 
 // Get a user by username
-router.get('/user/:username', async function (req, res, next) {
+router.get('/username/:username', async function (req, res, next) {
     var username = req.params.username;
     try {
         var user = await User.findOne({ username: username });
@@ -81,7 +75,7 @@ router.get('/user/:username', async function (req, res, next) {
 // ------------ UPDATE ------------
 
 // Replace a user by id
-router.put('/id/:id', async function (req, res, next) {
+router.put('/:id', async function (req, res, next) {
     var id = req.params.id;
     try {
         const user = await User.findById(id);
@@ -117,7 +111,7 @@ router.put('/id/:id', async function (req, res, next) {
 });
 
 // Update a user by id 
-router.patch('/id/:id', async function (req, res, next) {
+router.patch('/:id', async function (req, res, next) {
     var id = req.params.id;
     try {
         const user = await User.findById(id);
@@ -156,7 +150,7 @@ router.patch('/id/:id', async function (req, res, next) {
 // ------------ DELETE ------------
 
 // Delete a user by id
-router.delete('/id/:id', async function (req, res, next) {
+router.delete('/:id', async function (req, res, next) {
     var id = req.params.id;
     try {
         var user = await User.findOneAndDelete({ _id: id });
@@ -174,7 +168,7 @@ router.delete('/id/:id', async function (req, res, next) {
 });
 
 // Delete a user by username
-router.delete('/user/:username', async function (req, res, next) {
+router.delete('/username/:username', async function (req, res, next) {
     var username = req.params.username;
     try {
         var user = await User.findOneAndDelete({ username: username });

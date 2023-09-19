@@ -3,6 +3,21 @@
 var express = require('express');
 var router = express.Router();
 var Review = require('../models/review');
+var Util = require('./util');
+
+function addReviewLinks(review) {
+    review.links = [
+        {
+            rel: "self", href: "http://localhost:3000/api/v1/reviews/" + review._id
+        },
+        {
+            rel: "new_comment", href: "http://localhost:3000/api/v1/reviews/" + review._id + "/comment"
+        },
+        {
+            rel: "comments", href: "http://localhost:3000/api/v1/comments/review/" + review._id
+        }
+    ];
+}
 
 // ------------ CREATE ------------
 
@@ -15,16 +30,17 @@ router.post('/', async function (req, res, next) {
         review.isEdited = false;
 
         await review.save();
-        res.status(201).json(review);
+        return res.status(201).json(review);
 
     } catch (err) {
-        // ValidationError is thrown when a required field is missing or is invalid
-        if (err.name === 'ValidationError') {
-            res.status(400).json({ "message": err.message });
+        // MongoServerError with code 11000 is thrown when a duplicate key is found
+        if (err.name === 'MongoServerError' && err.code === 11000) {
+            return res.status(400).json({ "message": "A review by this user already exist for this game" });
         }
 
-        if (err.name === 'MongoServerError' && err.code === 11000) {
-            return res.status(400).json({ "message": "Bad Request: A user can only have one review per game" });
+        // ValidationError is thrown when a required field is missing or is invalid
+        if (err.name === 'ValidationError') {
+            return res.status(400).json({ "message": err.message });
         }
 
         next(err);
@@ -45,24 +61,66 @@ router.post('/:id/comment/', async function (req, res, next) {
     );
     try {
         await comment.save();
-        res.status(201).json(comment);
+        return res.status(201).json(comment);
     } catch (err) {
         // ValidationError is thrown when a required field is missing or is invalid
         if (err.name === 'ValidationError') {
-            res.status(400).json({ "message": err.message });
+            return res.status(400).json({ "message": err.message });
         }
+
+        // CastError is thrown when an invalid review id is passed to save
+        if (err.name === 'CastError') {
+            return res.status(400).json({ "message": "Invalid " + err.path });
+        }
+
         next(err);
     }
 });
 
 // ------------ READ ------------
 
-// Get all reviews
+// Get review(s) by query
 router.get('/', async function (req, res, next) {
     try {
-        var reviews = await Review.find();
-        res.status(200).json({ "reviews": reviews });
+        // Create query from query parameters
+        var query = Review.find(Util.queryCreation(req));
+        if (req.query.sort) {
+            query = Util.sortQuery(req, query);
+        }
+        if (req.query.fields) {
+            query = Util.fieldQuery(req, query);
+        }
+
+        // Get all matching documents
+        var reviews = await query;
+
+        if (reviews.length === 0) {
+            return res.status(404).json({ "message": "Review(s) not found" });
+        }
+
+        if (!req.query.fields || req.query.fields.split(',').includes('links')) {
+            // Add links to each review
+            reviews = reviews.map(review => review.toObject());
+            reviews.forEach(function (review) {
+                addReviewLinks(review);
+            });
+        }
+
+        return res.status(200).json({
+            reviews,
+            "links": [
+                {
+                    rel: "self", href: "http://localhost:3000/api/v1/reviews" + req.url
+                }
+            ]
+        });
+
     } catch (err) {
+        // CastError is thrown when an invalid id is passed
+        if (err.name === 'CastError') {
+            return res.status(400).json({ "message": "Invalid " + err.path });
+        }
+
         next(err);
     }
 });
@@ -74,37 +132,9 @@ router.get('/:id', async function (req, res, next) {
         if (review === null) {
             return res.status(404).json({ "message": "Review not found" });
         }
-        res.status(200).json(review);
+        return res.status(200).json(review);
     } catch (err) {
         // CastError is thrown when an invalid id is passed to findById
-        if (err.name === 'CastError') {
-            return res.status(400).json({ "message": "Invalid " + err.path });
-        }
-        next(err);
-    }
-});
-
-// Get all reviews by game id
-router.get('/game/:id', async function (req, res, next) {
-    try {
-        var reviews = await Review.find({ game: req.params.id });
-        res.status(200).json(reviews);
-    } catch (err) {
-        // CastError is thrown when an invalid id is passed to find
-        if (err.name === 'CastError') {
-            return res.status(400).json({ "message": "Invalid " + err.path });
-        }
-        next(err);
-    }
-});
-
-// Get all reviews by user id
-router.get('/user/:id', async function (req, res, next) {
-    try {
-        var reviews = await Review.find({ user: req.params.id });
-        res.status(200).json(reviews);
-    } catch (err) {
-        // CastError is thrown when an invalid id is passed to find
         if (err.name === 'CastError') {
             return res.status(400).json({ "message": "Invalid " + err.path });
         }
@@ -130,7 +160,7 @@ router.put('/:id', async function (req, res, next) {
         review.isEdited = true;
 
         await review.save();
-        res.status(201).json(review);
+        return res.status(201).json(review);
 
     } catch (err) {
         // ValidationError is thrown when a required field is missing or is invalid
@@ -168,7 +198,7 @@ router.patch('/:id', async function (req, res, next) {
         review.isEdited = true;
 
         await review.save();
-        res.status(201).json(review);
+        return res.status(201).json(review);
     } catch (err) {
         // ValidationError is thrown when a required field is missing or is invalid
         if (err.name === 'ValidationError') {
@@ -199,7 +229,7 @@ router.delete('/:id', async function (req, res, next) {
         if (review === null) {
             return res.status(404).json({ "message": "Review not found" });
         }
-        res.status(200).json(review);
+        return res.status(200).json(review);
 
     } catch (err) {
         // CastError is thrown when an invalid id is passed to findById
@@ -210,40 +240,26 @@ router.delete('/:id', async function (req, res, next) {
     }
 });
 
-// Delete all reviews
+// Delete review(s) by query
 router.delete('/', async function (req, res, next) {
     try {
-        await Review.deleteMany();
-        res.status(200).json({ "message": "All reviews deleted" });
-    } catch (err) {
-        next(err);
-    }
-});
+        // Create query from query parameters
+        var query = Review.find(Util.queryCreation(req));
 
-// Delete all reviews by game id
-router.delete('/game/:id', async function (req, res, next) {
-    try {
-        await Review.deleteMany({ game: req.params.id });
-        res.status(200).json({ "message": "All reviews for game deleted" });
-    } catch (err) {
-        // CastError is thrown when an invalid id is passed to deleteMany
-        if (err.name === 'CastError') {
-            return res.status(400).json({ "message": "Invalid game id" });
-        }
-        next(err);
-    }
-});
+        // Delete all matching documents
+        const reviews = await query.deleteMany();
 
-// Delete all reviews by user id
-router.delete('/user/:id', async function (req, res, next) {
-    try {
-        await Review.deleteMany({ user: req.params.id });
-        res.status(200).json({ "message": "All reviews for user deleted" });
-    } catch (err) {
-        // CastError is thrown when an invalid id is passed to deleteMany
-        if (err.name === 'CastError') {
-            return res.status(400).json({ "message": "Invalid user id" });
+        if (reviews.deletedCount === 0) {
+            return res.status(404).json({ "message": "Review(s) not found" });
         }
+
+        return res.status(200).json({ "message": reviews.deletedCount + " reviews deleted" });
+    } catch (err) {
+        // CastError is thrown when an invalid id is passed
+        if (err.name === 'CastError') {
+            return res.status(400).json({ "message": "Invalid " + err.path });
+        }
+
         next(err);
     }
 });

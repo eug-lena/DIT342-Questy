@@ -3,6 +3,15 @@
 var express = require('express');
 var router = express.Router();
 var Comment = require('../models/comment');
+var Util = require('./util');
+
+function addCommentsLinks(comment) {
+    comment.links = [
+        {
+            rel: "self", href: "http://localhost:3000/api/v1/comments/" + comment._id
+        }
+    ];
+}
 
 // ------------ CREATE ------------
 
@@ -15,12 +24,12 @@ router.post('/', async function (req, res, next) {
         comment.isEdited = false;
 
         await comment.save();
-        res.status(201).json(comment);
+        return res.status(201).json(comment);
 
     } catch (err) {
         // ValidationError is thrown when a required field is missing or is invalid
         if (err.name === 'ValidationError') {
-            res.status(400).json({ "message": err.message });
+            return res.status(400).json({ "message": err.message });
         }
 
         next(err);
@@ -29,13 +38,48 @@ router.post('/', async function (req, res, next) {
 
 // ------------ READ ------------
 
-// Get all comments
+// Get comment(s) by query
 router.get('/', async function (req, res, next) {
     try {
-        var comments = await Comment.find();
-        res.status(200).json(comments);
+        // Create query from query parameters
+        var query = Comment.find(Util.queryCreation(req));
+        if (req.query.sort) {
+            query = Util.sortQuery(req, query);
+        }
+        if (req.query.fields) {
+            query = Util.fieldQuery(req, query);
+        }
 
+        // Get all matching documents
+        var comments = await query;
+
+        if (comments.length === 0) {
+            return res.status(404).json({ "message": "Comment(s) not found" });
+        }
+        
+        if (!req.query.fields || req.query.fields.split(',').includes('links')) {
+            // Add links to each comment
+            comments = comments.map(comment => comment.toObject());
+            comments.forEach(function (comment) {
+                addCommentsLinks(comment);
+            });
+        }
+
+        return res.status(200).json({
+            comments,
+            "links": [
+                {
+                    rel: "self", href: "http://localhost:3000/api/v1/comments" + req.url
+                }
+            ]
+        });
+        
     } catch (err) {
+        // CastError is thrown when an invalid id is passed
+        if (err.name === 'CastError') {
+            return res.status(400).json({ "message": "Invalid " + err.path });
+        }
+
         next(err);
     }
 });
@@ -47,42 +91,10 @@ router.get('/:id', async function (req, res, next) {
         if (comment === null) {
             return res.status(404).json({ "message": "Comment not found" });
         }
-        res.status(200).json(comment);
+        return res.status(200).json(comment);
 
     } catch (err) {
         // CastError is thrown when an invalid id is passed to findById
-        if (err.name === 'CastError') {
-            return res.status(400).json({ "message": "Invalid " + err.path });
-        }
-
-        next(err);
-    }
-});
-
-// Get all comments for a review sorted by dates in descending order
-router.get('/review/:id', async function (req, res, next) {
-    try {
-        var comments = await Comment.find({ review: req.params.id }).sort({ date: -1 }); // -1 = descending order
-        res.status(200).json(comments);
-
-    } catch (err) {
-        // CastError is thrown when an invalid id is passed to find
-        if (err.name === 'CastError') {
-            return res.status(400).json({ "message": "Invalid " + err.path });
-        }
-
-        next(err);
-    }
-});
-
-// Get all comments for a review, based on the opinion, sorted by dates in descending order
-router.get('/review/:id/opinion/:opinion', async function (req, res, next) {
-    try {
-        var comments = await Comment.find({ review: req.params.id, opinion: req.params.opinion }).sort({ date: -1 }); // -1 = descending order
-        res.status(200).json(comments);
-
-    } catch (err) {
-        // CastError is thrown when an invalid id is passed to find
         if (err.name === 'CastError') {
             return res.status(400).json({ "message": "Invalid " + err.path });
         }
@@ -107,7 +119,7 @@ router.put('/:id', async function (req, res, next) {
         comment.isEdited = true;
 
         await comment.save();
-        res.status(200).json(comment);
+        return res.status(200).json(comment);
 
     } catch (err) {
         // CastError is thrown when an invalid id is passed to findById
@@ -137,7 +149,7 @@ router.patch('/:id', async function (req, res, next) {
         comment.isEdited = true;
 
         await comment.save();
-        res.status(200).json(comment);
+        return res.status(200).json(comment);
 
     } catch (err) {
         // CastError is thrown when an invalid id is passed to findById
@@ -163,7 +175,7 @@ router.delete('/:id', async function (req, res, next) {
         if (comment === null) {
             return res.status(404).json({ "message": "User not found" });
         }
-        res.status(200).json(comment);
+        return res.status(200).json(comment);
 
     } catch (err) {
         // CastError is thrown when an invalid id is passed to finOneAndDelete
@@ -174,43 +186,26 @@ router.delete('/:id', async function (req, res, next) {
     }
 });
 
-// Delete all comments for a review
-router.delete('/review/:id', async function (req, res, next) {
-    try {
-        var comments = await Comment.deleteMany({ review: req.params.id });
-        res.status(200).json(comments);
-
-    } catch (err) {
-        // CastError is thrown when an invalid id is passed to deleteMany
-        if (err.name === 'CastError') {
-            return res.status(400).json({ "message": "Invalid " + err.path });
-        }
-        next(err);
-    }
-});
-
-// Delete all comments for a user
-router.delete('/user/:id', async function (req, res, next) {
-    try {
-        var comments = await Comment.deleteMany({ user: req.params.id });
-        res.status(200).json(comments);
-
-    } catch (err) {
-        // CastError is thrown when an invalid id is passed to deleteMany
-        if (err.name === 'CastError') {
-            return res.status(400).json({ "message": "Invalid " + err.path });
-        }
-        next(err);
-    }
-});
-
-// Delete all comments
+// Delete comment(s) by query
 router.delete('/', async function (req, res, next) {
     try {
-        var comments = await Comment.deleteMany();
-        res.status(200).json(comments);
+        // Create query from query parameters
+        var query = Comment.find(Util.queryCreation(req));
 
+        // Delete all matching documents
+        const comments = await query.deleteMany();
+
+        if (comments.deletedCount === 0) {
+            return res.status(404).json({ "message": "Comment(s) not found" });
+        }
+
+        return res.status(200).json({ "message": comments.deletedCount + " comments deleted" });
     } catch (err) {
+        // CastError is thrown when an invalid id is passed
+        if (err.name === 'CastError') {
+            return res.status(400).json({ "message": "Invalid " + err.path });
+        }
+
         next(err);
     }
 });

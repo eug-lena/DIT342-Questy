@@ -3,6 +3,18 @@
 var express = require('express');
 var router = express.Router();
 var Game = require('../models/game');
+var Util = require('./util');
+
+function addGameLinks(game) {
+    game.links = [
+        {
+            rel: "self", href: "http://localhost:3000/api/v1/games/" + game._id
+        },
+        {
+            rel: "reviews", href: "http://localhost:3000/api/v1/reviews/game/" + game._id
+        }
+    ];
+}
 
 // ------------ CREATE ------------
 
@@ -11,17 +23,16 @@ router.post('/', async function (req, res, next) {
     var game = new Game(req.body);
     try {
         await game.save();
-        res.status(201).json(game);
-
+        return res.status(201).json(game);
     } catch (err) {
-        // MongoError with code 11000 is thrown when a duplicate key is found
-        if (err.name === 'MongoError' && err.code === 11000) {
+        // MongoServerError with code 11000 is thrown when a duplicate key is found
+        if (err.name === 'MongoServerError' && err.code === 11000) {
             return res.status(400).json({ "message": "A game with that name already exists" });
         }
 
         // ValidationError is thrown when a required field is missing or is invalid
         if (err.name === 'ValidationError') {
-            res.status(400).json({ "message": err.message });
+            return res.status(400).json({ "message": err.message });
         }
 
         next(err);
@@ -30,12 +41,48 @@ router.post('/', async function (req, res, next) {
 
 // ------------ READ ------------
 
-// Get all games
+// Get game(s) by query
 router.get('/', async function (req, res, next) {
     try {
-        var games = await Game.find();
-        res.status(200).json({ "games": games });
+        // Create query from query parameters
+        var query = Game.find(Util.queryCreation(req));
+        if (req.query.sort) {
+            query = Util.sortQuery(req, query);
+        }
+        if (req.query.fields) {
+            query = Util.fieldQuery(req, query);
+        }
+
+        // Get all matching documents
+        var games = await query;
+
+        if (games.length === 0) {
+            return res.status(404).json({ "message": "Game(s) not found" });
+        }
+
+        if (!req.query.fields || req.query.fields.split(',').includes('links')) {
+            // Add links to each game
+            games = games.map(game => game.toObject());
+            games.forEach(function (game) {
+                addGameLinks(game);
+            });
+        }
+
+        return res.status(200).json({
+            games,
+            "links": [
+                {
+                    rel: "self", "href": "http://localhost:3000/api/v1/games" + req.url
+                }
+            ]
+        });
+
     } catch (err) {
+        // CastError is thrown when an invalid id is passed
+        if (err.name === 'CastError') {
+            return res.status(400).json({ "message": "Invalid " + err.path });
+        }
+
         next(err);
     }
 });
@@ -48,26 +95,12 @@ router.get('/:id', async function (req, res, next) {
         if (game === null) {
             return res.status(404).json({ "message": "Game not found" });
         }
-        res.status(200).json(game);
+        return res.status(200).json(game);
     } catch (err) {
         // CastError is thrown when an invalid id is passed to findById
         if (err.name === 'CastError') {
             return res.status(400).json({ "message": "Invalid " + err.path });
         }
-        next(err);
-    }
-});
-
-// Get a game by name
-router.get('/name/:name', async function (req, res, next) {
-    var name = req.params.name;
-    try {
-        var game = await Game.findOne({ name: name });
-        if (game === null) {
-            return res.status(404).json({ "message": "Game not found" });
-        }
-        res.status(200).json(game);
-    } catch (err) {
         next(err);
     }
 });
@@ -89,7 +122,7 @@ router.put('/:id', async function (req, res, next) {
         game.tag = req.body.tag;
 
         await game.save();
-        res.status(201).json(game);
+        return res.status(201).json(game);
     } catch (err) {
         // ValidationError is thrown when a required field is missing or is invalid
         if (err.name === 'ValidationError') {
@@ -124,7 +157,7 @@ router.patch('/:id', async function (req, res, next) {
         game.tag = (req.body.tag || game.tag);
 
         await game.save();
-        res.status(201).json(game);
+        return res.status(201).json(game);
     } catch (err) {
         // ValidationError is thrown when a required field is missing or is invalid
         if (err.name === 'ValidationError') {
@@ -154,7 +187,7 @@ router.delete('/:id', async function (req, res, next) {
         if (game === null) {
             return res.status(404).json({ "message": "Game not found" });
         }
-        res.status(200).json(game);
+        return res.status(200).json(game);
     } catch (err) {
         // CastError is thrown when an invalid id is passed to findById
         if (err.name === 'CastError') {
@@ -164,27 +197,26 @@ router.delete('/:id', async function (req, res, next) {
     }
 });
 
-// Delete a game by name
-router.delete('/name/:name', async function (req, res, next) {
-    var name = req.params.name;
-    try {
-        var game = await Game.findOneAndDelete({ name: name });
-        if (game === null) {
-            return res.status(404).json({ "message": "Game not found" });
-        }
-        res.status(200).json(game);
-    } catch (err) {
-        next(err);
-    }
-});
-
-// Delete all games
+// Delete game(s) by query
 router.delete('/', async function (req, res, next) {
     try {
-        const game = await Game.find().deleteMany();
-        res.status(200).json(game);
-        
+        // Create query from query parameters
+        var query = Game.find(Util.queryCreation(req));
+
+        // Delete all matching documents
+        const games = await query.deleteMany();
+
+        if (games.deletedCount === 0) {
+            return res.status(404).json({ "message": "Game(s) not found" });
+        }
+
+        return res.status(200).json({ "message": games.deletedCount + " games deleted" });
     } catch (err) {
+        // CastError is thrown when an invalid id is passed
+        if (err.name === 'CastError') {
+            return res.status(400).json({ "message": "Invalid " + err.path });
+        }
+
         next(err);
     }
 });

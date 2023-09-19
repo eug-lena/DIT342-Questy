@@ -3,6 +3,18 @@
 var express = require('express');
 var router = express.Router();
 var User = require('../models/user');
+var Util = require('./util');
+
+function addUserLinks(user) {
+    user.links = [
+        {
+            rel: "self", href: "http://localhost:3000/api/v1/users/" + user._id
+        },
+        {
+            rel: "reviews", href: "http://localhost:3000/api/v1/reviews/user/" + user._id
+        }
+    ];
+}
 
 // ------------ CREATE ------------
 
@@ -11,16 +23,16 @@ router.post('/', async function (req, res, next) {
     var user = new User(req.body);
     try {
         await user.save();
-        res.status(201).json(user);
+        return res.status(201).json(user);
     } catch (err) {
+        // MongoServerError with code 11000 is thrown when a duplicate key is found
+        if (err.name === 'MongoServerError' && err.code === 11000) {
+            return res.status(400).json({ "message": "A user with that username already exists" });
+        }
+
         // ValidationError is thrown when a required field is missing or is invalid
         if (err.name === 'ValidationError') {
             return res.status(400).json({ "message": err.message });
-        }
-
-        // MongoError with code 11000 is thrown when a duplicate key is found
-        if (err.name === 'MongoServerError' && err.code === 11000) {
-            return res.status(400).json({ "message": "User already exists" });
         }
 
         next(err);
@@ -29,12 +41,47 @@ router.post('/', async function (req, res, next) {
 
 // ------------ READ ------------
 
-// Get all users
+// Get user(s) by query
 router.get('/', async function (req, res, next) {
     try {
-        var users = await User.find(req.query);
-        res.status(200).json({ "users": users });
+        // Create query from query parameters
+        var query = User.find(Util.queryCreation(req));
+        if (req.query.sort) {
+            query = Util.sortQuery(req, query);
+        }
+        if (req.query.fields) {
+            query = Util.fieldQuery(req, query);
+        }
+
+        // Get all matching documents
+        var users = await query;
+
+        if (users.length === 0) {
+            return res.status(404).json({ "message": "User(s) not found" });
+        }
+
+        if (!req.query.fields || req.query.fields.split(',').includes('links')) {
+            // Add links to each user
+            users = users.map(user => user.toObject());
+            users.forEach(function (user) {
+                addUserLinks(user);
+            });
+        }
+
+        return res.status(200).json({
+            users,
+            "links": [
+                {
+                    rel: "self", href: "http://localhost:3000/api/v1/users" + req.url
+                }
+            ]
+        });
     } catch (err) {
+        // CastError is thrown when an invalid id is passed
+        if (err.name === 'CastError') {
+            return res.status(400).json({ "message": "Invalid " + err.path });
+        }
+
         next(err);
     }
 });
@@ -47,27 +94,18 @@ router.get('/:id', async function (req, res, next) {
         if (user === null) {
             return res.status(404).json({ "message": "User not found" });
         }
-        res.status(200).json(user);
+
+        // Add links to user
+        user = user.toObject();
+        addUserLinks(user);
+
+        return res.status(200).json(user);
     } catch (err) {
         // CastError is thrown when an invalid id is passed to findById
         if (err.name === 'CastError') {
             return res.status(400).json({ "message": "Invalid " + err.path });
         }
 
-        next(err);
-    }
-});
-
-// Get a user by username
-router.get('/username/:username', async function (req, res, next) {
-    var username = req.params.username;
-    try {
-        var user = await User.findOne({ username: username });
-        if (user === null) {
-            return res.status(404).json({ "message": "User not found" });
-        }
-        res.status(200).json(user);
-    } catch (err) {
         next(err);
     }
 });
@@ -90,7 +128,7 @@ router.put('/:id', async function (req, res, next) {
         user.pinnedReview = req.body.pinnedReview;
 
         await user.save();
-        res.status(201).json(user);
+        return res.status(201).json(user);
     } catch (err) {
         // ValidationError is thrown when a required field is missing or is invalid
         if (err.name === 'ValidationError') {
@@ -126,7 +164,7 @@ router.patch('/:id', async function (req, res, next) {
         user.pinnedReview = (req.body.pinnedReview || user.pinnedReview);
 
         await user.save();
-        res.status(201).json(user);
+        return res.status(201).json(user);
     } catch (err) {
         // ValidationError is thrown when a required field is missing or is invalid
         if (err.name === 'ValidationError') {
@@ -157,7 +195,7 @@ router.delete('/:id', async function (req, res, next) {
         if (user === null) {
             return res.status(404).json({ "message": "User not found" });
         }
-        res.status(200).json(user);
+        return res.status(200).json(user);
     } catch (err) {
         // CastError is thrown when an invalid id is passed to findById
         if (err.name === 'CastError') {
@@ -167,26 +205,26 @@ router.delete('/:id', async function (req, res, next) {
     }
 });
 
-// Delete a user by username
-router.delete('/username/:username', async function (req, res, next) {
-    var username = req.params.username;
-    try {
-        var user = await User.findOneAndDelete({ username: username });
-        if (user === null) {
-            return res.status(404).json({ "message": "User not found" });
-        }
-        res.status(200).json(user);
-    } catch (err) {
-        next(err);
-    }
-});
-
-// Delete all users
+// Delete user(s) by query
 router.delete('/', async function (req, res, next) {
     try {
-        const user = await User.find().deleteMany();
-        res.status(200).json("All users deleted");
+        // Create query from query parameters
+        var query = User.find(Util.queryCreation(req));
+
+        // Delete all matching documents
+        const users = await query.deleteMany();
+
+        if (users.deletedCount === 0) {
+            return res.status(404).json({ "message": "User(s) not found" });
+        }
+
+        return res.status(200).json({ "message": users.deletedCount + " users deleted" });
     } catch (err) {
+        // CastError is thrown when an invalid id is passed
+        if (err.name === 'CastError') {
+            return res.status(400).json({ "message": "Invalid " + err.path });
+        }
+
         next(err);
     }
 });

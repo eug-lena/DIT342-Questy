@@ -10,7 +10,21 @@ var userSchema = new Schema({
     password: { type: String, required: true },
     bio: { type: String, default: 'This user has not set a bio yet.' },
     following: [{ type: Schema.Types.ObjectId, ref: 'users' }],
-    pinnedReview: { type: Schema.Types.ObjectId, ref: 'reviews' }
+    pinnedReview: {
+        type: Schema.Types.ObjectId,
+        ref: 'reviews',
+        validate: {
+            validator: async function (value) {
+                const review = await Review.findById(value);
+                if (review === null) {
+                    return false;
+                }
+
+                return true;
+            },
+            message: 'Review does not exist'
+        }
+    }
 });
 
 userSchema.pre('findOneAndDelete', { document: false, query: true }, async function () {
@@ -33,7 +47,7 @@ userSchema.pre('deleteMany', { document: false, query: true }, async function ()
     }
 });
 
-async function nullifyUserForReviewsAndComments(doc) {
+async function nullifyUserForReviewsAndComments(doc) {    
     const reviews = await Review.find({ user: doc._id });
     if (reviews !== null) {
         for (const review of reviews) {

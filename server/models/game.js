@@ -4,10 +4,10 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
 var gameSchema = new Schema({
-    name: { type: String, required: true, unique: true, minLength: [1, 'Name must be at least 1 character long'] },
-    author: { type: String, required: true, minLength: [1, 'Author must be at least 1 character long'] },
+    name: { type: String, required: true, unique: true, maxLength: [75, 'Name must be at most 75 characters long'] },
+    author: { type: String, required: true, maxLength: [75, 'Author must be at most 75 characters long'] },
     releaseDate: { type: Date, required: true },
-    tag: [{ type: String, required: true, minLength: [1, 'Must be at least 1 character long'], maxLength: [25, 'Must be at most 25 characters long'] }],
+    tag: [{ type: String, required: true, maxLength: [25, 'Must be at most 25 characters long'] }],
 });
 
 // Cascade delete reviews when a game is deleted for findOneAndDelete

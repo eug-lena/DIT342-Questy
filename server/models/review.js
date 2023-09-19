@@ -35,8 +35,8 @@ var reviewSchema = new Schema({
             message: 'User does not exist'
         }
     },
-    title: { type: String, required: true, maxLength: [50, 'Title cannot exceed 50 characters'], minLength: [1, 'Title must be at least 1 character long'] },
-    rating: { type: Number, required: true, min: [1, 'Rating must be at least 1'], max: [10, 'Rating cannot exceed 10'] },
+    title: { type: String, required: true, maxLength: [50, 'Title cannot exceed 50 characters'] },
+    rating: { type: Number, required: true, min: [1, 'Rating must be at least 1'], max: [5, 'Rating cannot exceed 5'] },
     text: { type: String, maxLength: [2500, 'Review cannot exceed 2500 characters'] },
     date: { type: Date, default: Date.now },
     isEdited: { type: Boolean, default: false }

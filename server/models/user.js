@@ -9,7 +9,7 @@ var userSchema = new Schema({
     username: { type: String, required: true, unique: true, match: [/^[a-zA-Z0-9]{6,18}$/, "Username can only be letters and number between 6-18 length"] }, // Minimum six characters, only letters and numbers
     password: { type: String, required: true },
     bio: { type: String, default: 'This user has not set a bio yet.' },
-    following: [{ type: Schema.Types.ObjectId, ref: 'users' }],
+    following: { type: [Schema.Types.ObjectId], ref: 'users' },
     pinnedReview: {
         type: Schema.Types.ObjectId,
         ref: 'reviews',

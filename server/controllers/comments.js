@@ -4,14 +4,7 @@ var express = require('express');
 var router = express.Router();
 var Comment = require('../models/comment');
 var Util = require('./util');
-
-function addCommentsLinks(comment) {
-    comment.links = [
-        {
-            rel: "self", href: "http://localhost:3000/api/v1/comments/" + comment._id
-        }
-    ];
-}
+var linksHandler = require('./linkshandler');
 
 // ------------ CREATE ------------
 
@@ -56,12 +49,12 @@ router.get('/', async function (req, res, next) {
         if (comments.length === 0) {
             return res.status(404).json({ "message": "Comment(s) not found" });
         }
-        
+
         if (!req.query.fields || req.query.fields.split(',').includes('links')) {
             // Add links to each comment
             comments = comments.map(comment => comment.toObject());
             comments.forEach(function (comment) {
-                addCommentsLinks(comment);
+                linksHandler.addCommentLinks(comment);
             });
         }
 
@@ -73,7 +66,7 @@ router.get('/', async function (req, res, next) {
                 }
             ]
         });
-        
+
     } catch (err) {
         // CastError is thrown when an invalid id is passed
         if (err.name === 'CastError') {
@@ -86,13 +79,18 @@ router.get('/', async function (req, res, next) {
 
 // Get a comment by id
 router.get('/:id', async function (req, res, next) {
+    var id = req.params.id;
     try {
-        var comment = await Comment.findById(req.params.id);
+        var comment = await Comment.findById(id);
         if (comment === null) {
             return res.status(404).json({ "message": "Comment not found" });
         }
-        return res.status(200).json(comment);
 
+        // Add links to comment
+        comment = comment.toObject();
+        linksHandler.addCommentLinks(comment);
+
+        return res.status(200).json(comment);
     } catch (err) {
         // CastError is thrown when an invalid id is passed to findById
         if (err.name === 'CastError') {
@@ -119,7 +117,7 @@ router.put('/:id', async function (req, res, next) {
         comment.isEdited = true;
 
         await comment.save();
-        return res.status(200).json(comment);
+        return res.status(201).json(comment);
 
     } catch (err) {
         // CastError is thrown when an invalid id is passed to findById
@@ -149,7 +147,7 @@ router.patch('/:id', async function (req, res, next) {
         comment.isEdited = true;
 
         await comment.save();
-        return res.status(200).json(comment);
+        return res.status(201).json(comment);
 
     } catch (err) {
         // CastError is thrown when an invalid id is passed to findById
@@ -170,6 +168,7 @@ router.patch('/:id', async function (req, res, next) {
 
 // Delete a comment by id
 router.delete('/:id', async function (req, res, next) {
+    var id = req.params.id;
     try {
         var comment = await Comment.findOneAndDelete({ _id: id });
         if (comment === null) {
@@ -199,7 +198,8 @@ router.delete('/', async function (req, res, next) {
             return res.status(404).json({ "message": "Comment(s) not found" });
         }
 
-        return res.status(200).json({ "message": comments.deletedCount + " comments deleted" });
+        return res.status(200).json({ "message": "Comment(s) deleted", "deletedCount": comments.deletedCount });
+        
     } catch (err) {
         // CastError is thrown when an invalid id is passed
         if (err.name === 'CastError') {

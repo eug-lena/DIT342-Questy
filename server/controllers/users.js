@@ -4,17 +4,7 @@ var express = require('express');
 var router = express.Router();
 var User = require('../models/user');
 var Util = require('./util');
-
-function addUserLinks(user) {
-    user.links = [
-        {
-            rel: "self", href: "http://localhost:3000/api/v1/users/" + user._id
-        },
-        {
-            rel: "reviews", href: "http://localhost:3000/api/v1/reviews/user/" + user._id
-        }
-    ];
-}
+var linksHandler = require('./linkshandler');
 
 // ------------ CREATE ------------
 
@@ -64,7 +54,7 @@ router.get('/', async function (req, res, next) {
             // Add links to each user
             users = users.map(user => user.toObject());
             users.forEach(function (user) {
-                addUserLinks(user);
+                linksHandler.addUserLinks(user);
             });
         }
 
@@ -97,7 +87,7 @@ router.get('/:id', async function (req, res, next) {
 
         // Add links to user
         user = user.toObject();
-        addUserLinks(user);
+        linksHandler.addUserLinks(user);
 
         return res.status(200).json(user);
     } catch (err) {
@@ -218,7 +208,12 @@ router.delete('/', async function (req, res, next) {
             return res.status(404).json({ "message": "User(s) not found" });
         }
 
-        return res.status(200).json({ "message": users.deletedCount + " users deleted" });
+        var response = {
+            "message": "User(s) deleted",
+            "deletedCount": users.deletedCount
+        };
+
+        return res.status(200).json({ "message": "User(s) deleted", "deletedCount": users.deletedCount });
     } catch (err) {
         // CastError is thrown when an invalid id is passed
         if (err.name === 'CastError') {

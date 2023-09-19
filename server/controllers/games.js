@@ -4,17 +4,7 @@ var express = require('express');
 var router = express.Router();
 var Game = require('../models/game');
 var Util = require('./util');
-
-function addGameLinks(game) {
-    game.links = [
-        {
-            rel: "self", href: "http://localhost:3000/api/v1/games/" + game._id
-        },
-        {
-            rel: "reviews", href: "http://localhost:3000/api/v1/reviews/game/" + game._id
-        }
-    ];
-}
+var linksHandler = require('./linkshandler');
 
 // ------------ CREATE ------------
 
@@ -64,7 +54,7 @@ router.get('/', async function (req, res, next) {
             // Add links to each game
             games = games.map(game => game.toObject());
             games.forEach(function (game) {
-                addGameLinks(game);
+                linksHandler.addGameLinks(game);
             });
         }
 
@@ -95,6 +85,11 @@ router.get('/:id', async function (req, res, next) {
         if (game === null) {
             return res.status(404).json({ "message": "Game not found" });
         }
+
+        // Add links to game
+        game = game.toObject();
+        linksHandler.addGameLinks(game);
+
         return res.status(200).json(game);
     } catch (err) {
         // CastError is thrown when an invalid id is passed to findById
@@ -210,7 +205,7 @@ router.delete('/', async function (req, res, next) {
             return res.status(404).json({ "message": "Game(s) not found" });
         }
 
-        return res.status(200).json({ "message": games.deletedCount + " games deleted" });
+        return res.status(200).json({ "message": "Game(s) deleted", "deletedCount": games.deletedCount });
     } catch (err) {
         // CastError is thrown when an invalid id is passed
         if (err.name === 'CastError') {

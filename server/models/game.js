@@ -7,7 +7,18 @@ var gameSchema = new Schema({
     name: { type: String, required: true, unique: true, maxLength: [75, 'Name must be at most 75 characters long'] },
     author: { type: String, required: true, maxLength: [75, 'Author must be at most 75 characters long'] },
     releaseDate: { type: Date, required: true },
-    tag: [{ type: String, required: true, maxLength: [25, 'Must be at most 25 characters long'] }],
+    tag: {
+        type: [{
+            type: String,
+            maxLength: 25,
+        }],
+        validate: {
+            validator: function (v) {
+                return Array.isArray(v) && v.length > 0;
+            },
+            message: 'Tag must be an array with at least one element'
+        },
+    }
 });
 
 // Cascade delete reviews when a game is deleted for findOneAndDelete

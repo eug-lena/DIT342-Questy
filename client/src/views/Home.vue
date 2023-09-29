@@ -1,9 +1,9 @@
 <template>
   <div>
-    <b-jumbotron header="DIT342 Frontend" lead="Welcome to your DIT342 Frontend Vue.js App">
-      <b-button class="btn_message" variant="primary" v-on:click="getMessage()" >Get Message from Server</b-button>
-      <p>Message from the server:<br/>
-      {{ message }}</p>
+    <b-jumbotron header="Questy" :lead="'Welcome ' + username">
+      <b-button class="btn_message" variant="primary" v-on:click="logout()"
+        >Logout</b-button
+      >
     </b-jumbotron>
   </div>
 </template>
@@ -16,25 +16,37 @@ export default {
   name: 'home',
   data() {
     return {
-      message: 'none'
+      username: '"username"'
     }
   },
+  created() {
+    this.isAuthenticated()
+  },
   methods: {
-    getMessage() {
-      Api.get('/')
-        .then(response => {
-          this.message = response.data.message
+    isAuthenticated() {
+      Api.get('/v1/authenticate/isAuthenticated')
+        .then((response) => {
+          console.log(response)
+          if (!response.data.authentication) {
+            this.$router.push('/login')
+          } else {
+            this.username = response.data.user.username
+          }
         })
-        .catch(error => {
-          this.message = error
+        .catch((error) => {
+          console.log(error)
         })
+    },
+    async logout() {
+      let success = true
+      Api.delete('/v1/authenticate/logout').catch((error) => {
+        console.log(error)
+        success = false
+      })
+      if (success) {
+        this.$router.push('/login')
+      }
     }
   }
 }
 </script>
-
-<style>
-.btn_message {
-  margin-bottom: 1em;
-}
-</style>

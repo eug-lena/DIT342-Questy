@@ -330,49 +330,6 @@
 								}
 							},
 							"response": []
-						},
-						{
-							"name": "invalid: no password",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"pm.test(\"Status code is 400\", function () {\r",
-											"    pm.response.to.have.status(400);\r",
-											"});"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"method": "POST",
-								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": "{\r\n    \"username\": \"notshort\"\r\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "http://localhost:3001/api/v1/users",
-									"protocol": "http",
-									"host": [
-										"localhost"
-									],
-									"port": "3001",
-									"path": [
-										"api",
-										"v1",
-										"users"
-									]
-								}
-							},
-							"response": []
 						}
 					]
 				},
@@ -4621,7 +4578,7 @@
 					"name": "Update",
 					"item": [
 						{
-							"name": "Comment 3: isEdited = false Copy",
+							"name": "Comment 3: isEdited = false",
 							"event": [
 								{
 									"listen": "test",
@@ -5621,7 +5578,7 @@
 					"response": []
 				},
 				{
-					"name": "Sort by descending username Copy",
+					"name": "Sort by descending username",
 					"event": [
 						{
 							"listen": "test",

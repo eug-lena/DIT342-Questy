@@ -10,13 +10,13 @@ var gameSchema = new Schema({
     tag: {
         type: [{
             type: String,
-            maxLength: 25,
+            maxLength: 12,
         }],
         validate: {
             validator: function (v) {
-                return Array.isArray(v) && v.length > 0;
+                return Array.isArray(v) && v.length > 0 && v.length < 10;
             },
-            message: 'Tag must be an array with at least one element'
+            message: 'Tag must be an array with at least one element and no more than 10 elements'
         },
     }
 });

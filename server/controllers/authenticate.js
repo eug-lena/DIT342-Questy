@@ -8,7 +8,7 @@ var passport = require('passport');
 router.post('/login', function (req, res, next) {
     passport.authenticate('local', function (err, user, info) {
         if (err) {
-            return res.status(400).json({ "message": err.message });
+            return next(err);
         }
 
         if (!user) {
@@ -17,7 +17,7 @@ router.post('/login', function (req, res, next) {
 
         req.logIn(user, function (err) {
             if (err) {
-                return res.status(400).json({ "message": err.message });
+                return next(err);
             }
 
             res.send({ 'message': 'User authenticated' });
@@ -55,6 +55,7 @@ router.get('/isAuthenticated', function (req, res) {
 router.delete('/logout', function (req, res, next) {
     req.logout(function (err) {
         if (err) { return next(err); }
+        res.json({ "message": "User logged out" });
     });
 });
 

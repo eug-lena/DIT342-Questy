@@ -118,6 +118,7 @@ export default {
         .then((response) => {
           this.authenticated = false
           this.username = ''
+          console.log(this.authenticated)
         })
         .catch((error) => {
           alert(error.response.data.message)

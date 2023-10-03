@@ -6,6 +6,12 @@
           :key="comment._id"
           :game="comment"
         ></comment-item>
+    <h1>Home</h1>
+    <comment-item
+          v-for="comment in comments.slice"
+          :key="comment._id"
+          :game="comment"
+        ></comment-item>
   </div>
 </template>
 
@@ -25,10 +31,16 @@ export default {
           title: 'This is a comment'
         }
       ]
+      comments: [
+        {
+          title: 'This is a comment'
+        }
+      ]
     }
   }
 }
 </script>
 
+<style scoped>
 <style scoped>
 </style>

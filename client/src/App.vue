@@ -48,3 +48,10 @@
   border-bottom: 1px solid black;
 }
 </style>
+
+<style scoped>
+.navbar {
+  background-color: rgb(217, 217, 217);
+  border-bottom: 1px solid black;
+}
+</style>

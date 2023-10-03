@@ -3,7 +3,7 @@
 var express = require('express');
 var router = express.Router();
 var Review = require('../models/review');
-var Util = require('./util');
+var queryHandler = require('./queryhandler');
 var linksHandler = require('./linkshandler');
 
 // ------------ CREATE ------------
@@ -72,12 +72,12 @@ router.post('/:id/comments/', async function (req, res, next) {
 router.get('/', async function (req, res, next) {
     try {
         // Create query from query parameters
-        var query = Review.find(Util.queryCreation(req));
+        var query = Review.find(queryHandler.queryCreation(req));
         if (req.query.sort) {
-            query = Util.sortQuery(req, query);
+            query = queryHandler.sortQuery(req, query);
         }
         if (req.query.fields) {
-            query = Util.fieldQuery(req, query);
+            query = queryHandler.fieldQuery(req, query);
         }
 
         // Get all matching documents
@@ -143,10 +143,10 @@ router.get('/:id/comments', async function (req, res, next) {
 
         var query = Comment.find({ review: req.params.id });
         if (req.query.sort) {
-            query = Util.sortQuery(req, query);
+            query = queryHandler.sortQuery(req, query);
         }
         if (req.query.fields) {
-            query = Util.fieldQuery(req, query);
+            query = queryHandler.fieldQuery(req, query);
         }
 
         // Get all matching documents
@@ -308,7 +308,7 @@ router.delete('/:id', async function (req, res, next) {
 router.delete('/', async function (req, res, next) {
     try {
         // Create query from query parameters
-        var query = Review.find(Util.queryCreation(req));
+        var query = Review.find(queryHandler.queryCreation(req));
 
         // Delete all matching documents
         const reviews = await query.deleteMany();

@@ -3,7 +3,7 @@
 var express = require('express');
 var router = express.Router();
 var Comment = require('../models/comment');
-var Util = require('./util');
+var queryHandler = require('./queryhandler');
 var linksHandler = require('./linkshandler');
 
 // ------------ CREATE ------------
@@ -35,12 +35,12 @@ router.post('/', async function (req, res, next) {
 router.get('/', async function (req, res, next) {
     try {
         // Create query from query parameters
-        var query = Comment.find(Util.queryCreation(req));
+        var query = Comment.find(queryHandler.queryCreation(req));
         if (req.query.sort) {
-            query = Util.sortQuery(req, query);
+            query = queryHandler.sortQuery(req, query);
         }
         if (req.query.fields) {
-            query = Util.fieldQuery(req, query);
+            query = queryHandler.fieldQuery(req, query);
         }
 
         // Get all matching documents
@@ -189,7 +189,7 @@ router.delete('/:id', async function (req, res, next) {
 router.delete('/', async function (req, res, next) {
     try {
         // Create query from query parameters
-        var query = Comment.find(Util.queryCreation(req));
+        var query = Comment.find(queryHandler.queryCreation(req));
 
         // Delete all matching documents
         const comments = await query.deleteMany();

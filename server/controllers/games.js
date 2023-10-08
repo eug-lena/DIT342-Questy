@@ -62,7 +62,7 @@ router.get('/', async function (req, res, next) {
             games,
             "links": [
                 {
-                    rel: "self", "href": "http://localhost:3000/api/v1/games" + req.url
+                    self: { href: "http://localhost:3000/api/v1/games" + req.url }
                 }
             ]
         });

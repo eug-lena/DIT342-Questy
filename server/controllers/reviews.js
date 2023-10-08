@@ -36,7 +36,6 @@ router.post('/', async function (req, res, next) {
 
 // Create a new comment for specific review
 router.post('/:id/comments/', async function (req, res, next) {
-    console.log(req.params.id);
     let Comment = require('../models/comment');
     var comment = new Comment(
         {
@@ -78,6 +77,10 @@ router.get('/', async function (req, res, next) {
         }
         if (req.query.fields) {
             query = queryHandler.fieldQuery(req, query);
+        }
+        
+        if (req.query.limit) {
+            query = query.limit(parseInt(req.query.limit));
         }
 
         // Get all matching documents

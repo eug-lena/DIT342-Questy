@@ -1,52 +1,30 @@
 <template>
   <div>
-    <b-jumbotron header="Questy" :lead="'Welcome ' + username">
-      <b-button class="btn_message" variant="primary" v-on:click="logout()"
-        >Logout</b-button
-      >
-    </b-jumbotron>
+    <h1>Home</h1>
+    <comment-item v-for="comment in comments.slice" :key="comment._id" :game="comment"></comment-item>
   </div>
 </template>
 
 <script>
-// @ is an alias to /src
-import { Api } from '@/Api'
+// import { Api } from '@/Api'
+import CommentItem from '../components/CommentBox.vue'
 
 export default {
   name: 'home',
+  components: {
+    'comment-item': CommentItem
+  },
   data() {
     return {
-      username: '"username"'
-    }
-  },
-  created() {
-    this.isAuthenticated()
-  },
-  methods: {
-    isAuthenticated() {
-      Api.get('/v1/authenticate/isAuthenticated')
-        .then((response) => {
-          console.log(response)
-          if (!response.data.authentication) {
-            this.$router.push('/login')
-          } else {
-            this.username = response.data.user.username
-          }
-        })
-        .catch((error) => {
-          console.log(error)
-        })
-    },
-    async logout() {
-      let success = true
-      Api.delete('/v1/authenticate/logout').catch((error) => {
-        console.log(error)
-        success = false
-      })
-      if (success) {
-        this.$router.push('/login')
-      }
+      comments: [
+        {
+          title: 'This is a comment'
+        }
+      ]
     }
   }
 }
 </script>
+
+<style scoped>
+</style>

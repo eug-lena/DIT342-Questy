@@ -1,24 +1,45 @@
 <template>
   <div class="background">
     <div class="content">
-
       <div v-if="!this.authenticated" class="sign-in">
-
         <header>
           <h1>Welcome to Questy!</h1>
         </header>
 
         <label for="username" class="sr-only">Username</label>
-        <input v-model="username" type="text" id="username" name="username" class="usernameBox" placeholder="Username"
-          autocomplete="username" required autofocus />
+        <input
+          v-model="username"
+          type="text"
+          id="username"
+          name="username"
+          class="usernameBox"
+          placeholder="Username"
+          autocomplete="username"
+          required
+          autofocus
+        />
         <br />
 
         <label for="password" class="sr-only">Password</label>
-        <input v-model="password" type="password" id="current-password" name="password" class="passwordBox"
-          placeholder="Password" autocomplete="current-password" required />
+        <input
+          v-model="password"
+          type="password"
+          id="current-password"
+          name="password"
+          class="passwordBox"
+          placeholder="Password"
+          autocomplete="current-password"
+          required
+        />
         <br />
 
-        <b-button :disabled="this.isDisabled" type="submit" class="loginButton" variant="primary" @click="login()">
+        <b-button
+          :disabled="this.isDisabled"
+          type="submit"
+          class="loginButton"
+          variant="primary"
+          @click="login()"
+        >
           <u><b>Sign in</b></u>
         </b-button>
 
@@ -26,26 +47,34 @@
         OR
         <br />
 
-        <b-button :disabled="this.isDisabled" type="submit" class="registerButton" variant="primary"
-          @click.prevent="register()">
+        <b-button
+          :disabled="this.isDisabled"
+          type="submit"
+          class="registerButton"
+          variant="primary"
+          @click.prevent="register()"
+        >
           <u><b>Create an account</b></u>
         </b-button>
-
       </div>
 
       <div v-else class="already-logged-in">
         <header>
-          <h3> Already logged in as </h3>
+          <h3>Already logged in as</h3>
           <br />
           <h1>{{ username }}</h1>
           <br />
         </header>
         <b-row class="justify-content-center">
           <a href="/" class="btn btn-success m-2" role="button">
-            <p><u><b>Continue</b></u></p>
+            <p>
+              <u><b>Continue</b></u>
+            </p>
           </a>
           <b-button class="m-2" variant="danger" @click.prevent="logout()">
-            <p><u><b>Logout</b></u></p>
+            <p>
+              <u><b>Logout</b></u>
+            </p>
           </b-button>
         </b-row>
       </div>
@@ -101,7 +130,6 @@ export default {
     isAuthenticated() {
       Api.get('/v1/authenticate/isAuthenticated')
         .then((response) => {
-          console.log(response.data)
           if (response.data.authenticated === true) {
             this.authenticated = true
             this.username = response.data.username
@@ -118,7 +146,6 @@ export default {
         .then((response) => {
           this.authenticated = false
           this.username = ''
-          console.log(this.authenticated)
         })
         .catch((error) => {
           alert(error.response.data.message)
@@ -138,7 +165,7 @@ export default {
   height: 100%;
 }
 
-.sign-in>input {
+.sign-in > input {
   margin-top: 10px;
   margin-bottom: 10px;
   width: 50%;
@@ -148,7 +175,7 @@ export default {
   background-color: #dbcec7;
 }
 
-.sign-in>button {
+.sign-in > button {
   margin-top: 10px;
   margin-bottom: 10px;
   width: 40%;
@@ -188,7 +215,7 @@ export default {
     transform: translate(-50%, -50%);
   }
 
-  button & a {
+  button {
     font-size: 12px;
   }
 

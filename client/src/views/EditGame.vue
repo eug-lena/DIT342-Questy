@@ -1,15 +1,15 @@
 <template>
-  <div>
+  <div class="w-100 h-100">
     <div class="background" />
-    <div class="content">
+    <div v-if="gameFound" class="content">
       <header>
-        <h1>Add a game</h1>
+        <h1>Edit game</h1>
       </header>
 
-      <b-row class="m-0">
+      <b-row style="margin: auto">
         <label for="name" class="sr-only">Name</label>
         <input
-          v-model="name"
+          v-model="game.name"
           type="text"
           id="name"
           name="name"
@@ -21,10 +21,10 @@
         />
       </b-row>
       <br />
-      <b-row class="m-0">
+      <b-row style="margin: auto">
         <label for="author" class="sr-only">Author</label>
         <input
-          v-model="author"
+          v-model="game.author"
           type="text"
           id="author"
           name="author"
@@ -46,18 +46,25 @@
           </label>
         </b-row>
       </div>
-      <p id="releasedate">Select release date:</p>
+      <p id="release-date">Select release date:</p>
       <b-form-datepicker
         id="datepicker"
-        v-model="releaseDate"
+        v-model="game.releaseDate"
         class=""
       ></b-form-datepicker>
       <br />
       <br />
       <br />
-      <b-button id="add-game-button" variant="primary" v-on:click="postGame()">
-        Add Game
-      </b-button>
+      <b-button
+        id="edit-game-button"
+        variant="info"
+        v-on:click="updateGame()"
+        >Edit Game</b-button
+      >
+    </div>
+    <div v-if="!this.gameFound" class="text-center">
+      <h1 id="not-found-text">Game not found</h1>
+      <router-link to="/all-games">Go to All Games</router-link>
     </div>
   </div>
 </template>
@@ -66,14 +73,12 @@
 import { Api } from '@/Api'
 
 export default {
-  name: 'add-game',
+  name: 'edit-game',
   data() {
     return {
       selected: 'A',
-      name: '',
-      author: '',
-      releaseDate: '',
-      tag: [],
+      gameFound: '',
+      game: {},
       tagOptions: {
         MMO: {
           name: 'MMO'
@@ -116,21 +121,39 @@ export default {
         },
         Roguelike: {
           name: 'Roguelike'
-        },
-        Platformer: {
-          name: 'Platformer'
         }
       }
     }
   },
+  mounted() {
+    this.getGame()
+  },
   methods: {
-    postGame() {
+    getGame() {
+      Api.get('v1/games?name=' + this.$route.query.name)
+        .then((response) => {
+          this.gameFound = true
+          this.game = response.data.games[0]
+          for (const tagOption in this.tagOptions) {
+            if (this.game.tag.includes(this.tagOptions[tagOption].name)) {
+              this.tagOptions[tagOption].state = true
+            }
+          }
+          this.game.tag = []
+          console.log(this.game)
+        })
+        .catch((error) => {
+          this.gameFound = false
+          alert(error.response.data.message)
+        })
+    },
+    updateGame() {
       this.getTags()
-      Api.post('/v1/games', {
-        name: this.name,
-        author: this.author,
-        releaseDate: this.releaseDate,
-        tag: this.tag
+      Api.put(this.game.links.self.href, { // HATEOAS link
+        name: this.game.name,
+        author: this.game.author,
+        releaseDate: this.game.releaseDate,
+        tag: this.game.tag
       })
         .then(() => {
           this.$router.push('/all-games')
@@ -143,7 +166,7 @@ export default {
     getTags() {
       for (const tagOption in this.tagOptions) {
         if (this.tagOptions[tagOption].state) {
-          this.tag.push(this.tagOptions[tagOption].name)
+          this.game.tag.push(this.tagOptions[tagOption].name)
         }
       }
     }
@@ -152,6 +175,10 @@ export default {
 </script>
 
 <style scoped>
+#not-found-text {
+  margin-top: 200px;
+}
+
 header {
   margin-top: 20px;
 }
@@ -180,13 +207,13 @@ header {
   height: 5vh;
 }
 
-#releasedate {
+#release-date {
   margin-top: 10px;
   margin-bottom: 10px;
   color: black !important;
 }
 
-#add-game-button {
+#edit-game-button {
   height: 5vh;
   position: absolute;
   bottom: 0;
@@ -195,7 +222,6 @@ header {
   margin-bottom: 10px;
   margin-right: 10px;
   margin-left: 10px;
-  background-color: #698f69 !important;
 }
 
 @media screen and (max-width: 1200px) {

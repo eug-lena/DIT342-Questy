@@ -12,7 +12,7 @@ router.post('/login', function (req, res, next) {
         }
 
         if (!user) {
-            return res.status(400).json({ "message": 'User does not exist is password is incorrect' });
+            return res.status(400).json({ "message": 'User does not exist or password is incorrect' });
         }
 
         req.logIn(user, function (err) {
@@ -45,10 +45,14 @@ router.post('/register', function (req, res) {
 });
 
 router.get('/isAuthenticated', function (req, res) {
-    if (req.isAuthenticated()) {
-        return res.json({ "authenticated": true, "username": req.user.username });
-    } else {
-        return res.json({ "authenticated": false });
+    try {
+        if (req.isAuthenticated()) {
+            return res.json({ "authenticated": true, "username": req.user.username, userId: req.user._id });
+        } else {
+            return res.json({ "authenticated": false });
+        }
+    } catch (err) {
+        return next(err);
     }
 });
 

@@ -27,7 +27,6 @@ export default {
     }
   },
   mounted() {
-    console.log(this.$route.query)
     this.getUser()
   },
   methods: {

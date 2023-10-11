@@ -9,7 +9,7 @@
       <b-row class="m-0">
         <label for="name" class="sr-only">Name</label>
         <input
-          v-model="name"
+          v-model="game.name"
           type="text"
           id="name"
           name="name"
@@ -24,7 +24,7 @@
       <b-row class="m-0">
         <label for="author" class="sr-only">Author</label>
         <input
-          v-model="author"
+          v-model="game.author"
           type="text"
           id="author"
           name="author"
@@ -49,7 +49,7 @@
       <p id="releasedate">Select release date:</p>
       <b-form-datepicker
         id="datepicker"
-        v-model="releaseDate"
+        v-model="game.releaseDate"
         class=""
       ></b-form-datepicker>
       <br />
@@ -63,17 +63,19 @@
 </template>
 
 <script>
-import { Api } from '@/Api'
+import { api } from '@/Api'
 
 export default {
   name: 'add-game',
   data() {
     return {
       selected: 'A',
-      name: '',
-      author: '',
-      releaseDate: '',
-      tag: [],
+      game: {
+        name: '',
+        author: '',
+        releaseDate: '',
+        tag: []
+      },
       tagOptions: {
         MMO: {
           name: 'MMO'
@@ -126,24 +128,13 @@ export default {
   methods: {
     postGame() {
       this.getTags()
-      Api.post('/v1/games', {
-        name: this.name,
-        author: this.author,
-        releaseDate: this.releaseDate,
-        tag: this.tag
-      })
-        .then(() => {
-          this.$router.push('/all-games')
-        })
-        .catch((error) => {
-          alert(error.response.data.message)
-          this.tag = []
-        })
+      api.postGame(this.game)
+      this.tag = []
     },
     getTags() {
       for (const tagOption in this.tagOptions) {
         if (this.tagOptions[tagOption].state) {
-          this.tag.push(this.tagOptions[tagOption].name)
+          this.game.tag.push(this.tagOptions[tagOption].name)
         }
       }
     }

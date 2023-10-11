@@ -4,7 +4,8 @@
     <b-row class="m-3">
       <div class="game-content col-12">
         <h1 id="game-name">{{ this.game.name }}</h1>
-        <p id="release-date">Release Date: {{ this.game.releaseDate }}</p>
+        <h3 id="game-author">Created by: {{ this.game.author }}</h3>
+        <p id="release-date">Release Date: {{ this.game.releaseDate.split('T')[0] }}</p>
         <b-row class="m-1 tag-row">
           <h5 class="m-2" v-for="tag in this.game.tag" :key="tag">{{ tag }}</h5>
         </b-row>
@@ -20,6 +21,7 @@
           class="m-3"
           variant="primary"
           v-on:click="createReview()"
+          :disabled="!this.store.isAuthenticated"
           >Add review</b-button
         >
         <b-button
@@ -47,7 +49,8 @@
 <script>
 import ReviewItem from '../components/ReviewBox.vue'
 
-import { Api } from '@/Api'
+import { Api, api } from '@/Api'
+import { useUserStore } from '../store/UserStore'
 
 export default {
   name: 'home',
@@ -58,23 +61,17 @@ export default {
     return {
       game: [],
       reviews: [],
-      error: ''
+      error: '',
+      store: useUserStore()
     }
   },
   mounted() {
     this.getGame()
   },
   methods: {
-    getGame() {
-      Api.get('v1/games?name=' + this.$route.query.name)
-        .then((response) => {
-          this.game = response.data.games[0]
-          this.game.releaseDate = this.game.releaseDate.slice(0, 10)
-          this.getReviews()
-        })
-        .catch((error) => {
-          alert(error.response.data.message)
-        })
+    async getGame() {
+      this.game = await api.getGameByName(this.$route.query.name)
+      this.getReviews()
     },
     getReviews() {
       Api.get(this.game.links.reviews.href) // HATEOAS link
@@ -87,12 +84,6 @@ export default {
           }
         })
     },
-    createReview() {
-      this.$router.push({
-        name: 'add-review',
-        query: { name: this.game.name }
-      })
-    },
     deleteGame() {
       if (confirm('Are you sure you want to delete this game?')) {
         Api.delete(this.game.links.self.href) // HATEOAS link
@@ -103,6 +94,12 @@ export default {
             alert(error.response.data.message)
           })
       }
+    },
+    createReview() {
+      this.$router.push({
+        name: 'add-review',
+        query: { name: this.game.name }
+      })
     },
     editGame() {
       this.$router.push({
@@ -117,11 +114,16 @@ export default {
 <style scoped>
 .game-content {
   text-align: center;
-  margin-bottom: 3px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
+  padding: 10px;
 }
 #game-name {
   margin-top: 10px;
   font-size: 50px;
+  word-break: break-word;
 }
 
 .tag-row {

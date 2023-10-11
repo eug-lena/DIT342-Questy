@@ -44,7 +44,7 @@ router.get('/', async function (req, res, next) {
         }
 
         // Get all matching documents
-        var comments = await query;
+        var comments = await query.populate('user', 'username');
 
         if (comments.length === 0) {
             return res.status(404).json({ "message": "Comment(s) not found" });
@@ -81,7 +81,7 @@ router.get('/', async function (req, res, next) {
 router.get('/:id', async function (req, res, next) {
     var id = req.params.id;
     try {
-        var comment = await Comment.findById(id);
+        var comment = await Comment.findById(id).populate('user', 'username');
         if (comment === null) {
             return res.status(404).json({ "message": "Comment not found" });
         }

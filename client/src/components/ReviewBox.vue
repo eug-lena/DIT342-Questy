@@ -29,35 +29,22 @@
 </template>
 
 <script>
-import { Api } from '@/Api'
-
 export default {
   name: 'review-item',
   props: ['review'],
   data() {
     return {
       date: '',
-      username: ''
+      username: 'Deleted user'
     }
   },
   mounted() {
     this.date = this.review.date.slice(0, 10)
     if (this.review.user) {
-      this.getUsername()
-    } else {
-      this.username = 'Deleted User'
+      this.username = this.review.user.username
     }
   },
   methods: {
-    getUsername() {
-      Api.get(this.review.links.user.href) // HATEOAS link
-        .then((response) => {
-          this.username = response.data.username
-        })
-        .catch((error) => {
-          alert(error.response.data.message)
-        })
-    },
     goToReview() {
       this.$router.push({
         name: 'review',

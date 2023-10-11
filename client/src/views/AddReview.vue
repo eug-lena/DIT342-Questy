@@ -8,7 +8,7 @@
       </header>
       <label for="title" class="sr-only">Title</label>
       <input
-        v-model="title"
+        v-model="review.title"
         type="text"
         id="title"
         name="title"
@@ -21,13 +21,13 @@
       <b-form-rating
         class="mt-1 mb-1"
         name="rating"
-        v-model="rating"
+        v-model="review.rating"
       ></b-form-rating>
 
       <label for="text" class="sr-only">Text</label>
       <b-form-textarea
         id="textarea-auto-height"
-        v-model="text"
+        v-model="review.text"
         placeholder="Enter text..."
         rows="8"
         name="text"
@@ -37,7 +37,7 @@
         class="m-0 mt-1"
         id="add-review-button"
         variant="primary"
-        v-on:click="postReview()"
+        v-on:click="test()"
       >
         Post review!
       </b-button>
@@ -46,61 +46,39 @@
 </template>
 
 <script>
-import { Api } from '@/Api'
+import { api } from '@/Api'
+import { useUserStore } from '../store/UserStore'
 
 export default {
   name: 'add-review',
   data() {
     return {
       game: {},
-      title: '',
-      rating: '',
-      text: '',
-      userId: ''
+      review: {
+        title: '',
+        rating: '',
+        text: '',
+        user: '',
+        game: ''
+      },
+      store: useUserStore()
     }
   },
   mounted() {
-    this.isAuthenticated()
+    this.getGame()
   },
   methods: {
     postReview() {
-      Api.post('/v1/reviews', {
-        title: this.title,
-        rating: this.rating,
-        text: this.text,
-        game: this.game._id,
-        user: this.userId
-      })
-        .then((response) => {
-          this.$router.push('/review?id=' + response.data._id)
-        })
-        .catch((err) => {
-          alert(err.response.data.message)
-        })
+      if (!this.store.isAuthenticated) {
+        alert('You must be logged in to post a review!')
+      } else {
+        this.review.user = this.store.getUserID
+        api.postReview(this.review)
+      }
     },
-    getGame() {
-      Api.get('/v1/games?name=' + this.$route.query.name)
-        .then((response) => {
-          this.game = response.data.games[0]
-        })
-        .catch((err) => {
-          alert(err.response.data.message)
-        })
-    },
-    isAuthenticated() {
-      Api.get('/v1/authenticate/isAuthenticated')
-        .then((response) => {
-          if (response.data.authenticated === true) {
-            this.userId = response.data.userId
-            this.getGame()
-          } else {
-            alert('You must be logged in to add a review')
-            this.$router.push('/game?name=' + this.$route.query.name)
-          }
-        })
-        .catch((error) => {
-          alert(error.response.data.message)
-        })
+    async getGame() {
+      this.game = await api.getGameByName(this.$route.query.name)
+      this.review.game = this.game._id
     }
   }
 }

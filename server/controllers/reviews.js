@@ -84,7 +84,7 @@ router.get('/', async function (req, res, next) {
         }
 
         // Get all matching documents
-        var reviews = await query;
+        var reviews = await query.populate('user', 'username').populate('game', 'name');
 
         if (reviews.length === 0) {
             return res.status(404).json({ "message": "Review(s) not found" });
@@ -120,7 +120,7 @@ router.get('/', async function (req, res, next) {
 // Get a review by id
 router.get('/:id', async function (req, res, next) {
     try {
-        var review = await Review.findById(req.params.id);
+        var review = await Review.findById(req.params.id).populate('user', 'username').populate('game', 'name');
         if (review === null) {
             return res.status(404).json({ "message": "Review not found" });
         }
@@ -153,7 +153,7 @@ router.get('/:id/comments', async function (req, res, next) {
         }
 
         // Get all matching documents
-        var comments = await query;
+        var comments = await query.populate('user', 'username');
 
         if (comments.length === 0) {
             return res.status(404).json({ "message": "Comment(s) not found" });

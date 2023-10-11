@@ -47,7 +47,7 @@ router.post('/register', function (req, res) {
 router.get('/isAuthenticated', function (req, res) {
     try {
         if (req.isAuthenticated()) {
-            return res.json({ "authenticated": true, "username": req.user.username, userId: req.user._id });
+            return res.json({ "authenticated": true, "username": req.user.username, "_id": req.user._id });
         } else {
             return res.json({ "authenticated": false });
         }

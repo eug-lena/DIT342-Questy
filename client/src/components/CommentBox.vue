@@ -2,13 +2,14 @@
   <div class="commentBox">
     <b-row class="m-0">
       <div class="user">
-        <p>{{ comment.username }}</p>
+        <p>{{ username }}</p>
       </div>
       <div id="ifEdited" v-if="comment.isEdited">
         <p class="editedText">(edited)</p>
       </div>
       <div class="date">
-        <p>Posted on {{ comment.date }}</p>
+        <p>Posted on {{ date }}</p>
+
       </div>
     </b-row>
     <div class="opinion">
@@ -32,6 +33,17 @@
         />
         <p class="test">Disagree</p>
       </b-row>
+      <b-row v-if="comment.opinion == null">
+        <img
+          src="../assets/sign.png"
+          class="neutralIcon"
+          alt="neutral"
+          width="30"
+          height="30"
+        />
+        <p class="test">Neutral</p>
+      </b-row>
+
     </div>
     <div class="comment">
       <p v-if="this.showMore">
@@ -57,12 +69,21 @@ export default {
   props: ['comment'],
   data() {
     return {
-      showMore: false
+      showMore: false,
+      date: '',
+      username: 'Deleted user'
     }
   },
   methods: {
     showComment() {
       this.showMore = !this.showMore
+    }
+  },
+  mounted() {
+    this.date = this.comment.date.slice(0, 19)
+    this.date = this.date.replace('T', ' at ')
+    if (this.comment.user.username) {
+      this.username = this.comment.user.username
     }
   }
 }
@@ -75,8 +96,6 @@ export default {
   padding: 10px;
   background-color: #fff;
   word-wrap: break-word;
-  width: 40%;
-  margin-left: 55%;
   margin-top: 50px;
   position: relative;
   text-overflow: ellipsis;

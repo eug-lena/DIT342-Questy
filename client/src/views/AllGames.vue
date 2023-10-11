@@ -16,7 +16,7 @@
         <h2 class="no-games-text" v-if="!this.games.length > 0">
           There are currently no games 😭
         </h2>
-        <b-form inline id="filter-form">
+        <b-form v-else inline id="filter-form">
           <label class="sr-only" for="inline-form-input-name"> Name </label>
           <b-form-input
             class="mb-2 mb-sm-0"
@@ -54,7 +54,7 @@
         <div class="overflow-auto">
           <b-pagination
             v-model="currentPage"
-            :total-rows="this.totalRows"
+            :total-rows="this.games.length"
             :per-page="perPage"
             first-number
             last-number
@@ -68,7 +68,7 @@
 </template>
 
 <script>
-import { Api } from '@/Api'
+import { api } from '@/Api'
 
 // Components
 import GameItem from '../components/GameBox.vue'
@@ -89,37 +89,19 @@ export default {
       }
     }
   },
-  computed: {
-    totalRows: function () {
-      return this.games.length
-    }
-  },
   mounted() {
     this.getGames()
   },
   methods: {
-    getGames() {
+    async getGames() {
       let filter = ''
       if (this.filter.name) {
         filter += 'name=' + this.filter.name + '&'
       }
       if (this.filter.tag) {
-        filter += 'tag=' + this.filter.tag + '&'
+        filter += 'tag=' + this.filter.tag
       }
-      Api.get('v1/games?' + filter)
-        .then((response) => {
-          this.games = response.data.games
-        })
-        .catch((error) => {
-          if (error.response.status === 404) {
-            console.log(this.filter)
-            if (this.filter) {
-              alert('No games match the criteria')
-            }
-          } else {
-            alert(error.response.data.message)
-          }
-        })
+      this.games = await api.getGames(filter)
     }
   }
 }

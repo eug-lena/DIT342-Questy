@@ -17,6 +17,7 @@ import EditGame from './views/EditGame.vue'
 // Review
 import Review from './views/Review.vue'
 import AddReview from './views/AddReview.vue'
+import EditReview from './views/EditReview.vue'
 
 // Comment
 
@@ -70,6 +71,11 @@ export default new Router({
       path: '/add-review',
       name: 'add-review',
       component: AddReview
+    },
+    {
+      path: '/edit-review',
+      name: 'edit-review',
+      component: EditReview
     }
   ]
 })

@@ -55,10 +55,7 @@
       <br />
       <br />
       <br />
-      <b-button
-        id="edit-game-button"
-        variant="info"
-        v-on:click="updateGame()"
+      <b-button id="edit-game-button" variant="info" v-on:click="updateGame()"
         >Edit Game</b-button
       >
     </div>
@@ -70,15 +67,14 @@
 </template>
 
 <script>
-import { Api } from '@/Api'
+import { api } from '@/Api'
 
 export default {
   name: 'edit-game',
   data() {
     return {
       selected: 'A',
-      gameFound: '',
-      game: {},
+      game: '',
       tagOptions: {
         MMO: {
           name: 'MMO'
@@ -128,40 +124,40 @@ export default {
   mounted() {
     this.getGame()
   },
+  computed: {
+    gameFound() {
+      if (!this.game) {
+        return false
+      }
+      return true
+    }
+  },
   methods: {
-    getGame() {
-      Api.get('v1/games?name=' + this.$route.query.name)
-        .then((response) => {
-          this.gameFound = true
-          this.game = response.data.games[0]
-          for (const tagOption in this.tagOptions) {
-            if (this.game.tag.includes(this.tagOptions[tagOption].name)) {
-              this.tagOptions[tagOption].state = true
-            }
-          }
-          this.game.tag = []
-          console.log(this.game)
-        })
-        .catch((error) => {
-          this.gameFound = false
-          alert(error.response.data.message)
-        })
+    async getGame() {
+      this.game = await api.getGameByName(this.$route.query.name)
+
+      if (!this.game) {
+        return
+      }
+
+      for (const tagOption in this.tagOptions) {
+        if (this.game.tag.includes(this.tagOptions[tagOption].name)) {
+          this.tagOptions[tagOption].state = true
+        }
+      }
+
+      this.game.tag = []
     },
-    updateGame() {
+    async updateGame() {
       this.getTags()
-      Api.put(this.game.links.self.href, { // HATEOAS link
-        name: this.game.name,
-        author: this.game.author,
-        releaseDate: this.game.releaseDate,
-        tag: this.game.tag
-      })
-        .then(() => {
-          this.$router.push('/all-games')
+      const response = await api.putByHateoas(this.game.links.self.href, this.game)
+      if (response === 201) {
+        this.$router.push({
+          name: 'game',
+          query: { name: this.game.name }
         })
-        .catch((error) => {
-          alert(error.response.data.message)
-          this.tag = []
-        })
+      }
+      // else, putByHateoas() will alert the user
     },
     getTags() {
       for (const tagOption in this.tagOptions) {

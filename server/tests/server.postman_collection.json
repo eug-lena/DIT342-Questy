@@ -3177,7 +3177,7 @@
 											"});\r",
 											"\r",
 											"pm.test(\"Review received by query is correct\", function () {\r",
-											"    pm.expect(pm.response.json().reviews[0].user).to.be.equal(pm.globals.get(\"william_id\"));\r",
+											"    pm.expect(pm.response.json().reviews[0].user._id).to.be.equal(pm.globals.get(\"william_id\"));\r",
 											"});"
 										],
 										"type": "text/javascript"

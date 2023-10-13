@@ -1,11 +1,13 @@
 <template>
   <div>
     <div class="background" />
-    <b-row class="m-3">
+    <b-row v-if="this.game" class="m-3">
       <div class="game-content col-12">
         <h1 id="game-name">{{ this.game.name }}</h1>
         <h3 id="game-author">Created by: {{ this.game.author }}</h3>
-        <p id="release-date">Release Date: {{ this.game.releaseDate.split('T')[0] }}</p>
+        <p id="release-date">
+          Release Date: {{ this.game.releaseDate.split('T')[0] }}
+        </p>
         <b-row class="m-1 tag-row">
           <h5 class="m-2" v-for="tag in this.game.tag" :key="tag">{{ tag }}</h5>
         </b-row>
@@ -14,6 +16,7 @@
           class=""
           variant="danger"
           v-on:click="deleteGame()"
+          :hidden="!this.store.isAuthenticated"
           >Delete</b-button
         >
         <b-button
@@ -21,7 +24,7 @@
           class="m-3"
           variant="primary"
           v-on:click="createReview()"
-          :disabled="!this.store.isAuthenticated"
+          :hidden="!this.store.isAuthenticated"
           >Add review</b-button
         >
         <b-button
@@ -29,11 +32,16 @@
           class="3"
           variant="info"
           v-on:click="editGame()"
+          :hidden="!this.store.isAuthenticated"
           >Edit</b-button
         >
       </div>
       <h5 class="text-center w-100 mt-5" v-if="!this.reviews.length > 0">
-        There seem to be no reviews, but you can go ahead and create one!
+        {{
+          this.loading
+            ? 'Loading...'
+            : 'There seem to be no reviews, but you can go ahead and create one!'
+        }}
       </h5>
       <b-list-group horizontal>
         <review-item
@@ -43,14 +51,21 @@
         ></review-item>
       </b-list-group>
     </b-row>
+    <div v-else class="text-center" id="not-found-box">
+      <b-spinner v-if="this.loading" label="Loading..."></b-spinner>
+      <div v-else>
+        <h1>Game not found</h1>
+        <router-link to="/all-games">Go to All Games</router-link>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
-import ReviewItem from '../components/ReviewBox.vue'
+import ReviewItem from '../../components/ReviewBox.vue'
 
-import { Api, api } from '@/Api'
-import { useUserStore } from '../store/UserStore'
+import { api } from '@/Api'
+import { useUserStore } from '../../store/UserStore'
 
 export default {
   name: 'home',
@@ -59,10 +74,11 @@ export default {
   },
   data() {
     return {
-      game: [],
-      reviews: [],
+      game: '',
+      reviews: '',
       error: '',
-      store: useUserStore()
+      store: useUserStore(),
+      loading: true
     }
   },
   mounted() {
@@ -70,29 +86,34 @@ export default {
   },
   methods: {
     async getGame() {
-      this.game = await api.getGameByName(this.$route.query.name)
-      this.getReviews()
+      const response = await api.getGameByName(this.$route.query.name)
+      if (response.status === 200) {
+        this.game = response.game
+        this.getReviews()
+      } else {
+        this.loading = false
+      }
     },
-    getReviews() {
-      Api.get(this.game.links.reviews.href) // HATEOAS link
-        .then((response) => {
-          this.reviews = response.data.reviews
-        })
-        .catch((error) => {
-          if (error.response.status !== 404) {
-            alert(error.response.data.message)
-          }
-        })
+    async getReviews() {
+      const response = await api.getByHateoas(this.game.links.reviews.href)
+      console.log(response)
+      if (response.status === 200) {
+        this.reviews = response.data.reviews
+      } else {
+        if (response.status !== 404) {
+          alert(response.message)
+        }
+      }
+      this.loading = false
     },
-    deleteGame() {
+    async deleteGame() {
       if (confirm('Are you sure you want to delete this game?')) {
-        Api.delete(this.game.links.self.href) // HATEOAS link
-          .then((response) => {
-            this.$router.push('/all-games')
-          })
-          .catch((error) => {
-            alert(error.response.data.message)
-          })
+        const response = await api.deleteByHateoas(this.game.links.self.href)
+        if (response.status === 200) {
+          this.$router.push('/all-games')
+        } else {
+          alert(response.message)
+        }
       }
     },
     createReview() {
@@ -134,6 +155,10 @@ export default {
   width: 100%;
   display: flex;
   flex-wrap: wrap;
+}
+
+#not-found-box {
+  margin-top: 100px;
 }
 
 b-list-group {

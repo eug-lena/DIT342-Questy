@@ -9,13 +9,12 @@
       </div>
       <div class="date">
         <p>Posted on {{ date }}</p>
-
       </div>
     </b-row>
     <div class="opinion">
       <b-row v-if="comment.opinion === true">
         <img
-          src="../assets/agree.png"
+          src="@/assets/agree.png"
           class="agreeIcon"
           alt="agree"
           width="30"
@@ -25,7 +24,7 @@
       </b-row>
       <b-row v-if="comment.opinion === false">
         <img
-          src="../assets/disagree.png"
+          src="@/assets/disagree.png"
           class="disagreeIcon"
           alt="disagree"
           width="30"
@@ -35,7 +34,7 @@
       </b-row>
       <b-row v-if="comment.opinion == null">
         <img
-          src="../assets/sign.png"
+          src="@/assets/sign.png"
           class="neutralIcon"
           alt="neutral"
           width="30"
@@ -43,7 +42,6 @@
         />
         <p class="test">Neutral</p>
       </b-row>
-
     </div>
     <div class="comment">
       <p v-if="this.showMore">
@@ -155,26 +153,9 @@ export default {
   margin-left: 5px;
 }
 
-@media screen and (max-width: 1200px) {
+@media screen and (max-width: 768px) {
   .commentBox {
-    width: 80%;
-    margin-left: 10%;
-  }
-  .user {
-    font-size: 0.8em;
-  }
-}
-@media screen and (max-width: 576px) {
-  .commentBox {
-    width: 90%;
-    margin-left: 5%;
-  }
-  .user {
-    font-size: 0.8em;
-    margin-right: 0px;
-  }
-  .date {
-    margin-left: 0px;
+    margin-top: 0px;
   }
 }
 </style>

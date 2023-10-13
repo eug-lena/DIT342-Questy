@@ -9,13 +9,17 @@
             class="m-3 ml-3"
             variant="primary"
             href="/add-game"
+            :hidden="!this.store.isAuthenticated"
           >
             Add Game
           </b-button>
         </b-row>
-        <h2 class="no-games-text" v-if="!this.games.length > 0">
-          There are currently no games 😭
-        </h2>
+        <div class="text-center" v-if="!this.games.length > 0">
+          <h2 id="no-games-text" v-if="!this.loading">
+            There are currently no games 😭
+          </h2>
+          <b-spinner v-else label="Loading..." class="mt-5"></b-spinner>
+        </div>
         <b-form v-else inline id="filter-form">
           <label class="sr-only" for="inline-form-input-name"> Name </label>
           <b-form-input
@@ -71,7 +75,10 @@
 import { api } from '@/Api'
 
 // Components
-import GameItem from '../components/GameBox.vue'
+import GameItem from '@/components/GameBox.vue'
+
+// Store
+import { useUserStore } from '@/store/UserStore'
 
 export default {
   name: 'all-games',
@@ -86,7 +93,9 @@ export default {
       filter: {
         name: '',
         tag: ''
-      }
+      },
+      store: useUserStore(),
+      loading: true
     }
   },
   mounted() {
@@ -101,7 +110,13 @@ export default {
       if (this.filter.tag) {
         filter += 'tag=' + this.filter.tag
       }
-      this.games = await api.getGames(filter)
+      const response = await api.getGames(filter)
+      if (response.status === 200) {
+        this.games = response.games
+      } else if (response.status !== 404) {
+        alert(response.message)
+      }
+      this.loading = false
     }
   }
 }
@@ -123,8 +138,7 @@ export default {
   margin-left: 15px;
 }
 
-.no-games-text {
-  text-align: left;
+#no-games-text {
   font-size: 30px;
   font-weight: bold;
   margin-top: 30px;

@@ -1,0 +1,42 @@
+<template>
+  <div class="userBox">
+    <b-row class="m-0 align-items-center">
+      <img
+        id="userIcon"
+        class="card-img"
+        alt="user icon"
+        src="../assets/user-icon.png"
+      />
+      {{ username }}
+    </b-row>
+  </div>
+</template>
+
+<script>
+export default {
+  name: 'followed-user',
+  props: ['followed-user'],
+  data() {
+    return {
+      username: 'Deleted user'
+    }
+  }
+}
+</script>
+
+<style scoped>
+.userBox {
+  display: inline-block;
+  width: auto;
+  margin: 10px;
+  padding: 10px;
+  border: 1px solid black;
+  border-radius: 5px;
+  background-color: #f5f5f5;
+}
+#userIcon {
+  width: auto;
+  height: 25px;
+  margin-right: 10px;
+}
+</style>

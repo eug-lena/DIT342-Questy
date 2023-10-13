@@ -84,7 +84,7 @@
 
 <script>
 import { api } from '@/Api'
-import { useUserStore } from '../store/UserStore'
+import { useUserStore } from '../../store/UserStore'
 
 export default {
   name: 'login',
@@ -118,7 +118,7 @@ export default {
 
 <style scoped>
 .background {
-  background: url('../assets/background-gif.gif') no-repeat;
+  background: url('../../assets/background-gif.gif') no-repeat;
   background-size: cover;
   position: fixed;
   z-index: 900;

@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="background" />
-    <div class="content">
+    <div v-if="this.game" class="content">
       <header>
         <h4>Add a review for</h4>
         <h2>{{ this.game.name }}</h2>
@@ -37,23 +37,29 @@
         class="m-0 mt-1"
         id="add-review-button"
         variant="primary"
-        v-on:click="test()"
+        v-on:click="postReview()"
       >
         Post review!
       </b-button>
+    </div>
+    <div class="text-center" id="not-found-box" v-else>
+      <b-spinner v-if="this.loading" label="Loading..."></b-spinner>
+      <div v-else>
+        <h2>Cannot find game</h2>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
 import { api } from '@/Api'
-import { useUserStore } from '../store/UserStore'
+import { useUserStore } from '../../store/UserStore'
 
 export default {
   name: 'add-review',
   data() {
     return {
-      game: {},
+      game: '',
       review: {
         title: '',
         rating: '',
@@ -61,7 +67,8 @@ export default {
         user: '',
         game: ''
       },
-      store: useUserStore()
+      store: useUserStore(),
+      loading: true
     }
   },
   mounted() {
@@ -77,8 +84,12 @@ export default {
       }
     },
     async getGame() {
-      this.game = await api.getGameByName(this.$route.query.name)
-      this.review.game = this.game._id
+      const response = await api.getGameByName(this.$route.query.name)
+      if (response.status === 200) {
+        this.game = response.game
+        this.review.game = this.game._id
+      }
+      this.loading = false
     }
   }
 }
@@ -117,6 +128,10 @@ header {
   height: 5vh;
   width: 100%;
   background-color: #698f69 !important;
+}
+
+#not-found-box {
+  margin-top: 100px;
 }
 
 @media screen and (max-width: 1200px) {

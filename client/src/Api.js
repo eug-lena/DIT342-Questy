@@ -89,8 +89,8 @@ export const api = {
 
   postGame: function (game) {
     Axios.post('/v1/games', game)
-      .then(() => {
-        router.push('/game?name=' + game.name)
+      .then((response) => {
+        router.push('/game?name=' + this.game.name)
       })
       .catch((error) => {
         alert(error.response.data.message)
@@ -98,45 +98,51 @@ export const api = {
   },
 
   getGames: async function (filter) {
-    let games
+    let returnData
     await Axios.get('/v1/games?' + filter)
       .then((response) => {
-        games = response.data.games
+        const status = response.status
+        const games = response.data.games
+        returnData = { status, games }
       })
       .catch((error) => {
-        if (error.response.status === 404) {
-          if (filter) {
-            alert('No games match the criteria')
-          } // else nothing, no games is a valid response unless there is a filter
-        } else {
-          alert(error.response.data.message)
-        }
+        const status = error.response.status
+        const message = error.response.data.message
+        returnData = { status, message }
       })
-    return games
+    return returnData
   },
 
   getGameById: async function (id) {
-    let game
+    let returnData
     await Axios.get('/v1/games/' + id)
       .then((response) => {
-        game = response.data
+        const status = response.status
+        const game = response.data
+        returnData = { status, game }
       })
       .catch((error) => {
-        alert(error.response.data.message)
+        const status = error.response.status
+        const message = error.response.data.message
+        returnData = { status, message }
       })
-    return game
+    return returnData
   },
 
   getGameByName: async function (name) {
-    let game
+    let returnData
     await Axios.get('/v1/games?name=' + name)
       .then((response) => {
-        game = response.data.games[0] // name is unique, so there should only be one
+        const status = response.status
+        const game = response.data.games[0] // name is unique, so there should only be one
+        returnData = { status, game }
       })
       .catch((error) => {
-        alert(error.response.data.message)
+        const status = error.response.status
+        const message = error.response.data.message
+        returnData = { status, message }
       })
-    return game
+    return returnData
   },
 
   // REVIEW
@@ -152,27 +158,51 @@ export const api = {
   },
 
   getReviewById: async function (id) {
-    let review
+    let returnData
     await Axios.get('/v1/reviews/' + id)
       .then((response) => {
-        review = response.data
+        const status = response.status
+        const review = response.data
+        returnData = { status, review }
       })
       .catch((error) => {
-        alert(error.response.data.message)
+        const status = error.response.status
+        const message = error.response.data.message
+        returnData = { status, message }
       })
-    return review
+    return returnData
   },
 
   // HATEOAS
+
+  postByHateoas: async function (url, inputData) {
+    let returnData
+    await Axios.post(url, inputData)
+      .then((response) => {
+        const status = response.status
+        const data = response.data
+        returnData = { status, data }
+      })
+      .catch((error) => {
+        const status = error.response.status
+        const message = error.response.data.message
+        returnData = { status, message }
+      })
+    return returnData
+  },
 
   getByHateoas: async function (url) {
     let returnData
     await Axios.get(url)
       .then((response) => {
-        returnData = response.data
+        const status = response.status
+        const data = response.data
+        returnData = { status, data }
       })
       .catch((error) => {
-        alert(error.response.data.message)
+        const status = error.response.status
+        const message = error.response.data.message
+        returnData = { status, message }
       })
     return returnData
   },
@@ -181,11 +211,30 @@ export const api = {
     let returnData
     await Axios.put(url, inputData)
       .then((response) => {
-        returnData = response.status
+        const status = response.status
+        returnData = { status }
       }
       )
       .catch((error) => {
-        alert(error.response.data.message)
+        const status = error.response.status
+        const message = error.response.data.message
+        returnData = { status, message }
+      })
+    return returnData
+  },
+
+  deleteByHateoas: async function (url) {
+    let returnData
+    await Axios.delete(url)
+      .then((response) => {
+        const status = response.status
+        returnData = { status }
+      }
+      )
+      .catch((error) => {
+        const status = error.response.status
+        const message = error.response.data.message
+        returnData = { status, message }
       })
     return returnData
   }

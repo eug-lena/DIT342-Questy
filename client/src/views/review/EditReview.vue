@@ -1,7 +1,7 @@
 <template>
   <div class="w-100 h-100">
     <div class="background" />
-    <div v-if="reviewFound" class="content">
+    <div v-if="this.review" class="content">
       <header>
         <h1>Edit review</h1>
       </header>
@@ -44,32 +44,30 @@
         id="edit-review-button"
         variant="info"
         v-on:click="updateReview()"
+        :disabled="this.posting"
         >Edit Review</b-button
       >
     </div>
-    <div v-if="!this.reviewFound" class="text-center">
-      <h1 id="not-found-text">Review not found</h1>
-      <router-link to="/">Go to homepage</router-link>
+    <div id="not-found-text" v-else class="text-center">
+      <div v-if="!this.loading">
+        <h1>Review not found</h1>
+        <router-link to="/">Go to homepage</router-link>
+      </div>
+      <b-spinner v-else label="Loading..."></b-spinner>
     </div>
   </div>
 </template>
 
 <script>
-import { Api, api } from '@/Api'
+import { api } from '@/Api'
 
 export default {
   name: 'edit-review',
   data() {
     return {
-      review: ''
-    }
-  },
-  computed: {
-    reviewFound() {
-      if (!this.review) {
-        return false
-      }
-      return true
+      review: '',
+      loading: true,
+      posting: false
     }
   },
   mounted() {
@@ -77,21 +75,26 @@ export default {
   },
   methods: {
     async getReview() {
-      this.review = await api.getReviewById(this.$route.query.id)
+      const response = await api.getReviewById(this.$route.query.id)
+      if (response.status === 200) {
+        this.review = response.review
+      } else {
+        alert(response.message)
+      }
+      this.loading = false
     },
-    updateReview() {
-      Api.put(this.review.links.self.href, {
-        // HATEOAS link
-        title: this.review.title,
-        rating: this.review.rating,
-        text: this.review.text
-      })
-        .then(() => {
-          this.$router.push('/review?id=' + this.$route.query.id)
-        })
-        .catch((error) => {
-          alert(error.response.data.message)
-        })
+    async updateReview() {
+      this.posting = true
+      const response = await api.putByHateoas(
+        this.review.links.self.href,
+        this.review
+      )
+      if (response.status === 201) {
+        this.$router.push({ name: 'review', query: { id: this.review.id } })
+      } else {
+        alert(response.message)
+      }
+      this.posting = false
     }
   }
 }

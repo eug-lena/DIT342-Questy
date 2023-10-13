@@ -33,7 +33,9 @@
                 >Sign Out</b-dropdown-item
               >
             </b-nav-item-dropdown>
-            <b-nav-item v-else-if="this.store.isAuthenticated === false" href="/login"
+            <b-nav-item
+              v-else-if="this.store.isAuthenticated === false"
+              href="/login"
               >Sign In</b-nav-item
             >
           </b-navbar-nav>
@@ -45,7 +47,6 @@
 </template>
 
 <script setup>
-
 </script>
 
 <script>

@@ -1,21 +1,18 @@
 <template>
   <div>
-    <div class="userData">
-      <div class="top">
-        <b-row class="m-0 align-items-center">
-          <b-col class="col-1">
-            <img
-              id="userIcon"
-              class="card-img"
-              alt="user icon"
-              src="../assets/user-icon.png"
-            />
-          </b-col>
-          <b-col class="col-1">
-            <h1 class="username">{{ user.name }}</h1>
-          </b-col>
-        </b-row>
-      </div>
+    <div class="top">
+      <b-row class="m-0 align-items-center">
+        <img
+          id="userIcon"
+          class="card-img"
+          alt="user icon"
+          src="../../assets/user-icon.png"
+        />
+
+        <h1 class="username">{{ user.name }}</h1>
+      </b-row>
+    </div>
+    <div class="bio">
       <h1>Bio</h1>
       <p class="ml-3">{{ user.bio }}</p>
     </div>
@@ -23,12 +20,11 @@
     <!-- following -->
     <div>
       <b-card-title>Following</b-card-title>
-      <b-card no-body class="overflow-hidden" style="max-width: 540px">
+      <b-card>
         <b-card-body>
           <b-card-text>
-            <b-card-text v-for="user in user.following" :key="user">
-              {{ user }}
-            </b-card-text>
+            <followed-user v-for="user in user.following" :key="user">
+            </followed-user>
           </b-card-text>
         </b-card-body>
       </b-card>
@@ -52,14 +48,18 @@
 </template>
 
 <script>
+import FollowedUser, { followedUser } from '../../components/FollowedUser.vue'
+
 export default {
+  components: { FollowedUser },
   name: 'user',
+  'followed-user': followedUser,
   data() {
     return {
       user: {
-        name: 'asdas',
+        name: 'asaaaaaaadas',
         bio: 'this is a bio',
-        following: ['bob', 'bob2', 'bob3'],
+        following: ['bobbob2', 'bob2', 'bob3'],
         pinnedReview: {
           game: 'world of warcraft',
           title: 'this is a review',
@@ -86,14 +86,11 @@ export default {
   margin: 10px;
   height: 80px;
   width: auto;
-  display: flex;
   align-items: center;
-  flex-direction: row;
 }
 .username {
   text-align: center;
   font: normal normal bold 36px/87px Arial;
-  letter-spacing: 0px;
   color: black;
 }
 .top {
@@ -103,5 +100,6 @@ export default {
   padding: 5px;
   margin: 10px;
   width: auto;
+  display: inline-block;
 }
 </style>

@@ -1,12 +1,12 @@
 <template>
-  <div>
+  <div class="w-100 h-100">
     <div class="background" />
-    <div class="content">
+    <div v-if="this.game" class="content">
       <header>
-        <h1>Add a game</h1>
+        <h1>Edit game</h1>
       </header>
 
-      <b-row class="m-0">
+      <b-row style="margin: auto">
         <label for="name" class="sr-only">Name</label>
         <input
           v-model="game.name"
@@ -21,7 +21,7 @@
         />
       </b-row>
       <br />
-      <b-row class="m-0">
+      <b-row style="margin: auto">
         <label for="author" class="sr-only">Author</label>
         <input
           v-model="game.author"
@@ -46,7 +46,7 @@
           </label>
         </b-row>
       </div>
-      <p id="releasedate">Select release date:</p>
+      <p id="release-date">Select release date:</p>
       <b-form-datepicker
         id="datepicker"
         v-model="game.releaseDate"
@@ -55,9 +55,21 @@
       <br />
       <br />
       <br />
-      <b-button id="add-game-button" variant="primary" v-on:click="postGame()">
-        Add Game
-      </b-button>
+      <b-button
+        id="edit-game-button"
+        variant="info"
+        v-on:click="updateGame()"
+        :disabled="this.posting"
+      >
+        Edit Game</b-button
+      >
+    </div>
+    <div v-else id="not-found-text" class="text-center">
+      <div v-if="!this.loading">
+        <h1>Game not found</h1>
+        <router-link to="/all-games">Go to All Games</router-link>
+      </div>
+      <b-spinner v-else label="Loading..."></b-spinner>
     </div>
   </div>
 </template>
@@ -66,16 +78,11 @@
 import { api } from '@/Api'
 
 export default {
-  name: 'add-game',
+  name: 'edit-game',
   data() {
     return {
       selected: 'A',
-      game: {
-        name: '',
-        author: '',
-        releaseDate: '',
-        tag: []
-      },
+      game: '',
       tagOptions: {
         MMO: {
           name: 'MMO'
@@ -118,18 +125,48 @@ export default {
         },
         Roguelike: {
           name: 'Roguelike'
-        },
-        Platformer: {
-          name: 'Platformer'
         }
-      }
+      },
+      loading: true,
+      posting: false
     }
   },
+  mounted() {
+    this.getGame()
+  },
   methods: {
-    postGame() {
+    async getGame() {
+      const response = await api.getGameByName(this.$route.query.name)
+      if (response.status === 200) {
+        this.game = response.game
+
+        for (const tagOption in this.tagOptions) {
+          if (this.game.tag.includes(this.tagOptions[tagOption].name)) {
+            this.tagOptions[tagOption].state = true
+          }
+        }
+
+        this.game.tag = []
+      }
+      this.loading = false
+    },
+    async updateGame() {
+      this.posting = true
       this.getTags()
-      api.postGame(this.game)
-      this.tag = []
+      const response = await api.putByHateoas(
+        this.game.links.self.href,
+        this.game
+      )
+      if (response.status === 201) {
+        this.$router.push({
+          name: 'game',
+          query: { name: this.game.name }
+        })
+      } else {
+        alert(response.message)
+      }
+      this.game.tag = []
+      this.posting = false
     },
     getTags() {
       for (const tagOption in this.tagOptions) {
@@ -143,6 +180,10 @@ export default {
 </script>
 
 <style scoped>
+#not-found-text {
+  margin-top: 200px;
+}
+
 header {
   margin-top: 20px;
 }
@@ -171,13 +212,13 @@ header {
   height: 5vh;
 }
 
-#releasedate {
+#release-date {
   margin-top: 10px;
   margin-bottom: 10px;
   color: black !important;
 }
 
-#add-game-button {
+#edit-game-button {
   height: 5vh;
   position: absolute;
   bottom: 0;
@@ -186,7 +227,6 @@ header {
   margin-bottom: 10px;
   margin-right: 10px;
   margin-left: 10px;
-  background-color: #698f69 !important;
 }
 
 @media screen and (max-width: 1200px) {

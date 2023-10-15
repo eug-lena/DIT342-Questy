@@ -1,65 +1,72 @@
 <template>
-  <div class="w-100 h-100">
+  <div>
     <div class="background" />
     <div v-if="this.review" class="content">
       <header>
-        <h1>Edit review</h1>
+        <h4>Edit your review for</h4>
+        <h2>{{ this.review.game.name }}</h2>
       </header>
 
-      <b-row style="margin: auto">
-        <label for="title" class="sr-only">Title</label>
-        <input
-          v-model="review.title"
-          type="text"
-          id="title"
-          name="title"
-          class="textbox col-12"
-          placeholder="Review Title"
-          autocomplete="title"
-          required
-          autofocus
-        />
-      </b-row>
+      <label for="title" class="sr-only">Title</label>
+      <input
+        v-model="review.title"
+        type="text"
+        id="title"
+        name="title"
+        class="textbox col-12"
+        placeholder="Review Title"
+        autocomplete="title"
+        autofocus
+      />
       <label for="rating" class="sr-only">Rating</label>
 
       <b-form-rating
         class="mt-1 mb-1"
         name="rating"
         v-model="review.rating"
-        required
       ></b-form-rating>
 
       <!-- text -->
       <b-form-textarea
-        id="text"
+        id="textarea-auto-height"
         v-model="review.text"
         placeholder="Review Text"
         rows="8"
         max-rows="16"
-        required
       ></b-form-textarea>
 
-      <br />
-      <b-button
-        id="edit-review-button"
-        variant="info"
-        v-on:click="updateReview()"
-        :disabled="this.posting"
-        >Edit Review</b-button
-      >
+      <b-row class="m-0">
+        <b-button
+          id="edit-review-button"
+          class="mr-auto"
+          variant="info"
+          v-on:click="updateReview()"
+          :disabled="this.posting || !this.review.title || !this.review.rating"
+          >Edit Review
+        </b-button>
+
+        <b-button
+          id="delete-review-button"
+          class="ml-auto"
+          variant="danger"
+          v-on:click="deleteReview()"
+          :disabled="this.posting"
+          >Delete Review
+        </b-button>
+      </b-row>
     </div>
-    <div id="not-found-text" v-else class="text-center">
-      <div v-if="!this.loading">
+    <div v-else class="text-center" id="not-found-box">
+      <b-spinner v-if="this.loading" label="Loading..."></b-spinner>
+      <div v-else>
         <h1>Review not found</h1>
         <router-link to="/">Go to homepage</router-link>
       </div>
-      <b-spinner v-else label="Loading..."></b-spinner>
     </div>
   </div>
 </template>
 
 <script>
-import { api } from '@/Api'
+import { Api } from '@/Api'
 
 export default {
   name: 'edit-review',
@@ -75,7 +82,7 @@ export default {
   },
   methods: {
     async getReview() {
-      const response = await api.getReviewById(this.$route.query.id)
+      const response = await Api.getReviewById(this.$route.query.id)
       if (response.status === 200) {
         this.review = response.review
       } else {
@@ -85,14 +92,34 @@ export default {
     },
     async updateReview() {
       this.posting = true
-      const response = await api.putByHateoas(
+      const response = await Api.putByHateoas(
         this.review.links.self.href,
         this.review
       )
       if (response.status === 201) {
-        this.$router.push({ name: 'review', query: { id: this.review.id } })
+        this.$router.push({ name: 'review', query: { id: this.review._id } })
       } else {
         alert(response.message)
+      }
+      this.posting = false
+    },
+    async deleteReview() {
+      if (
+        confirm(
+          'Are you sure you want to delete your review for ' +
+            this.review.game.name
+        )
+      ) {
+        this.posting = true
+        const response = await Api.deleteByHateoas(this.review.links.self.href)
+        if (response.status === 200) {
+          this.$router.push({
+            name: 'game',
+            query: { name: this.review.game.name }
+          })
+        } else {
+          alert(response.message)
+        }
       }
       this.posting = false
     }
@@ -100,14 +127,13 @@ export default {
 }
 </script>
 
-  <style scoped>
-#not-found-text {
-  margin-top: 200px;
-}
-
+<style scoped>
 header {
   margin-top: 20px;
+  word-wrap: break-word;
+  text-align: center;
 }
+
 .background {
   background-color: #f5f5f5;
   width: 100%;
@@ -123,31 +149,21 @@ header {
   padding: 10px;
   background-color: #ffffff;
   width: 40%;
-  height: auto;
   margin: auto;
   margin-top: 50px;
-  position: relative;
 }
 
 .textbox {
   height: 5vh;
 }
 
-#release-date {
-  margin-top: 10px;
-  margin-bottom: 10px;
-  color: black !important;
+button {
+  height: 5vh;
+  margin-top: 5px;
 }
 
-#edit-game-button {
-  height: 5vh;
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  margin-bottom: 10px;
-  margin-right: 10px;
-  margin-left: 10px;
+#not-found-box {
+  margin-top: 100px;
 }
 
 @media screen and (max-width: 1200px) {

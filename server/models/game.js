@@ -12,6 +12,7 @@ var gameSchema = new Schema({
             type: String,
             maxLength: 12,
         }],
+        required: true,
         validate: {
             validator: function (v) {
                 return Array.isArray(v) && v.length > 0 && v.length < 10;

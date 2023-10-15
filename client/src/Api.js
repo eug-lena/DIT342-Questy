@@ -4,13 +4,6 @@ import axios from 'axios'
 import router from './router'
 import { useUserStore } from './store/UserStore'
 
-export const Api = axios.create(
-  {
-    baseURL: process.env.VUE_APP_API_ENDPOINT || 'http://localhost:3000/api',
-    withCredentials: true
-  }
-)
-
 const Axios = axios.create(
   {
     baseURL: process.env.VUE_APP_API_ENDPOINT || 'http://localhost:3000/api',
@@ -18,11 +11,11 @@ const Axios = axios.create(
   }
 )
 
-function updateStore(response) {
+function updateStore(responseData) {
   const store = useUserStore()
   store.setAuthenticated(true)
-  store.setUsername(response.data.username)
-  store.setUserID(response.data._id)
+  store.setUsername(responseData.username)
+  store.setUserID(responseData._id)
 }
 
 function resetStore() {
@@ -32,17 +25,28 @@ function resetStore() {
   store.setUserID('')
 }
 
-export const api = {
+export const Api = {
 
   Axios,
 
-  // USER AUTHENTICATION
+  /*
+
+  Below are the functions that are used to communicate with the API.
+
+  The functions are structured in the following way:
+  - The function name describes what the function does.
+  - The function takes in the required input data. I.e id, name, url, etc.
+  - The function returns the response status and data or message from the API
+
+  */
+
+  // USER  & AUTHENTICATION
 
   isAuthenticated: function () {
     Axios.get('/v1/authenticate/isAuthenticated')
       .then((response) => {
         if (response.data.authenticated === true) {
-          updateStore(response)
+          updateStore(response.data)
         } else {
           resetStore()
         }
@@ -53,7 +57,7 @@ export const api = {
   },
 
   Logout: function () {
-    Axios.delete('/v1/authenticate/logout')
+    Axios.post('/v1/authenticate/logout?_method=DELETE') // Method override
       .then((response) => {
         resetStore()
         alert(response.data.message)
@@ -66,7 +70,7 @@ export const api = {
   Login: function (user) {
     Axios.post('/v1/authenticate/login', user)
       .then((response) => {
-        updateStore(response)
+        updateStore(response.data)
         router.push('/')
       })
       .catch((error) => {
@@ -74,31 +78,97 @@ export const api = {
       })
   },
 
-  RegisterAndLogin: function (user) {
-    Axios.post('/v1/authenticate/register', user)
+  RegisterAndLogin: async function (user) {
+    let returnData
+    await Axios.post('/v1/users', user)
       .then((response) => {
-        updateStore(response)
-        router.push('/')
+        updateStore(response.data)
+        const status = response.status
+        returnData = { status }
       })
       .catch((error) => {
+        const status = error.response.status
+        const message = error.response.data.message
+        returnData = { status, message }
         alert(error.response.data.message)
       })
+    return returnData
+  },
+
+  getUsers: async function (filter) {
+    let returnData
+    if (filter === undefined || filter === null) {
+      filter = ''
+    }
+    await Axios.get('/v1/users?' + filter)
+      .then((response) => {
+        const status = response.status
+        const users = response.data.users
+        returnData = { status, users }
+      })
+      .catch((error) => {
+        const status = error.response.status
+        const message = error.response.data.message
+        returnData = { status, message, users: null }
+      })
+    return returnData
+  },
+
+  getUserById: async function (id) {
+    let returnData
+    await Axios.get('/v1/users/' + id)
+      .then((response) => {
+        const status = response.status
+        const user = response.data
+        returnData = { status, user }
+      })
+      .catch((error) => {
+        const status = error.response.status
+        const message = error.response.data.message
+        returnData = { status, message, user: null }
+      })
+    return returnData
+  },
+
+  getUserByUsername: async function (username) {
+    let returnData
+    await Axios.get('/v1/users?username=' + username)
+      .then((response) => {
+        const status = response.status
+        const user = response.data.users[0]
+        returnData = { status, user }
+      })
+      .catch((error) => {
+        const status = error.response.status
+        const message = error.response.data.message
+        returnData = { status, message, user: null }
+      })
+    return returnData
   },
 
   // GAME
 
-  postGame: function (game) {
-    Axios.post('/v1/games', game)
+  postGame: async function (game) {
+    let returnData
+    await Axios.post('/v1/games', game)
       .then((response) => {
-        router.push('/game?name=' + this.game.name)
+        const status = response.status
+        const game = response.data
+        returnData = { status, game }
       })
       .catch((error) => {
-        alert(error.response.data.message)
+        const status = error.response.status
+        const message = error.response.data.message
+        returnData = { status, message }
       })
+    return returnData
   },
 
   getGames: async function (filter) {
     let returnData
+    if (filter === undefined || filter === null) {
+      filter = ''
+    }
     await Axios.get('/v1/games?' + filter)
       .then((response) => {
         const status = response.status
@@ -147,14 +217,20 @@ export const api = {
 
   // REVIEW
 
-  postReview: function (review) {
-    Axios.post('/v1/reviews', review)
+  postReview: async function (review) {
+    let returnData
+    await Axios.post('/v1/reviews', review)
       .then((response) => {
-        router.push('/review?id=' + response.data._id)
+        const status = response.status
+        const review = response.data
+        returnData = { status, review }
       })
       .catch((error) => {
-        alert(error.response.data.message)
+        const status = error.response.status
+        const message = error.response.data.message
+        returnData = { status, message }
       })
+    return returnData
   },
 
   getReviewById: async function (id) {

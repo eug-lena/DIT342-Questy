@@ -42,7 +42,7 @@
           </label>
         </b-row>
       </div>
-      <p id="releasedate">Select release date:</p>
+      <p id="releaseDate">Select release date:</p>
       <b-form-datepicker
         id="datepicker"
         v-model="game.releaseDate"
@@ -54,7 +54,13 @@
         id="add-game-button"
         variant="primary"
         v-on:click="postGame()"
-        :disabled="this.posting"
+        :disabled="
+          this.posting ||
+          !this.game.name ||
+          !this.game.author ||
+          !this.game.releaseDate ||
+          !this.isAnyTagSelected
+        "
       >
         Add Game
       </b-button>
@@ -63,7 +69,7 @@
 </template>
 
 <script>
-import { api } from '@/Api'
+import { Api } from '@/Api'
 
 export default {
   name: 'add-game',
@@ -126,11 +132,29 @@ export default {
       posting: false
     }
   },
+  computed: {
+    isAnyTagSelected() {
+      for (const tagOption in this.tagOptions) {
+        if (this.tagOptions[tagOption].state) {
+          return true
+        }
+      }
+      return false
+    }
+  },
   methods: {
     async postGame() {
       this.posting = true
       this.getTags()
-      await api.postGame(this.game)
+      const response = await Api.postGame(this.game)
+      if (response.status === 201) {
+        this.$router.push({
+          name: 'game',
+          query: { name: this.game.name }
+        })
+      } else {
+        alert(response.message)
+      }
       this.game.tag = []
       this.posting = false
     },
@@ -174,7 +198,7 @@ header {
   height: 5vh;
 }
 
-#releasedate {
+#releaseDate {
   margin-top: 10px;
   margin-bottom: 10px;
   color: black !important;

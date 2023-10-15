@@ -6,18 +6,19 @@
         <h4>Add a review for</h4>
         <h2>{{ this.game.name }}</h2>
       </header>
+
       <label for="title" class="sr-only">Title</label>
       <input
         v-model="review.title"
         type="text"
         id="title"
         name="title"
-        class="col-12 mt-1"
+        class="col-12"
         placeholder="Title"
         autofocus
       />
-      <label for="rating" class="sr-only">Rating</label>
 
+      <label for="rating" class="sr-only">Rating</label>
       <b-form-rating
         class="mt-1 mb-1"
         name="rating"
@@ -33,26 +34,30 @@
         name="text"
         max-rows="16"
       ></b-form-textarea>
+
       <b-button
-        class="m-0 mt-1"
         id="add-review-button"
         variant="primary"
         v-on:click="postReview()"
+        :disabled="this.posting || !this.review.title || !this.review.rating"
       >
         Post review!
       </b-button>
     </div>
+
     <div class="text-center" id="not-found-box" v-else>
       <b-spinner v-if="this.loading" label="Loading..."></b-spinner>
+
       <div v-else>
-        <h2>Cannot find game</h2>
+        <h1>Cannot find game</h1>
+        <router-link to="/">Go to homepage</router-link>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import { api } from '@/Api'
+import { Api } from '@/Api'
 import { useUserStore } from '../../store/UserStore'
 
 export default {
@@ -68,23 +73,31 @@ export default {
         game: ''
       },
       store: useUserStore(),
-      loading: true
+      loading: true,
+      posting: false
     }
   },
   mounted() {
     this.getGame()
   },
   methods: {
-    postReview() {
-      if (!this.store.isAuthenticated) {
-        alert('You must be logged in to post a review!')
-      } else {
+    async postReview() {
+      this.posting = true
+      if (this.store.isAuthenticated) {
         this.review.user = this.store.getUserID
-        api.postReview(this.review)
+        const response = await Api.postReview(this.review)
+        if (response.status === 201) {
+          this.$router.push('/review?id=' + response.review._id)
+        } else {
+          alert(response.message)
+        }
+      } else {
+        alert('You need to be logged in to post a review!')
       }
+      this.posting = false
     },
     async getGame() {
-      const response = await api.getGameByName(this.$route.query.name)
+      const response = await Api.getGameByName(this.$route.query.name)
       if (response.status === 200) {
         this.game = response.game
         this.review.game = this.game._id
@@ -101,6 +114,7 @@ header {
   word-wrap: break-word;
   text-align: center;
 }
+
 .background {
   background-color: #f5f5f5;
   width: 100%;
@@ -125,6 +139,7 @@ header {
 }
 
 #add-review-button {
+  margin-top: 5px;
   height: 5vh;
   width: 100%;
   background-color: #698f69 !important;

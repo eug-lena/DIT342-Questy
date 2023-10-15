@@ -75,7 +75,7 @@
 </template>
 
 <script>
-import { api } from '@/Api'
+import { Api } from '@/Api'
 
 export default {
   name: 'edit-game',
@@ -136,7 +136,7 @@ export default {
   },
   methods: {
     async getGame() {
-      const response = await api.getGameByName(this.$route.query.name)
+      const response = await Api.getGameByName(this.$route.query.name)
       if (response.status === 200) {
         this.game = response.game
 
@@ -153,7 +153,7 @@ export default {
     async updateGame() {
       this.posting = true
       this.getTags()
-      const response = await api.putByHateoas(
+      const response = await Api.putByHateoas(
         this.game.links.self.href,
         this.game
       )

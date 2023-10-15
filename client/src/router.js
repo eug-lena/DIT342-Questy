@@ -7,6 +7,7 @@ import Home from './views/Home.vue'
 // User
 import User from './views/user/User.vue'
 import Login from './views/user/Login.vue'
+import Following from './views/user/Following.vue'
 
 // Game
 import Game from './views/game/Game.vue'
@@ -76,6 +77,11 @@ export default new Router({
       path: '/edit-review',
       name: 'edit-review',
       component: EditReview
+    },
+    {
+      path: '/following',
+      name: 'following',
+      component: Following
     }
   ]
 })

@@ -5,28 +5,27 @@ var router = express.Router();
 var User = require('../models/user');
 var queryHandler = require('./queryhandler');
 var linksHandler = require('./linkshandler');
+var passport = require('passport');
 
 // ------------ CREATE ------------
 
 // Create a new user
 router.post('/', async function (req, res, next) {
-    var user = new User(req.body);
-    try {
-        await user.save();
-        return res.status(201).json(user);
-    } catch (err) {
-        // MongoServerError with code 11000 is thrown when a duplicate key is found
-        if (err.name === 'MongoServerError' && err.code === 11000) {
-            return res.status(400).json({ "message": "A user with that username already exists" });
-        }
-
-        // ValidationError is thrown when a required field is missing or is invalid
-        if (err.name === 'ValidationError') {
+    User.register(new User({ username: req.body.username }), req.body.password, function (err, user) {
+        if (err) {
             return res.status(400).json({ "message": err.message });
         }
 
-        next(err);
-    }
+        passport.authenticate('local')(req, res, function () {
+            req.logIn(user, function (err) {
+                if (err) {
+                    return next(err);
+                }
+
+                res.status(201).send({ user, 'message': 'User created & authenticated' });
+            });
+        });
+    });
 });
 
 // ------------ READ ------------
@@ -45,6 +44,16 @@ router.get('/', async function (req, res, next) {
 
         // Get all matching documents
         var users = await query;
+
+        // Populate following
+        if (!req.query.fields || req.query.fields.split(',').includes('following')) {
+            users = await User.populate(users, { path: 'following', select: 'username' });
+        }
+
+        // Populate pinnedReview
+        if (!req.query.fields || req.query.fields.split(',').includes('pinnedReview')) {
+            users = await User.populate(users, { path: 'pinnedReview' });
+        }
 
         if (users.length === 0) {
             return res.status(404).json({ "message": "User(s) not found" });
@@ -80,7 +89,7 @@ router.get('/', async function (req, res, next) {
 router.get('/:id', async function (req, res, next) {
     var id = req.params.id;
     try {
-        var user = await User.findById(id);
+        var user = await User.findById(id).populate('following', 'username').populate('pinnedReview');;
         if (user === null) {
             return res.status(404).json({ "message": "User not found" });
         }
@@ -111,8 +120,12 @@ router.put('/:id', async function (req, res, next) {
             return res.status(404).json({ "message": "User not found" });
         }
 
-        user.username = req.body.username;
-        user.password = req.body.password;
+        // Check if authenticated user is owner of user
+        if (!req.isAuthenticated() || req.user._id.toString() !== user._id.toString()) {
+            return res.status(401).json({ "message": "You are not authorized to edit this user" });
+        }
+
+        // user.username = req.body.username; // Can't change username
         user.bio = req.body.bio;
         user.following = req.body.following;
         user.pinnedReview = req.body.pinnedReview;
@@ -120,9 +133,9 @@ router.put('/:id', async function (req, res, next) {
         await user.save();
         return res.status(201).json(user);
     } catch (err) {
-        // ValidationError is thrown when a required field is missing or is invalid
-        if (err.name === 'ValidationError') {
-            return res.status(400).json({ "message": err.message });
+        // MongoServerError with code 11000 is thrown whenever you try to change a unique field to a value that already exists in the collection
+        if (err.name === 'MongoServerError' && err.code === 11000) {
+            return res.status(400).json({ "message": "User already exists" });
         }
 
         // CastError is thrown when an invalid id is passed to findById
@@ -130,10 +143,11 @@ router.put('/:id', async function (req, res, next) {
             return res.status(400).json({ "message": "Invalid " + err.path });
         }
 
-        // MongoServerError with code 11000 is thrown whenever you try to change a unique field to a value that already exists in the collection
-        if (err.name === 'MongoServerError' && err.code === 11000) {
-            return res.status(400).json({ "message": "User already exists" });
+        // ValidationError is thrown when a required field is missing or is invalid
+        if (err.name === 'ValidationError') {
+            return res.status(400).json({ "message": err.message });
         }
+
         next(err);
     }
 });
@@ -147,8 +161,12 @@ router.patch('/:id', async function (req, res, next) {
             return res.status(404).json({ "message": "User not found" });
         }
 
-        user.username = (req.body.username || user.username);
-        user.password = (req.body.password || user.password);
+        // Check if authenticated user is owner of user
+        if (!req.isAuthenticated() || req.user._id.toString() !== user._id.toString()) {
+            return res.status(401).json({ "message": "You are not authorized to edit this user" });
+        }
+
+        // user.username = (req.body.username || user.username); // Can't change username
         user.bio = (req.body.bio || user.bio);
         user.following = (req.body.following || user.following);
         user.pinnedReview = (req.body.pinnedReview || user.pinnedReview);
@@ -156,9 +174,9 @@ router.patch('/:id', async function (req, res, next) {
         await user.save();
         return res.status(201).json(user);
     } catch (err) {
-        // ValidationError is thrown when a required field is missing or is invalid
-        if (err.name === 'ValidationError') {
-            return res.status(400).json({ "message": err.message });
+        // MongoServerError with code 11000 is thrown whenever you try to change a unique field to a value that already exists in the collection
+        if (err.name === 'MongoServerError' && err.code === 11000) {
+            return res.status(400).json({ "message": "User already exists" });
         }
 
         // CastError is thrown when an invalid id is passed to findById
@@ -166,9 +184,9 @@ router.patch('/:id', async function (req, res, next) {
             return res.status(400).json({ "message": "Invalid " + err.path });
         }
 
-        // MongoServerError with code 11000 is thrown whenever you try to change a unique field to a value that already exists in the collection
-        if (err.name === 'MongoServerError' && err.code === 11000) {
-            return res.status(400).json({ "message": "User already exists" });
+        // ValidationError is thrown when a required field is missing or is invalid
+        if (err.name === 'ValidationError') {
+            return res.status(400).json({ "message": err.message });
         }
 
         next(err);

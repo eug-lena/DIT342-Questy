@@ -14,7 +14,7 @@
       </div>
       <b-button
         class="moreButton"
-        variant="primary"
+        variant="dark"
         v-on:click="gotoGame(game.name)"
         >More...</b-button
       >

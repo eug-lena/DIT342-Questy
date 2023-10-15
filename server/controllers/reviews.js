@@ -10,9 +10,16 @@ var linksHandler = require('./linkshandler');
 
 // Create a new review
 router.post('/', async function (req, res, next) {
+
+    // Check if user is authenticated
+    if (!req.isAuthenticated()) {
+        return res.status(401).json({ "message": "You need to login to post comments" });
+    }
+
     var review = new Review(req.body);
     try {
-        // To ensure that date and isEdited are set correctly
+        // To ensure that date, isEdited and user are set correctly
+        review.user = req.user._id;
         review.date = Date.now();
         review.isEdited = false;
 
@@ -36,10 +43,16 @@ router.post('/', async function (req, res, next) {
 
 // Create a new comment for specific review
 router.post('/:id/comments/', async function (req, res, next) {
+
+    // Check if user is authenticated
+    if (!req.isAuthenticated()) {
+        return res.status(401).json({ "message": "You need to login to post comments" });
+    }
+
     let Comment = require('../models/comment');
     var comment = new Comment(
         {
-            user: req.body.user,
+            user: req.user._id,
             text: req.body.text,
             opinion: req.body.opinion,
             date: Date.now(),
@@ -51,14 +64,14 @@ router.post('/:id/comments/', async function (req, res, next) {
         await comment.save();
         return res.status(201).json(comment);
     } catch (err) {
-        // ValidationError is thrown when a required field is missing or is invalid
-        if (err.name === 'ValidationError') {
-            return res.status(400).json({ "message": err.message });
-        }
-
         // CastError is thrown when an invalid review id is passed to save
         if (err.name === 'CastError') {
             return res.status(400).json({ "message": "Invalid " + err.path });
+        }
+
+        // ValidationError is thrown when a required field is missing or is invalid
+        if (err.name === 'ValidationError') {
+            return res.status(400).json({ "message": err.message });
         }
 
         next(err);
@@ -78,7 +91,7 @@ router.get('/', async function (req, res, next) {
         if (req.query.fields) {
             query = queryHandler.fieldQuery(req, query);
         }
-        
+
         if (req.query.limit) {
             query = query.limit(parseInt(req.query.limit));
         }
@@ -219,6 +232,11 @@ router.put('/:id', async function (req, res, next) {
             return res.status(404).json({ "message": "Review not found" });
         }
 
+        // Check if user is authorized to edit this review
+        if (!req.isAuthenticated() || req.user._id.toString() !== review.user.toString()) {
+            return res.status(401).json({ "message": "You are not authorized to edit this review" });
+        }
+
         // review.user = req.body.user; // Can't change user
         // review.game = req.body.game; // Can't change game
         review.title = req.body.title;
@@ -230,9 +248,9 @@ router.put('/:id', async function (req, res, next) {
         return res.status(201).json(review);
 
     } catch (err) {
-        // ValidationError is thrown when a required field is missing or is invalid
-        if (err.name === 'ValidationError') {
-            return res.status(400).json({ "message": err.message });
+        // MongoServerError with code 11000 is thrown whenever you try to change a unique field to a value that already exists in the collection
+        if (err.name === 'MongoServerError' && err.code === 11000) {
+            return res.status(400).json({ "message": "A game with that name already exists" });
         }
 
         // CastError is thrown when an invalid id is passed to findById
@@ -240,9 +258,9 @@ router.put('/:id', async function (req, res, next) {
             return res.status(400).json({ "message": "Invalid " + err.path });
         }
 
-        // MongoServerError with code 11000 is thrown whenever you try to change a unique field to a value that already exists in the collection
-        if (err.name === 'MongoServerError' && err.code === 11000) {
-            return res.status(400).json({ "message": "A game with that name already exists" });
+        // ValidationError is thrown when a required field is missing or is invalid
+        if (err.name === 'ValidationError') {
+            return res.status(400).json({ "message": err.message });
         }
 
         next(err);
@@ -257,6 +275,11 @@ router.patch('/:id', async function (req, res, next) {
             return res.status(404).json({ "message": "Review not found" });
         }
 
+        // Check if user is authorized to edit this review
+        if (!req.isAuthenticated() || req.user._id.toString() !== review.user.toString()) {
+            return res.status(401).json({ "message": "You are not authorized to edit this review" });
+        }
+
         //review.user = (req.body.user || review.user); // Can't change user
         //review.game = (req.body.game || review.game); // Can't change game
         review.title = (req.body.title || review.title);
@@ -267,9 +290,9 @@ router.patch('/:id', async function (req, res, next) {
         await review.save();
         return res.status(201).json(review);
     } catch (err) {
-        // ValidationError is thrown when a required field is missing or is invalid
-        if (err.name === 'ValidationError') {
-            return res.status(400).json({ "message": err.message });
+        // MongoServerError with code 11000 is thrown whenever you try to change a unique field to a value that already exists in the collection
+        if (err.name === 'MongoServerError' && err.code === 11000) {
+            return res.status(400).json({ "message": "A review with that name already exists" });
         }
 
         // CastError is thrown when an invalid id is passed to findById
@@ -277,9 +300,9 @@ router.patch('/:id', async function (req, res, next) {
             return res.status(400).json({ "message": "Invalid " + err.path });
         }
 
-        // MongoServerError with code 11000 is thrown whenever you try to change a unique field to a value that already exists in the collection
-        if (err.name === 'MongoServerError' && err.code === 11000) {
-            return res.status(400).json({ "message": "A review with that name already exists" });
+        // ValidationError is thrown when a required field is missing or is invalid
+        if (err.name === 'ValidationError') {
+            return res.status(400).json({ "message": err.message });
         }
 
         next(err);
@@ -292,10 +315,18 @@ router.patch('/:id', async function (req, res, next) {
 router.delete('/:id', async function (req, res, next) {
     var id = req.params.id;
     try {
-        var review = await Review.findOneAndDelete({ _id: id });
+        var review = await Review.findById(id);
         if (review === null) {
             return res.status(404).json({ "message": "Review not found" });
         }
+
+        // Check if user is authorized to delete this review
+        if (!req.isAuthenticated() || req.user._id.toString() !== review.user.toString()) {
+            return res.status(401).json({ "message": "You are not authorized to delete this review" });
+        }
+
+        await review.deleteOne();
+
         return res.status(200).json(review);
 
     } catch (err) {
@@ -337,10 +368,19 @@ router.delete('/:id/comments/:commentId', async function (req, res, next) {
     var id = req.params.commentId;
     try {
         let Comment = require('../models/comment');
-        var comment = await Comment.findOneAndDelete({ _id: id });
+        var comment = await Comment.findById(id);
+
         if (comment === null) {
             return res.status(404).json({ "message": "Comment not found" });
         }
+
+        // Check if user is authorized to delete this comment
+        if (!req.isAuthenticated() || req.user._id.toString() !== comment.user.toString()) {
+            return res.status(401).json({ "message": "You are not authorized to delete this comment" });
+        }
+
+        await comment.deleteOne();
+
         return res.status(200).json(comment);
 
     } catch (err) {

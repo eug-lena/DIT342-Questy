@@ -20,7 +20,7 @@
       <p id="edited" class="ml-2 mb-2" v-if="this.review.isEdited">(edited)</p>
       <b-button
         class="moreButton mb-1 mr-1"
-        variant="info"
+        variant="dark"
         v-on:click="goToReview()"
         >More...</b-button
       >

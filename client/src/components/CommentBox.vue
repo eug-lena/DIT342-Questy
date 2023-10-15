@@ -8,7 +8,7 @@
         <p class="editedText">(edited)</p>
       </div>
       <div class="date">
-        <p>Posted on {{ date }}</p>
+        <p>{{ date }}</p>
       </div>
     </b-row>
     <div class="opinion">
@@ -20,7 +20,7 @@
           width="30"
           height="30"
         />
-        <p class="test">Agree</p>
+        <h5>Agree</h5>
       </b-row>
       <b-row v-if="comment.opinion === false">
         <img
@@ -30,7 +30,7 @@
           width="30"
           height="30"
         />
-        <p class="test">Disagree</p>
+        <h5>Disagree</h5>
       </b-row>
       <b-row v-if="comment.opinion == null">
         <img
@@ -40,12 +40,15 @@
           width="30"
           height="30"
         />
-        <p class="test">Neutral</p>
+        <h5>Neutral</h5>
       </b-row>
     </div>
     <div class="comment">
       <p v-if="this.showMore">
         {{ comment.text }}
+      </p>
+      <p v-else-if="comment.text.length > 200">
+        {{ comment.text.slice(0, 200) }}...
       </p>
       <p v-else>{{ comment.text.slice(0, 200) }}</p>
       <b-button
@@ -79,7 +82,7 @@ export default {
   },
   mounted() {
     this.date = this.comment.date.slice(0, 19)
-    this.date = this.date.replace('T', ' at ')
+    this.date = this.date.replace('T', ' ')
     if (this.comment.user.username) {
       this.username = this.comment.user.username
     }
@@ -118,9 +121,9 @@ export default {
   border-radius: 10px;
   margin: 10px;
   padding: 10px;
-  width: auto;
   height: auto;
   background-color: #f5f5f5;
+  word-wrap: break-word;
 }
 .showMoreBtn {
   width: 120px;
@@ -137,7 +140,6 @@ export default {
   margin: 10px;
   padding: 10px;
   height: 50px;
-  margin-left: auto;
 }
 .editedText {
   font-size: 0.8em;
@@ -149,7 +151,7 @@ export default {
   margin-left: 30px;
 }
 
-.test {
+h5 {
   margin-left: 5px;
 }
 

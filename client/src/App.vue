@@ -7,8 +7,8 @@
           ><img
             src="../src/assets/logo.png"
             alt="Questy"
-            width="180"
-            height="60"
+            height="65"
+            width="auto"
         /></b-navbar-brand>
 
         <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
@@ -50,7 +50,7 @@
 </script>
 
 <script>
-import { api } from '@/Api'
+import { Api } from '@/Api'
 import { useUserStore } from './store/UserStore'
 
 export default {
@@ -61,16 +61,16 @@ export default {
     }
   },
   beforeCreate() {
-    api.isAuthenticated()
+    Api.isAuthenticated()
   },
   watch: {
     $route(to, from) {
-      api.isAuthenticated()
+      Api.isAuthenticated()
     }
   },
   methods: {
     logout() {
-      api.Logout()
+      Api.Logout()
     },
     goToProfile() {
       this.$router.push({

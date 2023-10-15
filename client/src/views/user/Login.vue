@@ -40,7 +40,7 @@
           variant="primary"
           @click="login()"
         >
-          <u><b>Sign in</b></u>
+          <u><b>Login</b></u>
         </b-button>
 
         <br />
@@ -54,7 +54,7 @@
           variant="primary"
           @click.prevent="register()"
         >
-          <u><b>Create account <br> and sign in</b></u>
+          <u><b>Create account <br> and login</b></u>
         </b-button>
       </div>
 
@@ -71,7 +71,7 @@
               <u><b>Continue</b></u>
             </p>
           </a>
-          <b-button class="m-2" variant="danger" @click.prevent="logout()">
+          <b-button class="m-2" variant="danger" @click.prevent="logout()" :disabled="posting">
             <p>
               <u><b>Logout</b></u>
             </p>
@@ -83,7 +83,7 @@
 </template>
 
 <script>
-import { api } from '@/Api'
+import { Api } from '@/Api'
 import { useUserStore } from '../../store/UserStore'
 
 export default {
@@ -94,23 +94,35 @@ export default {
         username: '',
         password: ''
       },
-      store: useUserStore()
+      store: useUserStore(),
+      posting: false
     }
   },
   computed: {
     isDisabled: function () {
-      return !this.user.username || !this.user.password
+      return !this.user.username || !this.user.password || this.posting
     }
   },
   methods: {
     login() {
-      api.Login(this.user)
+      this.posting = true
+      Api.Login(this.user)
+      this.posting = false
     },
-    register() {
-      api.RegisterAndLogin(this.user)
+    async register() {
+      this.posting = true
+      const response = await Api.RegisterAndLogin(this.user)
+      if (response.status === 201) {
+        this.$router.push('/')
+      } else {
+        alert(response.message)
+      }
+      this.posting = false
     },
     logout() {
-      api.Logout()
+      this.posting = true
+      Api.Logout()
+      this.posting = false
     }
   }
 }

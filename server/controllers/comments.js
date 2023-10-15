@@ -10,9 +10,16 @@ var linksHandler = require('./linkshandler');
 
 // Create a new comment
 router.post('/', async function (req, res, next) {
+
+    // Check if user is authenticated
+    if (!req.isAuthenticated()) {
+        return res.status(401).json({ "message": "You need to login to post comments" });
+    }
+
     var comment = new Comment(req.body);
     try {
-        // To ensure that date and isEdited are set correctly
+        // To ensure that date, isEdited and user are set correctly
+        comment.user = req.user._id;
         comment.date = Date.now();
         comment.isEdited = false;
 
@@ -20,6 +27,11 @@ router.post('/', async function (req, res, next) {
         return res.status(201).json(comment);
 
     } catch (err) {
+        // CastError is thrown when an invalid id is passed
+        if (err.name === 'CastError') {
+            return res.status(400).json({ "message": "Invalid " + err.path });
+        }
+
         // ValidationError is thrown when a required field is missing or is invalid
         if (err.name === 'ValidationError') {
             return res.status(400).json({ "message": err.message });
@@ -111,6 +123,11 @@ router.put('/:id', async function (req, res, next) {
             return res.status(404).json({ "message": "Comment not found" });
         }
 
+        // Check if user is authorized to edit this comment
+        if (!req.isAuthenticated() || comment.user.toString() !== req.user._id.toString()) {
+            return res.status(401).json({ "message": "You are not authorized to edit this comment" });
+        }
+
         // Update the comment
         comment.text = req.body.text;
         comment.opinion = req.body.opinion;
@@ -120,7 +137,7 @@ router.put('/:id', async function (req, res, next) {
         return res.status(201).json(comment);
 
     } catch (err) {
-        // CastError is thrown when an invalid id is passed to findById
+        // CastError is thrown when an invalid id is passed
         if (err.name === 'CastError') {
             return res.status(400).json({ "message": "Invalid " + err.path });
         }
@@ -150,7 +167,7 @@ router.patch('/:id', async function (req, res, next) {
         return res.status(201).json(comment);
 
     } catch (err) {
-        // CastError is thrown when an invalid id is passed to findById
+        // CastError is thrown when an invalid id is passed
         if (err.name === 'CastError') {
             return res.status(400).json({ "message": "Invalid " + err.path });
         }
@@ -199,7 +216,7 @@ router.delete('/', async function (req, res, next) {
         }
 
         return res.status(200).json({ "message": "Comment(s) deleted", "deletedCount": comments.deletedCount });
-        
+
     } catch (err) {
         // CastError is thrown when an invalid id is passed
         if (err.name === 'CastError') {

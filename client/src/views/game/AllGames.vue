@@ -14,30 +14,28 @@
             Add Game
           </b-button>
         </b-row>
+
         <div class="text-center" v-if="!this.games.length > 0">
           <h2 id="no-games-text" v-if="!this.loading">
             There are currently no games 😭
           </h2>
           <b-spinner v-else label="Loading..." class="mt-5"></b-spinner>
         </div>
+
         <b-form v-else inline id="filter-form">
           <label class="sr-only" for="inline-form-input-name"> Name </label>
           <b-form-input
-            class="mb-2 mb-sm-0"
-            placeholder="Game name"
+            class="mb-2 mb-sm-0 filter-box"
+            placeholder="Filter by name"
             v-model="filter.name"
           ></b-form-input>
 
-          <label class="sr-only" for="inline-form-input-username"> Tag </label>
+          <label class="sr-only" for="inline-form-input-tag"> Tag </label>
           <b-form-input
-            class="mb-2 mb-sm-0 ml-0 ml-sm-1"
-            placeholder="Tag"
+            class="mb-2 mb-sm-0 ml-0 ml-sm-1 filter-box"
+            placeholder="Filter by tag"
             v-model="filter.tag"
           ></b-form-input>
-
-          <b-button class="ml-0 ml-sm-1" variant="info" v-on:click="getGames()"
-            >Filter</b-button
-          >
         </b-form>
       </div>
     </div>
@@ -45,7 +43,7 @@
     <div v-if="this.games.length > 0">
       <b-list-group horizontal>
         <game-item
-          v-for="game in games.slice(
+          v-for="game in this.displayedGames.slice(
             (currentPage - 1) * perPage,
             (currentPage - 1) * perPage + perPage
           )"
@@ -68,11 +66,17 @@
         </div>
       </div>
     </div>
+    <h2
+      v-if="this.games.length > 0 && this.displayedGames.length < 1"
+      class="text-center"
+    >
+      No games match your search criteria
+    </h2>
   </div>
 </template>
 
 <script>
-import { api } from '@/Api'
+import { Api } from '@/Api'
 
 // Components
 import GameItem from '@/components/GameBox.vue'
@@ -98,36 +102,42 @@ export default {
       loading: true
     }
   },
+  computed: {
+    displayedGames() {
+      return this.filterGames()
+    }
+  },
   mounted() {
     this.getGames()
   },
   methods: {
     async getGames() {
-      let filter = ''
-      if (this.filter.name) {
-        filter += 'name=' + this.filter.name + '&'
-      }
-      if (this.filter.tag) {
-        filter += 'tag=' + this.filter.tag
-      }
-      const response = await api.getGames(filter)
+      const response = await Api.getGames()
       if (response.status === 200) {
         this.games = response.games
       } else if (response.status !== 404) {
         alert(response.message)
       }
       this.loading = false
+    },
+    filterGames() {
+      return this.games.filter((game) => {
+        return (
+          game.name.toLowerCase().includes(this.filter.name.toLowerCase()) &&
+          game.tag.some((tag) => {
+            return tag.toLowerCase().includes(this.filter.tag.toLowerCase())
+          })
+        )
+      })
     }
   }
 }
 </script>
 
 <style scoped>
-#gamesText {
-  text-align: left;
+h2 {
   font-size: 50px;
   font-weight: bold;
-  margin-left: 15px;
 }
 
 #add-game-button {
@@ -154,5 +164,11 @@ export default {
   width: 100%;
   display: flex;
   flex-wrap: wrap;
+}
+
+@media screen and (max-width: 576px) {
+.filter-box {
+  max-width: 94%;
+}
 }
 </style>

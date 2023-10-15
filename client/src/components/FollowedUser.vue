@@ -7,19 +7,17 @@
         alt="user icon"
         src="../assets/user-icon.png"
       />
-      {{ username }}
+      {{ followedUser.username }}
     </b-row>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'followed-user',
-  props: ['followed-user'],
+  name: 'followedUser',
+  props: ['followedUser'],
   data() {
-    return {
-      username: 'Deleted user'
-    }
+    return {}
   }
 }
 </script>

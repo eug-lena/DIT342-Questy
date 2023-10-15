@@ -13,50 +13,21 @@
 
             <!-- Rating icon logic -->
             <div>
-              <b-row v-if="this.review.rating == 1">
+              <b-row>
                 <p id="rating">Rating:</p>
                 <img
-                  src="../../assets/health-bar-1.png"
-                  alt="1 star"
-                  width="150px"
-                  height="30px"
-                />
-              </b-row>
-              <b-row v-if="this.review.rating == 2">
-                <p id="rating">Rating:</p>
-                <img
-                  src="../../assets/health-bar-2.png"
-                  alt="2 stars"
-                  width="150px"
-                  height="30px"
-                />
-              </b-row>
-              <b-row v-if="this.review.rating == 3">
-                <p id="rating">Rating:</p>
-                <img
-                  src="../../assets/health-bar-3.png"
+                  :src="
+                    require('../../assets/health-bar-' +
+                      this.review.rating +
+                      '.png')
+                  "
                   alt="3 stars"
-                  width="150px"
-                  height="30px"
+                  height="35px"
+                  width="auto"
                 />
-              </b-row>
-              <b-row v-if="this.review.rating == 4">
-                <p id="rating">Rating:</p>
-                <img
-                  src="../../assets/health-bar-4.png"
-                  alt="4 stars"
-                  width="150px"
-                  height="30px"
-                />
-              </b-row>
-              <b-row v-if="this.review.rating == 5">
-                <p id="rating">Rating:</p>
-                <img
-                  src="../../assets/health-bar-5.png"
-                  alt="5 stars"
-                  width="150px"
-                  height="30px"
-                />
+                <p v-if="review.isEdited" class="ml-auto mr-3 card-text">
+                  (edited)
+                </p>
               </b-row>
             </div>
 
@@ -65,11 +36,15 @@
                 <p v-if="this.showMore">
                   {{ review.text }}
                 </p>
+                <p v-else-if="review.text.length > 200">
+                  {{ review.text.slice(0, 200) }}...
+                </p>
                 <p v-else>{{ review.text.slice(0, 200) }}</p>
                 <b-button
                   :pressed="this.showMore"
                   v-if="review.text.length > 200"
                   v-on:click="showText()"
+                  variant="link"
                   class="showMoreBtn"
                   text
                 >
@@ -79,14 +54,13 @@
             </div>
             <b-row>
               <p id="date" class="card-text mr-auto">
-                Posted on {{ review.date }}
+                {{ review.date }}
               </p>
-              <p v-if="review.isEdited" class="card-text">(edited)</p>
 
               <b-button
                 id="editReview"
                 class="ml-auto"
-                variant="primary"
+                variant="info"
                 v-on:click="editReview()"
                 :hidden="review.user.username != this.store.getUsername"
               >
@@ -95,51 +69,53 @@
 
               <!-- button to add comment -->
               <b-button
+                v-b-toggle.collapse-1
                 id="button"
                 class="ml-auto"
-                variant="primary"
-                v-on:click="showCommentBox()"
+                variant="warning"
                 :hidden="!this.store.isAuthenticated"
               >
-                {{ this.showComment ? 'Hide comment' : 'Add comment' }}
+                <span class="when-open">Hide comment</span
+                ><span class="when-closed">Add comment</span>
               </b-button>
             </b-row>
-          </div>
+            <b-collapse id="collapse-1" class="mt-2">
+              <div id="addComment">
+                <h4 class="card-title">
+                  Do you agree with {{ review.user.username }}'s review?
+                </h4>
+                <div id="agreeDisagree">
+                  <b-row id="opinion"
+                    ><b-form-group v-slot="{ ariaDescribedby }">
+                      <b-form-radio-group
+                        v-model="selected"
+                        :options="options"
+                        :aria-describedby="ariaDescribedby"
+                        name="plain-inline"
+                        plain
+                      ></b-form-radio-group>
+                    </b-form-group>
+                  </b-row>
+                </div>
 
-          <div id="addComment">
-            <h4 class="card-title">
-              Do you agree with {{ review.user.username }}'s review?
-            </h4>
-            <div id="agreeDisagree">
-              <b-row id="opinion"
-                ><b-form-group v-slot="{ ariaDescribedby }">
-                  <b-form-radio-group
-                    v-model="selected"
-                    :options="options"
-                    :aria-describedby="ariaDescribedby"
-                    name="plain-inline"
-                    plain
-                  ></b-form-radio-group>
-                </b-form-group>
-              </b-row>
-            </div>
-
-            <div id="commentBody">
-              <b-form-textarea
-                id="commentText"
-                placeholder="Leave a comment..."
-              ></b-form-textarea>
-              <b-row class="m-2">
-                <b-button
-                  id="button"
-                  class="ml-auto"
-                  variant="primary"
-                  v-on:click="postComment()"
-                  :disabled="this.posting"
-                  >Submit</b-button
-                >
-              </b-row>
-            </div>
+                <div id="commentBody">
+                  <b-form-textarea
+                    id="commentText"
+                    placeholder="Leave a comment..."
+                  ></b-form-textarea>
+                  <b-row class="m-2">
+                    <b-button
+                      id="button"
+                      class="ml-auto"
+                      variant="success"
+                      v-on:click="postComment()"
+                      :disabled="this.posting"
+                      >Submit</b-button
+                    >
+                  </b-row>
+                </div>
+              </div></b-collapse
+            >
           </div>
         </div>
       </b-col>
@@ -148,7 +124,7 @@
       <b-col v-if="this.comments.length == 0">
         <h4 class="card-title mt-5">No comments yet</h4>
       </b-col>
-      <b-col v-else>
+      <b-col class="col-12 col-lg-6" v-else>
         <b-list-group class="comments">
           <comment-item
             v-for="comment in comments"
@@ -168,7 +144,7 @@
 </template>
 
 <script>
-import { api } from '@/Api'
+import { Api } from '@/Api'
 
 // Components
 import CommentItem from '../../components/CommentBox.vue'
@@ -181,8 +157,7 @@ export default {
   },
   data() {
     return {
-      showMore: true,
-      showComment: false,
+      showMore: false,
       review: '',
       comments: [],
       selected: 'neutral',
@@ -198,15 +173,14 @@ export default {
   },
   mounted() {
     this.getReview()
-    document.getElementById('addComment').style.display = 'none'
   },
   methods: {
     async getReview() {
-      const response = await api.getReviewById(this.$route.query.id)
+      const response = await Api.getReviewById(this.$route.query.id)
       if (response.status === 200) {
         this.review = response.review
         this.review.date = this.review.date.slice(0, 19)
-        this.review.date = this.review.date.replace('T', ' at ')
+        this.review.date = this.review.date.replace('T', ' ')
         if (!this.review.user) {
           this.review.user = { username: 'Deleted User' }
         }
@@ -216,7 +190,7 @@ export default {
       }
     },
     async getComments() {
-      const response = await api.getByHateoas(this.review.links.comments.href)
+      const response = await Api.getByHateoas(this.review.links.comments.href)
       if (response.status === 200) {
         this.comments = response.data.comments
       } else if (response.status !== 404) {
@@ -230,19 +204,6 @@ export default {
         name: 'edit-review',
         query: { id: this.review._id }
       })
-    },
-    showCommentBox() {
-      const commentDiv = document.getElementById('addComment')
-      if (
-        commentDiv.style.display === 'none' ||
-        commentDiv.style.display === ''
-      ) {
-        this.showComment = true
-        commentDiv.style.display = 'block'
-      } else {
-        this.showComment = false
-        commentDiv.style.display = 'none'
-      }
     },
     booleanOpinion() {
       if (this.selected === 'agree') {
@@ -258,7 +219,8 @@ export default {
     },
     async postComment() {
       this.posting = true
-      const response = await api.postByHateoas(
+
+      const response = await Api.postByHateoas(
         this.review.links.comments.href,
         {
           user: this.store.getUserID,
@@ -269,12 +231,13 @@ export default {
 
       if (response.status === 201) {
         this.getComments()
-        this.showCommentBox()
         document.getElementById('commentText').value = ''
         this.selected = 'neutral'
+        this.$root.$emit('bv::toggle::collapse', 'collapse-1')
       } else {
         alert(response.message)
       }
+
       this.posting = false
     }
   }
@@ -286,9 +249,9 @@ export default {
   border: 1px solid #ccc;
   border-radius: 10px;
   box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
-  margin-left: 10px;
   margin-top: 20px;
-  display: none;
+  display: inline-block;
+  width: 100%;
 }
 #commentText {
   margin: 10px;
@@ -343,13 +306,30 @@ h1 {
 #not-found-box {
   margin-top: 100px;
 }
-@media screen and (max-width: 1200px) {
+.collapsed > .when-open,
+.not-collapsed > .when-closed {
+  display: none;
+}
+@media screen and (max-width: 576px) {
   #reviewBox {
-    width: 90%;
-    max-width: 90%;
+    width: 100%;
+    max-width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+  }
+  h1 {
+    margin: 0;
+    font-size: 1.4em;
+  }
+  h4 {
+    font-size: 1.2em;
   }
   #comments {
-    width: 90%;
+    width: 100%;
+  }
+  #review {
+    margin-left: 0;
+    margin-right: 0;
   }
 }
 </style>

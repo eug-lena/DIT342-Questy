@@ -22,7 +22,7 @@
         <b-button
           id="reviewButton"
           class="m-3"
-          variant="primary"
+          variant="success"
           v-on:click="createReview()"
           :hidden="!this.store.isAuthenticated"
           >Add review</b-button
@@ -64,7 +64,7 @@
 <script>
 import ReviewItem from '../../components/ReviewBox.vue'
 
-import { api } from '@/Api'
+import { Api } from '@/Api'
 import { useUserStore } from '../../store/UserStore'
 
 export default {
@@ -86,7 +86,7 @@ export default {
   },
   methods: {
     async getGame() {
-      const response = await api.getGameByName(this.$route.query.name)
+      const response = await Api.getGameByName(this.$route.query.name)
       if (response.status === 200) {
         this.game = response.game
         this.getReviews()
@@ -95,7 +95,7 @@ export default {
       }
     },
     async getReviews() {
-      const response = await api.getByHateoas(this.game.links.reviews.href)
+      const response = await Api.getByHateoas(this.game.links.reviews.href)
       console.log(response)
       if (response.status === 200) {
         this.reviews = response.data.reviews
@@ -108,7 +108,7 @@ export default {
     },
     async deleteGame() {
       if (confirm('Are you sure you want to delete this game?')) {
-        const response = await api.deleteByHateoas(this.game.links.self.href)
+        const response = await Api.deleteByHateoas(this.game.links.self.href)
         if (response.status === 200) {
           this.$router.push('/all-games')
         } else {

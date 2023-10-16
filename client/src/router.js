@@ -3,6 +3,7 @@ import Router from 'vue-router'
 
 // Default
 import Home from './views/Home.vue'
+import NotFound from './views/404.vue'
 
 // User
 import User from './views/user/User.vue'
@@ -82,6 +83,15 @@ export default new Router({
       path: '/following',
       name: 'following',
       component: Following
+    },
+    {
+      path: '/404',
+      component: NotFound,
+      name: 'not-found'
+    },
+    {
+      path: '*',
+      redirect: '/404'
     }
   ]
 })

@@ -9,7 +9,7 @@
           </h1>
 
           <div id="review" class="card-body">
-            <h5 class="card-title">{{ review.title }}</h5>
+            <h5 id="title" class="card-title">{{ review.title }}</h5>
 
             <!-- Rating icon logic -->
             <div>
@@ -25,11 +25,16 @@
                   height="35px"
                   width="auto"
                 />
-                <p v-if="review.isEdited" class="ml-auto mr-3 card-text">
-                  (edited)
-                </p>
               </b-row>
             </div>
+            <b-row>
+              <p id="date" class="card-text mr-auto">
+                {{ review.date }}
+              </p>
+              <p v-if="review.isEdited" class="ml-auto mr-3 card-text">
+                (edited)
+              </p>
+            </b-row>
 
             <div id="text" class="card-text">
               <div class="text">
@@ -52,14 +57,10 @@
                 </b-button>
               </div>
             </div>
-            <b-row>
-              <p id="date" class="card-text mr-auto">
-                {{ review.date }}
-              </p>
-
+            <b-row id="review-buttons" class="m-0">
               <b-button
                 id="editReview"
-                class="ml-auto"
+                class="mr-auto"
                 variant="info"
                 v-on:click="editReview()"
                 :hidden="review.user.username != this.store.getUsername"
@@ -77,8 +78,8 @@
               >
                 <span class="when-open">Hide comment</span
                 ><span class="when-closed">Add comment</span>
-              </b-button>
-            </b-row>
+              </b-button></b-row
+            >
             <b-collapse id="collapse-1" class="mt-2">
               <div id="addComment">
                 <h4 class="card-title">
@@ -130,6 +131,8 @@
             v-for="comment in comments"
             :key="comment._id"
             :comment="comment"
+            @deleteComment="handleDeleteComment"
+            @updateComment="handleUpdateComment"
           ></comment-item>
         </b-list-group>
       </b-col>
@@ -147,8 +150,8 @@
 import { Api } from '@/Api'
 
 // Components
-import CommentItem from '../../components/CommentBox.vue'
-import { useUserStore } from '../../store/UserStore'
+import CommentItem from '@/components/CommentBox.vue'
+import { useUserStore } from '@/store/UserStore'
 
 export default {
   name: 'Review',
@@ -198,6 +201,18 @@ export default {
       }
 
       this.loading = false
+    },
+    handleDeleteComment(commentId) {
+      this.comments = this.comments.filter(
+        (comment) => comment._id !== commentId
+      )
+    },
+    handleUpdateComment(comment) {
+      const index = this.comments.findIndex(
+        (element) => element._id.toString() === comment._id.toString()
+      )
+      this.comments[index] = comment
+      console.log(index)
     },
     editReview() {
       this.$router.push({
@@ -310,6 +325,7 @@ h1 {
 .not-collapsed > .when-closed {
   display: none;
 }
+
 @media screen and (max-width: 576px) {
   #reviewBox {
     width: 100%;
@@ -330,6 +346,9 @@ h1 {
   #review {
     margin-left: 0;
     margin-right: 0;
+  }
+  #review-buttons > button {
+    font-size: 0.8em;
   }
 }
 </style>

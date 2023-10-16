@@ -185,12 +185,20 @@ router.patch('/:id', async function (req, res, next) {
 
 // Delete a comment by id
 router.delete('/:id', async function (req, res, next) {
-    var id = req.params.id;
+    const id = req.params.id;
     try {
-        var comment = await Comment.findOneAndDelete({ _id: id });
+        const comment = await Comment.findById(id);
         if (comment === null) {
             return res.status(404).json({ "message": "User not found" });
         }
+
+        // Check if user is authorized to delete this comment
+        if (!req.isAuthenticated() || req.user._id.toString() !== comment.user.toString()) {
+            return res.status(401).json({ "message": "You are not authorized to delete this comment" });
+        }
+
+        await comment.deleteOne();
+
         return res.status(200).json(comment);
 
     } catch (err) {

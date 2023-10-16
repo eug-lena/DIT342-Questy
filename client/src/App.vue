@@ -19,12 +19,10 @@
             <b-nav-item href="/all-games">Games</b-nav-item>
           </b-navbar-nav>
 
-          <!-- Right aligned nav items -->
-          <b-navbar-nav class="ml-auto">
+          <b-navbar-nav class="ml-auto" :store="store">
             <b-nav-item-dropdown right v-if="this.store.isAuthenticated">
-              <!-- Using 'button-content' slot -->
               <template #button-content>
-                <em>User</em>
+                <em>{{ store.getUsername }}</em>
               </template>
               <b-dropdown-item @click.prevent="goToProfile()"
                 >Profile</b-dropdown-item
@@ -57,7 +55,8 @@ export default {
   name: 'app',
   data() {
     return {
-      store: useUserStore()
+      store: useUserStore(),
+      username: 'asd'
     }
   },
   beforeCreate() {

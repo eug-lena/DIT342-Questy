@@ -252,65 +252,73 @@ export const Api = {
   // HATEOAS
 
   postByHateoas: async function (url, inputData) {
-    let returnData
+    const returnData = {}
     await Axios.post(url, inputData)
       .then((response) => {
-        const status = response.status
-        const data = response.data
-        returnData = { status, data }
+        returnData.status = response.status
+        returnData.data = response.data
       })
       .catch((error) => {
-        const status = error.response.status
-        const message = error.response.data.message
-        returnData = { status, message }
+        returnData.status = error.response.status
+        returnData.message = error.response.data.message
       })
     return returnData
   },
 
   getByHateoas: async function (url) {
-    let returnData
+    const returnData = {}
     await Axios.get(url)
       .then((response) => {
-        const status = response.status
-        const data = response.data
-        returnData = { status, data }
+        returnData.status = response.status
+        returnData.data = response.data
       })
       .catch((error) => {
-        const status = error.response.status
-        const message = error.response.data.message
-        returnData = { status, message }
+        returnData.status = error.response.status
+        returnData.message = error.response.data.message
       })
     return returnData
   },
 
   putByHateoas: async function (url, inputData) {
-    let returnData
+    const returnData = {}
     await Axios.put(url, inputData)
       .then((response) => {
-        const status = response.status
-        returnData = { status }
+        returnData.status = response.status
+        returnData.data = response.data
       }
       )
       .catch((error) => {
-        const status = error.response.status
-        const message = error.response.data.message
-        returnData = { status, message }
+        returnData.status = error.response.status
+        returnData.message = error.response.data.message
+      })
+    return returnData
+  },
+
+  patchByHateoas: async function (url, inputData) {
+    const returnData = {}
+    await Axios.patch(url, inputData)
+      .then((response) => {
+        returnData.status = response.status
+        returnData.data = response.data
+      }
+      )
+      .catch((error) => {
+        returnData.status = error.response.status
+        returnData.message = error.response.data.message
       })
     return returnData
   },
 
   deleteByHateoas: async function (url) {
-    let returnData
+    const returnData = {}
     await Axios.delete(url)
       .then((response) => {
-        const status = response.status
-        returnData = { status }
+        returnData.status = response.status
       }
       )
       .catch((error) => {
-        const status = error.response.status
-        const message = error.response.data.message
-        returnData = { status, message }
+        returnData.status = error.response.status
+        returnData.message = error.response.data.message
       })
     return returnData
   }

@@ -69,4 +69,5 @@ export default {
   margin-top: 1vh;
   width: 100%;
 }
+
 </style>

@@ -55,7 +55,7 @@
               <br />
 
               <!-- pinned review -->
-              <div id="review" class="mr-auto">
+              <div class="mr-auto">
                 <b-row class="m-0">
                   <b-card-title>Pinned Review</b-card-title>
                 </b-row>
@@ -77,7 +77,6 @@
               </recent-activity-item>
             </b-col>
           </b-row>
-
         </b-tab>
 
         <!-- following -->
@@ -274,12 +273,7 @@ export default {
       this.user.bio = data.bio
     },
     async handleUpdatePinnedReview(data) {
-      const response = await Api.getReviewById(data.pinnedReview)
-      if (response.status) {
-        this.user.pinnedReview = response.review
-      } else {
-        alert(response.message)
-      }
+      window.location.reload()
     }
   }
 }
@@ -377,6 +371,15 @@ export default {
 
   #userIcon {
     display: none;
+  }
+
+  #left-column {
+    margin: 0;
+  }
+
+  #right-column {
+    margin: 0;
+    margin-top: 10px;
   }
 }
 </style>

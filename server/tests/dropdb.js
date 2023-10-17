@@ -26,8 +26,6 @@ mongoose.connection.dropDatabase().then(async function () {
     await user.save();
     await User.updateOne({ username: 'testAdmin' }, { $set: { isAdmin: true } });
 
-    console.log(await User.findOne({ username: 'testAdmin' }));
-
     console.log(`Dropped database: ${mongoURI}`);
     process.exit(0);
 });

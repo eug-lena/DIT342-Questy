@@ -79,84 +79,88 @@ export const Api = {
   },
 
   RegisterAndLogin: async function (user) {
-    let returnData
+    const returnData = {}
     await Axios.post('/v1/users', user)
       .then((response) => {
         updateStore(response.data)
-        const status = response.status
-        returnData = { status }
+        returnData.status = response.status
       })
       .catch((error) => {
-        const status = error.response.status
-        const message = error.response.data.message
-        returnData = { status, message }
+        returnData.status = error.response.status
+        returnData.message = error.response.data.message
       })
     return returnData
   },
 
   getUsers: async function (filter) {
-    let returnData
+    const returnData = {}
     if (filter === undefined || filter === null) {
       filter = ''
     }
     await Axios.get('/v1/users?' + filter)
       .then((response) => {
-        const status = response.status
-        const users = response.data.users
-        returnData = { status, users }
+        returnData.status = response.status
+        returnData.users = response.data.users
       })
       .catch((error) => {
-        const status = error.response.status
-        const message = error.response.data.message
-        returnData = { status, message, users: null }
+        returnData.status = error.response.status
+        returnData.message = error.response.data.message
       })
     return returnData
   },
 
   getUserById: async function (id) {
-    let returnData
+    const returnData = {}
     await Axios.get('/v1/users/' + id)
       .then((response) => {
-        const status = response.status
-        const user = response.data
-        returnData = { status, user }
+        returnData.status = response.status
+        returnData.user = response.data
       })
       .catch((error) => {
-        const status = error.response.status
-        const message = error.response.data.message
-        returnData = { status, message }
+        returnData.status = error.response.status
+        returnData.message = error.response.data.message
       })
     return returnData
   },
 
   getUserByUsername: async function (username) {
-    let returnData
+    const returnData = {}
     await Axios.get('/v1/users?username=' + username)
       .then((response) => {
-        const status = response.status
-        const user = response.data.users[0]
-        returnData = { status, user }
+        returnData.status = response.status
+        returnData.user = response.data.users[0]
       })
       .catch((error) => {
-        const status = error.response.status
-        const message = error.response.data.message
-        returnData = { status, message }
+        returnData.status = error.response.status
+        returnData.message = error.response.data.message
       })
     return returnData
   },
 
   getUserFollowingReviews: async function (id) {
-    let returnData
+    const returnData = {}
     await Axios.get('/v1/users/' + id + '/followingReviews')
       .then((response) => {
-        const status = response.status
-        const reviews = response.data
-        returnData = { status, reviews }
+        returnData.status = response.status
+        returnData.reviews = response.data
       })
       .catch((error) => {
-        const status = error.response.status
-        const message = error.response.data.message
-        returnData = { status, message }
+        returnData.status = error.response.status
+        returnData.message = error.response.data.message
+      })
+    return returnData
+  },
+
+  getUserRecentActivity: async function (id) {
+    const returnData = {}
+    await Axios.get('/v1/users/' + id + '/recentActivity')
+      .then((response) => {
+        returnData.status = response.status
+        returnData.data = response.data
+      })
+      .catch((error) => {
+        returnData.status = error.response.status
+        returnData.message = error.response.data.message
       })
     return returnData
   },
@@ -164,68 +168,60 @@ export const Api = {
   // GAME
 
   postGame: async function (game) {
-    let returnData
+    const returnData = {}
     await Axios.post('/v1/games', game)
       .then((response) => {
-        const status = response.status
-        const game = response.data
-        returnData = { status, game }
+        returnData.status = response.status
+        returnData.game = response.data
       })
       .catch((error) => {
-        const status = error.response.status
-        const message = error.response.data.message
-        returnData = { status, message }
+        returnData.status = error.response.status
+        returnData.message = error.response.data.message
       })
     return returnData
   },
 
   getGames: async function (filter) {
-    let returnData
+    const returnData = {}
     if (filter === undefined || filter === null) {
       filter = ''
     }
     await Axios.get('/v1/games?' + filter)
       .then((response) => {
-        const status = response.status
-        const games = response.data.games
-        returnData = { status, games }
+        returnData.status = response.status
+        returnData.games = response.data.games
       })
       .catch((error) => {
-        const status = error.response.status
-        const message = error.response.data.message
-        returnData = { status, message }
+        returnData.status = error.response.status
+        returnData.message = error.response.data.message
       })
     return returnData
   },
 
   getGameById: async function (id) {
-    let returnData
+    const returnData = {}
     await Axios.get('/v1/games/' + id)
       .then((response) => {
-        const status = response.status
-        const game = response.data
-        returnData = { status, game }
+        returnData.status = response.status
+        returnData.game = response.data
       })
       .catch((error) => {
-        const status = error.response.status
-        const message = error.response.data.message
-        returnData = { status, message }
+        returnData.status = error.response.status
+        returnData.message = error.response.data.message
       })
     return returnData
   },
 
   getGameByName: async function (name) {
-    let returnData
+    const returnData = {}
     await Axios.get('/v1/games?name=' + name)
       .then((response) => {
-        const status = response.status
-        const game = response.data.games[0] // name is unique, so there should only be one
-        returnData = { status, game }
+        returnData.status = response.status
+        returnData.game = response.data.games[0] // name is unique, so there should only be one
       })
       .catch((error) => {
-        const status = error.response.status
-        const message = error.response.data.message
-        returnData = { status, message }
+        returnData.status = error.response.status
+        returnData.message = error.response.data.message
       })
     return returnData
   },
@@ -233,33 +229,46 @@ export const Api = {
   // REVIEW
 
   postReview: async function (review) {
-    let returnData
+    const returnData = {}
     await Axios.post('/v1/reviews', review)
       .then((response) => {
-        const status = response.status
-        const review = response.data
-        returnData = { status, review }
+        returnData.status = response.status
+        returnData.review = response.data
       })
       .catch((error) => {
-        const status = error.response.status
-        const message = error.response.data.message
-        returnData = { status, message }
+        returnData.status = error.response.status
+        returnData.message = error.response.data.message
+      })
+    return returnData
+  },
+
+  async getReviews(filter) {
+    const returnData = {}
+    if (filter === undefined || filter === null) {
+      filter = ''
+    }
+    await Axios.get('/v1/reviews?' + filter)
+      .then((response) => {
+        returnData.status = response.status
+        returnData.reviews = response.data.reviews
+      })
+      .catch((error) => {
+        returnData.status = error.response.status
+        returnData.message = error.response.data.message
       })
     return returnData
   },
 
   getReviewById: async function (id) {
-    let returnData
+    const returnData = {}
     await Axios.get('/v1/reviews/' + id)
       .then((response) => {
-        const status = response.status
-        const review = response.data
-        returnData = { status, review }
+        returnData.status = response.status
+        returnData.review = response.data
       })
       .catch((error) => {
-        const status = error.response.status
-        const message = error.response.data.message
-        returnData = { status, message }
+        returnData.status = error.response.status
+        returnData.message = error.response.data.message
       })
     return returnData
   },

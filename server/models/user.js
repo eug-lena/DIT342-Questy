@@ -53,7 +53,6 @@ var userSchema = new Schema({
                 for (var i = 0; i < following.length; ++i) {
                     var value = following[i].toString();
                     if (valuesSoFar.indexOf(value) !== -1) {
-                        console.log(valuesSoFar + " | " + value);
                         return false;
                     }
                     valuesSoFar.push(value);

@@ -107,7 +107,6 @@
 
 <script>
 import { Api } from '@/Api'
-
 import bioItem from '@/components/User/BioItem.vue'
 import followingItem from '@/components/User/FollowingItem.vue'
 import recentActivityItem from '@/components/User/RecentActivityItem.vue'
@@ -123,6 +122,7 @@ export default {
       },
       following: null,
       editing: false,
+      posting: false,
       store: useUserStore(),
       user1: {
         _id: '1244234',
@@ -168,6 +168,7 @@ export default {
   async mounted() {
     await this.getUser()
     this.loading = false
+    console.log(this.user)
   },
   methods: {
     async getUser() {

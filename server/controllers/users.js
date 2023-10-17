@@ -113,6 +113,7 @@ router.get('/:id', async function (req, res, next) {
     }
 });
 
+// Get a users (with id) most recent reviews by people they follow
 router.get('/:id/followingReviews', async function (req, res, next) {
     var id = req.params.id;
     try {
@@ -121,6 +122,7 @@ router.get('/:id/followingReviews', async function (req, res, next) {
             return res.status(404).json({ "message": "User not found" });
         }
 
+        // Find reviews by users that the user follows and sort by most recent
         let Review = require('../models/review');
         var reviews = await Review.find({ user: { $in: user.following } }).sort({ _id: -1 }).limit(3).populate('user', 'username').populate('game', 'name');
 
@@ -128,6 +130,50 @@ router.get('/:id/followingReviews', async function (req, res, next) {
     }
     catch (err) {
 
+        if (err.name === 'CastError') {
+            return res.status(400).json({ "message": "Invalid " + err.path });
+        }
+        next(err);
+    }
+
+});
+
+// Get a users (with id) most recent activity
+router.get('/:id/recentActivity', async function (req, res, next) {
+    var id = req.params.id;
+    try {
+        var user = await User.findById(id);
+        if (user === null) {
+            return res.status(404).json({ "message": "User not found" });
+        }
+
+        // Find reviews by user and sort by most recent
+        let Review = require('../models/review');
+        var reviews = await Review.find({ user: user._id }).sort({ _id: -1 }).limit(3).populate('game', 'name');
+
+        // For each review, add type: 'review', and split date by 'T'
+        reviews = reviews.map(review => review.toObject());
+        reviews.forEach(function (review) {
+            review.type = 'review';
+            var date = new Date(review.date);
+            review.date = date.toISOString().split('T')[0];
+        });        
+        
+        // Find comments by user and sort by most recent
+        let Comment = require('../models/comment');
+        var comments = await Comment.find({ user: user._id }).sort({ _id: -1 }).limit(3).populate('review', 'title');
+
+        // For each comment, add type: 'comment'
+
+        // Combine reviews and comments
+        var recentActivity = reviews.concat(comments);
+
+        // Sort by date
+        recentActivity.sort((a, b) => (a.date < b.date) ? 1 : -1);
+
+        return res.status(200).json(recentActivity);
+    }
+    catch (err) {
         if (err.name === 'CastError') {
             return res.status(400).json({ "message": "Invalid " + err.path });
         }

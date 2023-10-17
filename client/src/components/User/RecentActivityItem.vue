@@ -15,6 +15,7 @@
 import { Api } from '@/Api'
 
 export default {
+  props: ['user'],
   data() {
     return {
       reviews: ''
@@ -22,12 +23,12 @@ export default {
   },
   methods: {
     async getRecentActivity() {
-      const response = await Api().get('/api/user/recent-activity')
+      const response = await Api.getUserRecentActivity(this.user.links.revies.href)
       this.recentActivity = response.data
     }
   },
   mounted() {
-    this.getRecentActivity()
+    // this.getRecentActivity()
   }
 }
 </script>

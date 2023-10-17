@@ -1,8 +1,6 @@
 # Backend and Frontend Template
 
-Latest version: https://git.chalmers.se/courses/dit342/group-00-web
-
-This template refers to itself as `group-00-web`. In your project, use your group number in place of `00`.
+Latest version: https://git.chalmers.se/courses/dit342/group-27-web
 
 ## Project Structure
 
@@ -39,10 +37,10 @@ You can also use alternative tools if you know how to configure them (e.g., Fire
 
 ```bash
 # Clone repository
-git clone git@git.chalmers.se:courses/dit342/group-00-web.git
+git clone git@git.chalmers.se:courses/dit342/group-27-web.git
 
 # Change into the directory
-cd group-00-web
+cd group-27-web
 
 # Setup backend
 cd server && npm install
@@ -63,7 +61,7 @@ Open the `server` and `client` in separate VSCode workspaces or open the combine
 
 ### Purpose
 
-The system is a platform where the users can interact, discuss and particularly review games. Other users can comment and give their opinion whether they agree, feel neutral, or disagree with the review. There is an administrator role for certain users to moderate content and add new games to the website, which other users can then review.
+Questy is a platform where the users can interact with each other by particularly reviewing games and having discussions in the comment section. Users can comment and give their opinion whether they agree, disagree, or feel neutral with the review. There is an administrator role for certain users to moderate content on the website, which other users can then interact with.
 
 ### Pages
 

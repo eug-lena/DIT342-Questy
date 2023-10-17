@@ -1,106 +1,108 @@
 <template>
   <div>
     <div class="background" />
-    <div class="content">
+    <div v-if="this.game" class="content">
       <header>
         <h4>Add a review for</h4>
         <h2>{{ this.game.name }}</h2>
       </header>
+
       <label for="title" class="sr-only">Title</label>
       <input
-        v-model="title"
+        v-model="review.title"
         type="text"
         id="title"
         name="title"
-        class="col-12 mt-1"
+        class="col-12"
         placeholder="Title"
         autofocus
       />
-      <label for="rating" class="sr-only">Rating</label>
 
+      <label for="rating" class="sr-only">Rating</label>
       <b-form-rating
         class="mt-1 mb-1"
         name="rating"
-        v-model="rating"
+        v-model="review.rating"
       ></b-form-rating>
 
       <label for="text" class="sr-only">Text</label>
       <b-form-textarea
         id="textarea-auto-height"
-        v-model="text"
+        v-model="review.text"
         placeholder="Enter text..."
         rows="8"
         name="text"
         max-rows="16"
       ></b-form-textarea>
+
       <b-button
-        class="m-0 mt-1"
         id="add-review-button"
         variant="primary"
         v-on:click="postReview()"
+        :disabled="this.posting || !this.review.title || !this.review.rating"
       >
         Post review!
       </b-button>
+    </div>
+
+    <div class="text-center" id="not-found-box" v-else>
+      <b-spinner v-if="this.loading" label="Loading..."></b-spinner>
+
+      <div v-else>
+        <h1>Cannot find game</h1>
+        <router-link to="/">Go to homepage</router-link>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
 import { Api } from '@/Api'
+import { useUserStore } from '../../store/UserStore'
 
 export default {
   name: 'add-review',
   data() {
     return {
-      game: {},
-      title: '',
-      rating: '',
-      text: '',
-      userId: ''
+      game: '',
+      review: {
+        title: '',
+        rating: '',
+        text: '',
+        user: '',
+        game: ''
+      },
+      store: useUserStore(),
+      loading: true,
+      posting: false
     }
   },
   mounted() {
-    this.isAuthenticated()
+    this.getGame()
   },
   methods: {
-    postReview() {
-      Api.post('/v1/reviews', {
-        title: this.title,
-        rating: this.rating,
-        text: this.text,
-        game: this.game._id,
-        user: this.userId
-      })
-        .then((response) => {
-          this.$router.push('/review?id=' + response.data._id)
-        })
-        .catch((err) => {
-          alert(err.response.data.message)
-        })
+    async postReview() {
+      this.posting = true
+      if (this.store.isAuthenticated) {
+        this.review.user = this.store.getUserID
+        const response = await Api.postReview(this.review)
+        if (response.status === 201) {
+          this.$router.push('/review/' + response.review._id)
+        } else {
+          alert(response.message)
+        }
+      } else {
+        alert('You need to be logged in to post a review!')
+      }
+      this.posting = false
     },
-    getGame() {
-      Api.get('/v1/games?name=' + this.$route.query.name)
-        .then((response) => {
-          this.game = response.data.games[0]
-        })
-        .catch((err) => {
-          alert(err.response.data.message)
-        })
-    },
-    isAuthenticated() {
-      Api.get('/v1/authenticate/isAuthenticated')
-        .then((response) => {
-          if (response.data.authenticated === true) {
-            this.userId = response.data.userId
-            this.getGame()
-          } else {
-            alert('You must be logged in to add a review')
-            this.$router.push('/game?name=' + this.$route.query.name)
-          }
-        })
-        .catch((error) => {
-          alert(error.response.data.message)
-        })
+    async getGame() {
+      const response = await Api.getGameByName(this.$route.params.gamename)
+      if (response.status === 200) {
+        this.game = response.game
+        this.review.game = this.game._id
+      }
+      this.loading = false
     }
   }
 }
@@ -112,6 +114,7 @@ header {
   word-wrap: break-word;
   text-align: center;
 }
+
 .background {
   background-color: #f5f5f5;
   width: 100%;
@@ -136,9 +139,14 @@ header {
 }
 
 #add-review-button {
+  margin-top: 5px;
   height: 5vh;
   width: 100%;
   background-color: #698f69 !important;
+}
+
+#not-found-box {
+  margin-top: 100px;
 }
 
 @media screen and (max-width: 1200px) {

@@ -24,8 +24,8 @@ module.exports = {
         {
             self: { href: "http://localhost:3000/api/v1/reviews/" + review._id },
             comments: { href: "http://localhost:3000/api/v1/reviews/" + review._id + "/comments" },
-            game: { href: "http://localhost:3000/api/v1/games/" + review.game },
-            user: { href: "http://localhost:3000/api/v1/users/" + review.user }
+            game: { href: "http://localhost:3000/api/v1/games/" + review.game._id },
+            user: { href: "http://localhost:3000/api/v1/users/" + review.user._id }
         };
     },
 
@@ -34,7 +34,7 @@ module.exports = {
         comment.links = {
             self: { href: "http://localhost:3000/api/v1/comments/" + comment._id },
             review: { href: "http://localhost:3000/api/v1/reviews/" + comment.review },
-            user: { href: "http://localhost:3000/api/v1/users/" + comment.user }
+            user: { href: "http://localhost:3000/api/v1/users/" + comment.user._id }
         };
 
     }

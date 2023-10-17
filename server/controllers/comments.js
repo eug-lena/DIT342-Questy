@@ -10,9 +10,16 @@ var linksHandler = require('./linkshandler');
 
 // Create a new comment
 router.post('/', async function (req, res, next) {
+
+    // Check if user is authenticated
+    if (!req.isAuthenticated()) {
+        return res.status(401).json({ "message": "You need to login to post comments" });
+    }
+
     var comment = new Comment(req.body);
     try {
-        // To ensure that date and isEdited are set correctly
+        // To ensure that date, isEdited and user are set correctly
+        comment.user = req.user._id;
         comment.date = Date.now();
         comment.isEdited = false;
 
@@ -20,6 +27,11 @@ router.post('/', async function (req, res, next) {
         return res.status(201).json(comment);
 
     } catch (err) {
+        // CastError is thrown when an invalid id is passed
+        if (err.name === 'CastError') {
+            return res.status(400).json({ "message": "Invalid " + err.path });
+        }
+
         // ValidationError is thrown when a required field is missing or is invalid
         if (err.name === 'ValidationError') {
             return res.status(400).json({ "message": err.message });
@@ -45,6 +57,11 @@ router.get('/', async function (req, res, next) {
 
         // Get all matching documents
         var comments = await query;
+
+        // Populate user
+        if (!req.query.fields || req.query.fields.split(',').includes('user')) {
+            comments = await Comment.populate(comments, { path: 'user', select: 'username' });
+        }
 
         if (comments.length === 0) {
             return res.status(404).json({ "message": "Comment(s) not found" });
@@ -81,7 +98,7 @@ router.get('/', async function (req, res, next) {
 router.get('/:id', async function (req, res, next) {
     var id = req.params.id;
     try {
-        var comment = await Comment.findById(id);
+        var comment = await Comment.findById(id).populate('user', 'username');
         if (comment === null) {
             return res.status(404).json({ "message": "Comment not found" });
         }
@@ -111,6 +128,11 @@ router.put('/:id', async function (req, res, next) {
             return res.status(404).json({ "message": "Comment not found" });
         }
 
+        // Check if user is authorized to edit this comment
+        if (!req.isAuthenticated() || comment.user.toString() !== req.user._id.toString()) {
+            return res.status(401).json({ "message": "You are not authorized to edit this comment" });
+        }
+
         // Update the comment
         comment.text = req.body.text;
         comment.opinion = req.body.opinion;
@@ -120,7 +142,7 @@ router.put('/:id', async function (req, res, next) {
         return res.status(201).json(comment);
 
     } catch (err) {
-        // CastError is thrown when an invalid id is passed to findById
+        // CastError is thrown when an invalid id is passed
         if (err.name === 'CastError') {
             return res.status(400).json({ "message": "Invalid " + err.path });
         }
@@ -142,15 +164,19 @@ router.patch('/:id', async function (req, res, next) {
             return res.status(404).json({ "message": "Comment not found" });
         }
 
-        comment.text = (req.body.text || comment.text);
-        comment.opinion = (req.body.opinion || comment.opinion);
+        if (req.body.text !== undefined) {
+            comment.text = req.body.text;
+        }
+        if (req.body.opinion === true || req.body.opinion === false || req.body.opinion === null) {
+            comment.opinion = req.body.opinion;
+        }
         comment.isEdited = true;
 
         await comment.save();
         return res.status(201).json(comment);
 
     } catch (err) {
-        // CastError is thrown when an invalid id is passed to findById
+        // CastError is thrown when an invalid id is passed
         if (err.name === 'CastError') {
             return res.status(400).json({ "message": "Invalid " + err.path });
         }
@@ -168,12 +194,20 @@ router.patch('/:id', async function (req, res, next) {
 
 // Delete a comment by id
 router.delete('/:id', async function (req, res, next) {
-    var id = req.params.id;
+    const id = req.params.id;
     try {
-        var comment = await Comment.findOneAndDelete({ _id: id });
+        const comment = await Comment.findById(id);
         if (comment === null) {
             return res.status(404).json({ "message": "User not found" });
         }
+
+        // Check if user is authorized to delete this comment
+        if (!req.isAuthenticated() || req.user._id.toString() !== comment.user.toString()) {
+            return res.status(401).json({ "message": "You are not authorized to delete this comment" });
+        }
+
+        await comment.deleteOne();
+
         return res.status(200).json(comment);
 
     } catch (err) {
@@ -199,7 +233,7 @@ router.delete('/', async function (req, res, next) {
         }
 
         return res.status(200).json({ "message": "Comment(s) deleted", "deletedCount": comments.deletedCount });
-        
+
     } catch (err) {
         // CastError is thrown when an invalid id is passed
         if (err.name === 'CastError') {

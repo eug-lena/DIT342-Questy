@@ -25,29 +25,10 @@ router.post('/login', function (req, res, next) {
     })(req, res, next);
 });
 
-
-router.post('/register', function (req, res) {
-    User.register(new User({ username: req.body.username }), req.body.password, function (err, user) {
-        if (err) {
-            return res.status(400).json({ "message": err.message });
-        }
-
-        passport.authenticate('local')(req, res, function () {
-            req.logIn(user, function (err) {
-                if (err) {
-                    return next(err);
-                }
-
-                res.send({ 'message': 'User authenticated' });
-            });
-        });
-    });
-});
-
 router.get('/isAuthenticated', function (req, res) {
     try {
         if (req.isAuthenticated()) {
-            return res.json({ "authenticated": true, "username": req.user.username, userId: req.user._id });
+            return res.json({ "authenticated": true, "username": req.user.username, "_id": req.user._id, "isAdmin": req.user.isAdmin });
         } else {
             return res.json({ "authenticated": false });
         }

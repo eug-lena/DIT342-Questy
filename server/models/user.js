@@ -9,12 +9,61 @@ var Comment = require('../models/comment');
 var passportLocalMongoose = require('passport-local-mongoose');
 
 var userSchema = new Schema({
-    username: { type: String, required: true, unique: true, match: [/^[a-zA-Z0-9]{6,18}$/, "Username can only be letters and number between 6-18 length"] }, // Minimum six characters, only letters and numbers
-    password: { type: String },
-    // Password is automatically hashed and salted by passport-local-mongoose, thus will not be stored in database
 
-    bio: { type: String, default: 'This user has not set a bio yet.' },
-    following: { type: [Schema.Types.ObjectId], ref: 'users' },
+    username: {
+        type: String,
+        required: true,
+        unique: true,
+        match: [/^[a-zA-Z0-9]{6,18}$/, "Username can only be letters and number between 6-18 length"]
+        // Minimum six characters, only letters and numbers
+    },
+
+    password: { type: String },
+    // Password is automatically hashed and salted by passport-local-mongoose.
+    // Therefore, it will not be stored in the database.
+
+    bio: {
+        type: String,
+        default: 'This user has not set a bio yet.'
+    },
+
+    following: {
+        type: [{
+            type: Schema.Types.ObjectId,
+            ref: 'users'
+        }],
+        validate: {
+            validator: async function (following) {
+                // Check if all ids in array are valid
+                var User = require('../models/user');
+                for (const id of following) {
+                    const user = await User.findById(id);
+                    if (user === null) {
+                        return false;
+                    }
+                }
+
+                // Check if user is following themselves
+                if (following.includes(this._id)) {
+                    return false;
+                }
+
+                // Check if array contains duplicates
+                var valuesSoFar = [];
+                for (var i = 0; i < following.length; ++i) {
+                    var value = following[i].toString();
+                    if (valuesSoFar.indexOf(value) !== -1) {
+                        return false;
+                    }
+                    valuesSoFar.push(value);
+                }
+
+                return true;
+            },
+            message: 'Following must be an array of valid user ids with no duplicates and cannot contain the user themselves'
+        }
+    },
+
     pinnedReview: {
         type: Schema.Types.ObjectId,
         ref: 'reviews',
@@ -25,10 +74,19 @@ var userSchema = new Schema({
                     return false;
                 }
 
+                if (!review.user.equals(this._id)) {
+                    return false;
+                }
+
                 return true;
             },
-            message: 'Review does not exist'
+            message: 'Review does not exist or does not belong to user'
         }
+    },
+
+    isAdmin: {
+        type: Boolean,
+        default: false
     }
 });
 

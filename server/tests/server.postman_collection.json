@@ -1,10 +1,10 @@
 {
 	"info": {
-		"_postman_id": "3a8fbf1c-0996-4892-9036-246c297a871e",
+		"_postman_id": "7025e6cc-2d68-4d44-aa7c-45290bc9240a",
 		"name": "GameReview - Postman Test Script",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "29744231",
-		"_collection_link": "https://winter-desert-178755.postman.co/workspace/New-Team-Workspace~c6c3752b-41d8-46c5-86c6-7e02ec2a4854/collection/29744231-3a8fbf1c-0996-4892-9036-246c297a871e?action=share&source=collection_link&creator=29744231"
+		"_collection_link": "https://winter-desert-178755.postman.co/workspace/New-Team-Workspace~c6c3752b-41d8-46c5-86c6-7e02ec2a4854/collection/29744231-7025e6cc-2d68-4d44-aa7c-45290bc9240a?action=share&source=collection_link&creator=29744231"
 	},
 	"item": [
 		{
@@ -20,7 +20,7 @@
 									"listen": "test",
 									"script": {
 										"exec": [
-											"pm.globals.set(\"william_id\", pm.response.json()._id);\r",
+											"pm.globals.set(\"william_id\", pm.response.json().user._id);\r",
 											"\r",
 											"pm.test(\"Status code is 201\", function () {\r",
 											"    pm.response.to.have.status(201);\r",
@@ -28,13 +28,9 @@
 											"\r",
 											"pm.test(\"Username is as requested\", function () {\r",
 											"    pm.expect(JSON.parse(pm.request.body.raw).username)\r",
-											"    .to.be.equal(pm.response.json().username);\r",
+											"    .to.be.equal(pm.response.json().user.username);\r",
 											"})\r",
-											"\r",
-											"pm.test(\"Password is as requested\", function () {\r",
-											"    pm.expect(JSON.parse(pm.request.body.raw).password)\r",
-											"    .to.be.equal(pm.response.json().password);\r",
-											"})"
+											""
 										],
 										"type": "text/javascript"
 									}
@@ -79,8 +75,8 @@
 											"    pm.response.to.have.status(201);\r",
 											"});\r",
 											"\r",
-											"pm.globals.set(\"lenaaa_id\", pm.response.json()._id);\r",
-											"pm.globals.set(\"lenaaa_username\", pm.response.json().username);"
+											"pm.globals.set(\"lenaaa_id\", pm.response.json().user._id);\r",
+											"pm.globals.set(\"lenaaa_username\", pm.response.json().user.username);"
 										],
 										"type": "text/javascript"
 									}
@@ -125,7 +121,7 @@
 											"    pm.response.to.have.status(201);\r",
 											"});\r",
 											"\r",
-											"pm.globals.set(\"bobson_id\", pm.response.json()._id);"
+											"pm.globals.set(\"bobson_id\", pm.response.json().user._id);"
 										],
 										"type": "text/javascript"
 									}
@@ -330,6 +326,49 @@
 								}
 							},
 							"response": []
+						},
+						{
+							"name": "invalid: no password",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 400\", function () {\r",
+											"    pm.response.to.have.status(400);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"username\": \"notshort\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:3001/api/v1/users",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3001",
+									"path": [
+										"api",
+										"v1",
+										"users"
+									]
+								}
+							},
+							"response": []
 						}
 					]
 				},
@@ -347,8 +386,8 @@
 											"    pm.response.to.have.status(200);\r",
 											"});\r",
 											"\r",
-											"pm.test(\"Returns all (3) users\", function () {\r",
-											"    pm.expect(pm.response.json().users.length).to.be.equal(3);\r",
+											"pm.test(\"Returns all (4) users\", function () {\r",
+											"    pm.expect(pm.response.json().users.length).to.be.equal(4);\r",
 											"});"
 										],
 										"type": "text/javascript"
@@ -597,35 +636,26 @@
 					"name": "Update",
 					"item": [
 						{
-							"name": "User 3: Put",
+							"name": "Invalid: Cant follow yourself",
 							"event": [
 								{
 									"listen": "test",
 									"script": {
 										"exec": [
-											"pm.test(\"Status code is 201\", function () {\r",
-											"    pm.response.to.have.status(201);\r",
-											"});\r",
-											"\r",
-											"pm.test(\"Username is updated\", function () {\r",
-											"    pm.expect(JSON.parse(pm.request.body.raw).username)\r",
-											"    .to.be.equal(pm.response.json().username);\r",
-											"})\r",
-											"\r",
-											"pm.globals.set(\"bobson_username\", pm.response.json().username);\r",
-											"pm.globals.set(\"bobson_password\", pm.response.json().password);\r",
-											"pm.globals.set(\"bobson_bio\", pm.response.json().bio);"
+											"pm.test(\"Status code is 400\", function () {\r",
+											"    pm.response.to.have.status(400);\r",
+											"});"
 										],
 										"type": "text/javascript"
 									}
 								}
 							],
 							"request": {
-								"method": "PUT",
+								"method": "PATCH",
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\r\n    \"username\": \"bobsoncool\",\r\n    \"password\": \"bobs_new_password\",\r\n    \"bio\": \"Hi, I am bob\"\r\n}",
+									"raw": "{\r\n    \"following\": [\"{{bobson_id}}\"]\r\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -644,6 +674,190 @@
 										"v1",
 										"users",
 										"{{bobson_id}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Invalid: Cant follow duplicates",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 400\", function () {\r",
+											"    pm.response.to.have.status(400);\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"following\": [\"{{william_id}}\", \"{{william_id}}\"]\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:3001/api/v1/users/{{bobson_id}}",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3001",
+									"path": [
+										"api",
+										"v1",
+										"users",
+										"{{bobson_id}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Invalid: Cant follow invalid user",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 400\", function () {\r",
+											"    pm.response.to.have.status(400);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"following\": [\"idontexist\"]\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:3001/api/v1/users/{{bobson_id}}",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3001",
+									"path": [
+										"api",
+										"v1",
+										"users",
+										"{{bobson_id}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "User 3: Put",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Bio is updated\", function () {\r",
+											"    pm.expect(JSON.parse(pm.request.body.raw).bio)\r",
+											"    .to.be.equal(pm.response.json().bio);\r",
+											"})\r",
+											"\r",
+											"pm.globals.set(\"bobson_bio\", pm.response.json().bio);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"bio\": \"Hi, I am bob\",\r\n    \"following\": [\"{{william_id}}\", \"{{lenaaa_id}}\"]\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:3001/api/v1/users/{{bobson_id}}",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3001",
+									"path": [
+										"api",
+										"v1",
+										"users",
+										"{{bobson_id}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Login user 3 (bobson) - session expires with name change",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"username\": \"bobson\",\r\n    \"password\": \"bobs_password\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:3001/api/v1/authenticate/login",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3001",
+									"path": [
+										"api",
+										"v1",
+										"authenticate",
+										"login"
 									]
 								}
 							},
@@ -660,9 +874,9 @@
 											"    pm.response.to.have.status(201);\r",
 											"});\r",
 											"\r",
-											"pm.test(\"Username is updated\", function () {\r",
-											"    pm.expect(JSON.parse(pm.request.body.raw).username)\r",
-											"    .to.be.equal(pm.response.json().username);\r",
+											"pm.test(\"Bio is updated\", function () {\r",
+											"    pm.expect(JSON.parse(pm.request.body.raw).bio)\r",
+											"    .to.be.equal(pm.response.json().bio);\r",
 											"})\r",
 											""
 										],
@@ -675,7 +889,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\r\n    \"username\": \"bobson\"\r\n}",
+									"raw": "{\r\n    \"bio\": \"Hi\"\r\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -694,6 +908,50 @@
 										"v1",
 										"users",
 										"{{bobson_id}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Login user 3 (bobson) - session expires with name change",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"username\": \"bobson\",\r\n    \"password\": \"bobs_password\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:3001/api/v1/authenticate/login",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3001",
+									"path": [
+										"api",
+										"v1",
+										"authenticate",
+										"login"
 									]
 								}
 							},
@@ -710,20 +968,14 @@
 											"    pm.response.to.have.status(200);\r",
 											"});\r",
 											"\r",
-											"pm.test(\"Name is overwritten from the put by the patch\", function () {\r",
-											"    pm.expect(pm.globals.get(\"bobson_username\")).to.not.be.equal(pm.response.json().username);\r",
+											"pm.test(\"Bio is overwritten from the put by the patch\", function () {\r",
+											"    pm.expect(pm.globals.get(\"bobson_bio\")).to.not.be.equal(pm.response.json().bio);\r",
 											"})\r",
 											"\r",
-											"pm.test(\"Password is updated from put\", function () {\r",
-											"    pm.expect(pm.globals.get(\"bobson_password\")).to.be.equal(pm.response.json().password);\r",
+											"pm.test(\"There is a following\", function () {\r",
+											"    pm.expect(pm.response.json().following.length).to.be.equal(2);\r",
 											"})\r",
 											"\r",
-											"pm.test(\"There is a bio from put\", function () {\r",
-											"    pm.expect(pm.globals.get(\"bobson_bio\")).to.be.equal(pm.response.json().bio);\r",
-											"})\r",
-											"\r",
-											"pm.globals.unset(\"bobson_username\");\r",
-											"pm.globals.unset(\"bobson_password\");\r",
 											"pm.globals.unset(\"bobson_bio\");\r",
 											""
 										],
@@ -740,50 +992,6 @@
 								"body": {
 									"mode": "raw",
 									"raw": "",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "http://localhost:3001/api/v1/users/{{bobson_id}}",
-									"protocol": "http",
-									"host": [
-										"localhost"
-									],
-									"port": "3001",
-									"path": [
-										"api",
-										"v1",
-										"users",
-										"{{bobson_id}}"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "invalid: missing fields",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"pm.test(\"Status code is 400\", function () {\r",
-											"    pm.response.to.have.status(400);\r",
-											"});"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"method": "PUT",
-								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": "{\r\n    \"bio\": \"Tjena!\"\r\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -858,7 +1066,7 @@
 					"name": "Delete",
 					"item": [
 						{
-							"name": "User a: coolguy",
+							"name": "User a: deleteme",
 							"event": [
 								{
 									"listen": "test",
@@ -877,7 +1085,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\r\n    \"username\": \"coolguy\",\r\n    \"password\": \"deleteme\"\r\n}",
+									"raw": "{\r\n    \"username\": \"deleteme\",\r\n    \"password\": \"123\"\r\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -901,50 +1109,7 @@
 							"response": []
 						},
 						{
-							"name": "User b: verycoolguy",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"pm.test(\"Status code is 201\", function () {\r",
-											"    pm.response.to.have.status(201);\r",
-											"});"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"method": "POST",
-								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": "{\r\n    \"username\": \"verycoolguy\",\r\n    \"password\": \"deleteme\"\r\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "http://localhost:3001/api/v1/users",
-									"protocol": "http",
-									"host": [
-										"localhost"
-									],
-									"port": "3001",
-									"path": [
-										"api",
-										"v1",
-										"users"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "User c: ilikecats",
+							"name": "User b: ilikecats",
 							"event": [
 								{
 									"listen": "test",
@@ -954,7 +1119,7 @@
 											"    pm.response.to.have.status(201);\r",
 											"});\r",
 											"\r",
-											"pm.globals.set(\"ilikecats_id\", pm.response.json()._id);"
+											"pm.globals.set(\"ilikecats_id\", pm.response.json().user._id);"
 										],
 										"type": "text/javascript"
 									}
@@ -999,8 +1164,8 @@
 											"    pm.response.to.have.status(200);\r",
 											"});\r",
 											"\r",
-											"pm.test(\"All (2) users deleted with password = 'deleteme'\", function () {\r",
-											"    pm.expect(pm.response.json().deletedCount).to.be.equal(2);\r",
+											"pm.test(\"Deleted user with username = 'deleteme'\", function () {\r",
+											"    pm.expect(pm.response.json().deletedCount).to.be.equal(1);\r",
 											"})\r",
 											"\r",
 											""
@@ -1013,7 +1178,7 @@
 								"method": "DELETE",
 								"header": [],
 								"url": {
-									"raw": "http://localhost:3001/api/v1/users?password=deleteme",
+									"raw": "http://localhost:3001/api/v1/users?username=deleteme",
 									"protocol": "http",
 									"host": [
 										"localhost"
@@ -1026,7 +1191,7 @@
 									],
 									"query": [
 										{
-											"key": "password",
+											"key": "username",
 											"value": "deleteme"
 										}
 									]
@@ -1159,6 +1324,51 @@
 					"name": "Post",
 					"item": [
 						{
+							"name": "Login as admin",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"username\": \"testAdmin\",\r\n    \"password\": \"admin\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:3001/api/v1/authenticate/login",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3001",
+									"path": [
+										"api",
+										"v1",
+										"authenticate",
+										"login"
+									]
+								}
+							},
+							"response": []
+						},
+						{
 							"name": "Game 1: Maze",
 							"event": [
 								{
@@ -1200,7 +1410,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\r\n    \"name\": \"Maze\",\r\n    \"author\": \"Team 27\",\r\n    \"releaseDate\": \"2024-01-22\",\r\n    \"tag\": [\r\n        \"Simulator\",\r\n        \"Roleplay\",\r\n        \"Third-person\"\r\n    ]\r\n}",
+									"raw": "{\r\n    \"name\": \"Maze\",\r\n    \"author\": \"Team 27\",\r\n    \"releaseDate\": \"2020-01-22\",\r\n    \"tag\": [\r\n        \"Simulator\",\r\n        \"Roleplay\",\r\n        \"Third-person\"\r\n    ]\r\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -2508,6 +2718,42 @@
 								}
 							},
 							"response": []
+						},
+						{
+							"name": "Logout as Admin",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:3001/api/v1/authenticate/logout",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3001",
+									"path": [
+										"api",
+										"v1",
+										"authenticate",
+										"logout"
+									]
+								}
+							},
+							"response": []
 						}
 					]
 				}
@@ -2519,6 +2765,50 @@
 				{
 					"name": "Post",
 					"item": [
+						{
+							"name": "Login user1 (william)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"username\": \"william\",\r\n    \"password\": \"good_password123\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:3001/api/v1/authenticate/login",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3001",
+									"path": [
+										"api",
+										"v1",
+										"authenticate",
+										"login"
+									]
+								}
+							},
+							"response": []
+						},
 						{
 							"name": "Review 1 - Maze by william",
 							"event": [
@@ -2535,8 +2825,8 @@
 											"    .to.be.equal(pm.response.json().game);\r",
 											"})\r",
 											"\r",
-											"pm.test(\"User is as requested\", function () {\r",
-											"    pm.expect(JSON.parse(pm.request.body.raw).user)\r",
+											"pm.test(\"User currently logged in user\", function () {\r",
+											"    pm.expect(pm.globals.get(\"william_id\"))\r",
 											"    .to.be.equal(pm.response.json().user);\r",
 											"})\r",
 											"\r",
@@ -2565,7 +2855,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\r\n    \"game\": \"{{game1_id}}\",\r\n    \"user\": \"{{william_id}}\",\r\n    \"title\": \"Game was boring\",\r\n    \"rating\": \"1\",\r\n    \"text\": \"I did not like the game as it was very boring! :)\"\r\n}",
+									"raw": "{\r\n    \"game\": \"{{game1_id}}\",\r\n    \"title\": \"Game was boring\",\r\n    \"rating\": \"1\",\r\n    \"text\": \"I did not like the game as it was very boring! :)\"\r\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -2584,6 +2874,94 @@
 										"v1",
 										"reviews",
 										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Logout",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:3001/api/v1/authenticate/logout",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3001",
+									"path": [
+										"api",
+										"v1",
+										"authenticate",
+										"logout"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Login user2 (lenaaa)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"username\": \"lenaaa\",\r\n    \"password\": \"hejthisismypassword\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:3001/api/v1/authenticate/login",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3001",
+									"path": [
+										"api",
+										"v1",
+										"authenticate",
+										"login"
 									]
 								}
 							},
@@ -2611,7 +2989,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\r\n    \"game\": \"{{game2_id}}\",\r\n    \"user\": \"{{lenaaa_id}}\",\r\n    \"rating\":  \"5\",\r\n    \"title\": \"Very fun!\"\r\n}",
+									"raw": "{\r\n    \"game\": \"{{game2_id}}\",\r\n    \"rating\":  \"5\",\r\n    \"title\": \"Very fun!\"\r\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -2630,6 +3008,94 @@
 										"v1",
 										"reviews",
 										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Logout",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:3001/api/v1/authenticate/logout",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3001",
+									"path": [
+										"api",
+										"v1",
+										"authenticate",
+										"logout"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Login user3 (bobson)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"username\": \"bobson\",\r\n    \"password\": \"bobs_password\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:3001/api/v1/authenticate/login",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3001",
+									"path": [
+										"api",
+										"v1",
+										"authenticate",
+										"login"
 									]
 								}
 							},
@@ -2657,7 +3123,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\r\n    \"game\": \"{{game3_id}}\",\r\n    \"user\": \"{{bobson_id}}\",\r\n    \"rating\": \"3\",\r\n    \"title\": \"It was alright! OwO\",\r\n    \"text\": \"Coooooooooooooooooooooooooooooooooooooooooooool!! :)\"\r\n}",
+									"raw": "{\r\n    \"game\": \"{{game3_id}}\",\r\n    \"rating\": \"3\",\r\n    \"title\": \"It was alright! OwO\",\r\n    \"text\": \"Coooooooooooooooooooooooooooooooooooooooooooool!! :)\"\r\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -2701,7 +3167,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\r\n    \"game\": \"{{game2_id}}\",\r\n    \"user\": \"{{lenaaa_id}}\",\r\n    \"rating\": \"5\",\r\n    \"title\": \"Actually, it was pretty good\",\r\n    \"text\": \"I had fun with my friends!! :)\"\r\n}",
+									"raw": "{\r\n    \"game\": \"{{game3_id}}\",\r\n    \"rating\": \"3\",\r\n    \"title\": \"duplicate review for a game by a user\",\r\n    \"text\": \"I wont get posted\"\r\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -2732,8 +3198,8 @@
 									"listen": "test",
 									"script": {
 										"exec": [
-											"pm.test(\"Status code is 400\", function () {\r",
-											"    pm.response.to.have.status(400);\r",
+											"pm.test(\"Status code is 404\", function () {\r",
+											"    pm.response.to.have.status(404);\r",
 											"});"
 										],
 										"type": "text/javascript"
@@ -2745,7 +3211,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\r\n    \"user\": \"{{lenaaa_id}}\",\r\n    \"rating\": \"3\",\r\n    \"title\": \"It was alright! OwO\",\r\n    \"text\": \"Coooooooooooooooooooooooooooooooooooooooooooool!! :)\"\r\n}",
+									"raw": "{\r\n    \"rating\": \"3\",\r\n    \"title\": \"It was alright! OwO\",\r\n    \"text\": \"Coooooooooooooooooooooooooooooooooooooooooooool!! :)\"\r\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -2789,51 +3255,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\r\n    \"game\": \"{{game123_id}}\",\r\n    \"user\": \"{{lenaaa_id}}\",\r\n    \"rating\": \"3\",\r\n    \"title\": \"It was alright! OwO\",\r\n    \"text\": \"Coooooooooooooooooooooooooooooooooooooooooooool!! :)\"\r\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "http://localhost:3001/api/v1/reviews/",
-									"protocol": "http",
-									"host": [
-										"localhost"
-									],
-									"port": "3001",
-									"path": [
-										"api",
-										"v1",
-										"reviews",
-										""
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "invalid: user",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"pm.test(\"Status code is 400\", function () {\r",
-											"    pm.response.to.have.status(400);\r",
-											"});"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"method": "POST",
-								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": "{\r\n    \"game\": \"{{game2_id}}\",\r\n    \"user\": \"{{mults_id}}\",\r\n    \"rating\": \"3\",\r\n    \"title\": \"It was alright! OwO\",\r\n    \"text\": \"Coooooooooooooooooooooooooooooooooooooooooooool!! :)\"\r\n}",
+									"raw": "{\r\n    \"game\": \"{{game123_id}}\",\r\n    \"rating\": \"3\",\r\n    \"title\": \"It was alright! OwO\",\r\n    \"text\": \"Coooooooooooooooooooooooooooooooooooooooooooool!! :)\"\r\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -2877,7 +3299,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\r\n    \"game\": \"{{game2_id}}\",\r\n    \"user\": \"{{lenaaa_id}}\",\r\n    \"title\": \"It was alright! OwO\",\r\n    \"text\": \"Coooooooooooooooooooooooooooooooooooooooooooool!! :)\"\r\n}",
+									"raw": "{\r\n    \"game\": \"{{game2_id}}\",\r\n    \"title\": \"It was alright! OwO\",\r\n    \"text\": \"Coooooooooooooooooooooooooooooooooooooooooooool!! :)\"\r\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -2921,7 +3343,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\r\n    \"game\": \"{{game2_id}}\",\r\n    \"user\": \"{{lenaaa_id}}\",\r\n    \"rating\": \"zero\",\r\n    \"title\": \"It was alright! OwO\",\r\n    \"text\": \"Coooooooooooooooooooooooooooooooooooooooooooool!! :)\"\r\n}",
+									"raw": "{\r\n    \"game\": \"{{game2_id}}\",\r\n    \"rating\": \"zero\",\r\n    \"title\": \"It was alright! OwO\",\r\n    \"text\": \"Coooooooooooooooooooooooooooooooooooooooooooool!! :)\"\r\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -2965,7 +3387,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\r\n    \"game\": \"{{game2_id}}\",\r\n    \"user\": \"{{lenaaa_id}}\",\r\n    \"rating\": \"31\",\r\n    \"title\": \"It was alright! OwO\",\r\n    \"text\": \"Coooooooooooooooooooooooooooooooooooooooooooool!! :)\"\r\n}",
+									"raw": "{\r\n    \"game\": \"{{game2_id}}\",\r\n    \"rating\": \"31\",\r\n    \"title\": \"It was alright! OwO\",\r\n    \"text\": \"Coooooooooooooooooooooooooooooooooooooooooooool!! :)\"\r\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -3009,7 +3431,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\r\n    \"game\": \"{{game2_id}}\",\r\n    \"user\": \"{{lenaaa_id}}\",\r\n    \"rating\": \"3\",\r\n    \"text\": \"Not coooooooooooooooooooooooooooooooooooooooooooool!! :(\"\r\n}",
+									"raw": "{\r\n    \"game\": \"{{game2_id}}\",\r\n    \"rating\": \"3\",\r\n    \"text\": \"Not coooooooooooooooooooooooooooooooooooooooooooool!! :(\"\r\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -3053,7 +3475,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\r\n    \"game\": \"{{game3_id}}\",\r\n    \"user\": \"{{bobson_id}}\",\r\n    \"rating\": \"1\",\r\n    \"title\": \"Yesterday I was walking my dog and I saw an old friend of mine who I haven't seen since high school. He looked very sad so I approached him and asked what's wrong. He showed me a copy of this game and told me to avoid buying it at all costs, as it was a big disappoitment and a waste of money. Naturally, I bought the game because I wanted to test his theory. Yep, it's pretty bad. Don't buy it. And then my dog cried.\",\r\n    \"text\": \"Cool story above! :)\"\r\n}",
+									"raw": "{\r\n    \"game\": \"{{game3_id}}\",\r\n    \"rating\": \"1\",\r\n    \"title\": \"Yesterday I was walking my dog and I saw an old friend of mine who I haven't seen since high school. He looked very sad so I approached him and asked what's wrong. He showed me a copy of this game and told me to avoid buying it at all costs, as it was a big disappoitment and a waste of money. Naturally, I bought the game because I wanted to test his theory. Yep, it's pretty bad. Don't buy it. And then my dog cried.\",\r\n    \"text\": \"Cool story above! :)\"\r\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -3097,7 +3519,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\r\n    \"game\": \"{{game1_id}}\",\r\n    \"user\": \"{{william_id}}\",\r\n    \"rating\": \"5\",\r\n    \"title\": \"Crazy?\",\r\n    \"text\": \"Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy.Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy.Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy.\"\r\n}",
+									"raw": "{\r\n    \"game\": \"{{game1_id}}\",\r\n    \"rating\": \"5\",\r\n    \"title\": \"Crazy?\",\r\n    \"text\": \"Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy.Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy.Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy.\"\r\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -3177,7 +3599,7 @@
 											"});\r",
 											"\r",
 											"pm.test(\"Review received by query is correct\", function () {\r",
-											"    pm.expect(pm.response.json().reviews[0].user).to.be.equal(pm.globals.get(\"william_id\"));\r",
+											"    pm.expect(pm.response.json().reviews[0].user._id).to.be.equal(pm.globals.get(\"william_id\"));\r",
 											"});"
 										],
 										"type": "text/javascript"
@@ -3370,6 +3792,50 @@
 										"v1",
 										"reviews",
 										"{{review3_id}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Invalid: not authorized",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 401\", function () {\r",
+											"    pm.response.to.have.status(401);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"game\": \"{{game3_id}}\",\r\n    \"user\": \"{{bobson_id}}\",\r\n    \"rating\": \"5\",\r\n    \"title\": \"It was alright! OwO\",\r\n    \"text\": \"Very Coooooooooooooooooooooooooooooooooooooooooooool!! :)\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:3001/api/v1/reviews/{{review1_id}}",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3001",
+									"path": [
+										"api",
+										"v1",
+										"reviews",
+										"{{review1_id}}"
 									]
 								}
 							},
@@ -3640,6 +4106,50 @@
 					"name": "Delete",
 					"item": [
 						{
+							"name": "Login user1 (william)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"username\": \"william\",\r\n    \"password\": \"good_password123\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:3001/api/v1/authenticate/login",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3001",
+									"path": [
+										"api",
+										"v1",
+										"authenticate",
+										"login"
+									]
+								}
+							},
+							"response": []
+						},
+						{
 							"name": "Review a - Zonked by william",
 							"event": [
 								{
@@ -3684,6 +4194,94 @@
 							"response": []
 						},
 						{
+							"name": "Logout",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:3001/api/v1/authenticate/logout",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3001",
+									"path": [
+										"api",
+										"v1",
+										"authenticate",
+										"logout"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Login user2 (lenaaa)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"username\": \"lenaaa\",\r\n    \"password\": \"hejthisismypassword\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:3001/api/v1/authenticate/login",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3001",
+									"path": [
+										"api",
+										"v1",
+										"authenticate",
+										"login"
+									]
+								}
+							},
+							"response": []
+						},
+						{
 							"name": "Review b - Zonked by lenaaa",
 							"event": [
 								{
@@ -3722,6 +4320,94 @@
 										"v1",
 										"reviews",
 										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Logout",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:3001/api/v1/authenticate/logout",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3001",
+									"path": [
+										"api",
+										"v1",
+										"authenticate",
+										"logout"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Login user3 (bobson)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"username\": \"bobson\",\r\n    \"password\": \"bobs_password\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:3001/api/v1/authenticate/login",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3001",
+									"path": [
+										"api",
+										"v1",
+										"authenticate",
+										"login"
 									]
 								}
 							},
@@ -3823,42 +4509,6 @@
 							"response": []
 						},
 						{
-							"name": "invalid: _id",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"pm.test(\"Status code is 400\", function () {\r",
-											"    pm.response.to.have.status(400);\r",
-											"});\r",
-											""
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"method": "DELETE",
-								"header": [],
-								"url": {
-									"raw": "http://localhost:3001/api/v1/reviews/not-a-id",
-									"protocol": "http",
-									"host": [
-										"localhost"
-									],
-									"port": "3001",
-									"path": [
-										"api",
-										"v1",
-										"reviews",
-										"not-a-id"
-									]
-								}
-							},
-							"response": []
-						},
-						{
 							"name": "Delete review by id",
 							"event": [
 								{
@@ -3944,6 +4594,55 @@
 			"name": "Comment",
 			"item": [
 				{
+					"name": "Login",
+					"item": [
+						{
+							"name": "Login user3 (bobson)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"username\": \"bobson\",\r\n    \"password\": \"bobs_password\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:3001/api/v1/authenticate/login",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3001",
+									"path": [
+										"api",
+										"v1",
+										"authenticate",
+										"login"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
 					"name": "Post",
 					"item": [
 						{
@@ -3968,7 +4667,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{ \r\n    \"user\": \"{{william_id}}\",\r\n    \"review\" : \"{{review2_id}}\",\r\n    \"text\": \"omg you are so right bestie!!! OwO\",\r\n    \"opinion\" : \"true\"\r\n}",
+									"raw": "{ \r\n    \"review\" : \"{{review2_id}}\",\r\n    \"text\": \"omg you are so right bestie!!! OwO\",\r\n    \"opinion\" : \"true\"\r\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -4013,7 +4712,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{ \r\n    \"user\": \"{{lenaaa_id}}\",\r\n    \"review\" : \"{{review2_id}}\",\r\n    \"text\": \"I disagree! :)\",\r\n    \"opinion\" : \"false\"\r\n}",
+									"raw": "{ \r\n    \"review\" : \"{{review2_id}}\",\r\n    \"text\": \"I disagree! :)\",\r\n    \"opinion\" : \"false\"\r\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -4058,7 +4757,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{ \r\n    \"user\": \"{{bobson_id}}\",\r\n    \"review\" : \"{{review1_id}}\",\r\n    \"text\": \"i don't like your opinion\",\r\n    \"opinion\" : \"false\"\r\n}",
+									"raw": "{ \r\n    \"review\" : \"{{review1_id}}\",\r\n    \"text\": \"i don't like your opinion\",\r\n    \"opinion\" : false\r\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -4101,7 +4800,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{ \r\n    \"user\": \"{{bobson_id}}\",\r\n    \"text\": \"Cool!\",\r\n    \"opinion\" : true\r\n}",
+									"raw": "{ \r\n    \"text\": \"Cool!\",\r\n    \"opinion\" : true\r\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -4144,50 +4843,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{ \r\n    \"user\": \"{{bobson_id}}\",\r\n    \"review\": \"234\",\r\n    \"text\": \"Cool!\",\r\n    \"opinion\" : true\r\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "http://localhost:3001/api/v1/comments",
-									"protocol": "http",
-									"host": [
-										"localhost"
-									],
-									"port": "3001",
-									"path": [
-										"api",
-										"v1",
-										"comments"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "invalid: non-valid user",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"pm.test(\"Status code is 400\", function () {\r",
-											"    pm.response.to.have.status(400);\r",
-											"});"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"method": "POST",
-								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": "{ \r\n    \"user\": \"aaaaa\",\r\n    \"review\" : \"{{review1_id}}\",\r\n    \"text\": \"Hej!\",\r\n    \"opinion\" : true\r\n}",
+									"raw": "{ \r\n    \"review\": \"234\",\r\n    \"text\": \"Cool!\",\r\n    \"opinion\" : true\r\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -4230,7 +4886,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{ \r\n    \"user\": \"{{bobson_id}}\",\r\n    \"review\" : \"{{review1_id}}\",\r\n    \"opinion\" : false\r\n}",
+									"raw": "{ \r\n    \"review\" : \"{{review1_id}}\",\r\n    \"opinion\" : false\r\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -4273,7 +4929,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{ \r\n    \"user\": \"{{bobson_id}}\",\r\n    \"review\" : \"{{review1_id}}\",\r\n    \"text\": \"Nah, not really\",\r\n    \"opinion\" : \"hej\"\r\n}",
+									"raw": "{ \r\n    \"review\" : \"{{review1_id}}\",\r\n    \"text\": \"Nah, not really\",\r\n    \"opinion\" : \"hej\"\r\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -4316,7 +4972,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{ \r\n    \"user\": \"{{bobson_id}}\",\r\n    \"review\" : \"{{review1_id}}\",\r\n    \"opinion\" : \"true\",\r\n    \"text\": \"Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy.Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy.Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy.\"\r\n}",
+									"raw": "{ \r\n    \"review\" : \"{{review1_id}}\",\r\n    \"opinion\" : \"true\",\r\n    \"text\": \"Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy.Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy.Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy. Crazy? I was crazy once. They locked me in a room. A rubber room. A rubber room with rats. And rats make me crazy.\"\r\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -4339,7 +4995,8 @@
 							},
 							"response": []
 						}
-					]
+					],
+					"description": "User for comment is the currently logged in user. In the tests case, 'bobson'."
 				},
 				{
 					"name": "Get",
@@ -4578,7 +5235,7 @@
 					"name": "Update",
 					"item": [
 						{
-							"name": "Comment 3: isEdited = false",
+							"name": "Comment 3: isEdited = false Copy",
 							"event": [
 								{
 									"listen": "test",
@@ -4644,7 +5301,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{ \r\n    \"user\": \"{{bobson_id}}\",\r\n    \"review\" : \"{{review1_id}}\",\r\n    \"text\": \"i don't like your opinion or mby i do\"\r\n}",
+									"raw": "{ \r\n    \"text\": \"i don't like your opinion or mby i do\",\r\n    \"opinion\": true\r\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -4681,7 +5338,7 @@
 											"\r",
 											"pm.test(\"Opinion is updated\", function () {\r",
 											"    pm.expect(JSON.parse(pm.request.body.raw).opinion)\r",
-											"    .to.be.equal(pm.response.json().opinion.toString());\r",
+											"    .to.be.equal(pm.response.json().opinion);\r",
 											"})"
 										],
 										"type": "text/javascript"
@@ -4693,7 +5350,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\r\n    \"opinion\": \"false\"\r\n}",
+									"raw": "{\r\n    \"opinion\": false\r\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -4939,7 +5596,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{ \r\n    \"user\": \"{{lenaaa_id}}\",\r\n    \"review\" : \"{{review1_id}}\",\r\n    \"text\": \"dont delete pls\"\r\n}",
+									"raw": "{ \r\n    \"user\": \"{{bobson_id}}\",\r\n    \"review\" : \"{{review1_id}}\",\r\n    \"text\": \"dont delete pls\"\r\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -4982,7 +5639,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{ \r\n    \"user\": \"{{bobson_id}}\",\r\n    \"review\" : \"{{review3_id}}\",\r\n    \"text\": \"deleteme\"\r\n}",
+									"raw": "{ \r\n    \"user\": \"{{lenaaa_id}}\",\r\n    \"review\" : \"{{review3_id}}\",\r\n    \"text\": \"deleteme\"\r\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -5168,472 +5825,52 @@
 			]
 		},
 		{
-			"name": "Method Override",
-			"item": [
-				{
-					"name": "User: MethodOverride",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 201\", function () {\r",
-									"    pm.response.to.have.status(201);\r",
-									"});\r",
-									"\r",
-									"pm.globals.set(\"MethodOverride_id\", pm.response.json()._id);"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"username\": \"MethodOverride\",\r\n    \"password\": \"_method\"\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "http://localhost:3001/api/v1/users",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "3001",
-							"path": [
-								"api",
-								"v1",
-								"users"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Method Override: Put",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 201\", function () {\r",
-									"    pm.response.to.have.status(201);\r",
-									"});\r",
-									"\r",
-									"pm.test(\"Uses method overriding (_method=PUT)\", function () {\r",
-									"    pm.expect(pm.request.url.getQueryString()).to.be.equal(\"_method=PUT\");\r",
-									"});\r",
-									"\r",
-									"pm.test(\"Username is updated\", function () {\r",
-									"    pm.expect(JSON.parse(pm.request.body.raw).username)\r",
-									"    .to.be.equal(pm.response.json().username);\r",
-									"})\r",
-									"\r",
-									"pm.globals.set(\"MethodOverride_username\", pm.response.json().username);\r",
-									"pm.globals.set(\"MethodOverride_password\", pm.response.json().password);\r",
-									"pm.globals.set(\"MethodOverride_bio\", pm.response.json().bio);"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"username\": \"MethodOverride1\",\r\n    \"password\": \"_method\",\r\n    \"bio\": \"I overwrite methods\"\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "http://localhost:3001/api/v1/users/{{MethodOverride_id}}/?_method=PUT",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "3001",
-							"path": [
-								"api",
-								"v1",
-								"users",
-								"{{MethodOverride_id}}",
-								""
-							],
-							"query": [
-								{
-									"key": "_method",
-									"value": "PUT"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Method Override: Patch",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 201\", function () {\r",
-									"    pm.response.to.have.status(201);\r",
-									"});\r",
-									"\r",
-									"pm.test(\"Uses method overriding (_method=PATCH)\", function () {\r",
-									"    pm.expect(pm.request.url.getQueryString()).to.be.equal(\"_method=PATCH\");\r",
-									"});\r",
-									"\r",
-									"pm.test(\"Username is updated\", function () {\r",
-									"    pm.expect(JSON.parse(pm.request.body.raw).username)\r",
-									"    .to.be.equal(pm.response.json().username);\r",
-									"})\r",
-									"\r",
-									"pm.globals.set(\"MethodOverride_username\", pm.response.json().username);"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"username\": \"MethodOverride\"\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "http://localhost:3001/api/v1/users/{{MethodOverride_id}}/?_method=PATCH",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "3001",
-							"path": [
-								"api",
-								"v1",
-								"users",
-								"{{MethodOverride_id}}",
-								""
-							],
-							"query": [
-								{
-									"key": "_method",
-									"value": "PATCH"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Check updates",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 200\", function () {\r",
-									"    pm.response.to.have.status(200);\r",
-									"});\r",
-									"\r",
-									"pm.test(\"Uses method overriding (_method=GET)\", function () {\r",
-									"    pm.expect(pm.request.url.getQueryString()).to.be.equal(\"_method=GET\");\r",
-									"});\r",
-									"\r",
-									"pm.test(\"Name is overwritten from the put by the patch\", function () {\r",
-									"    pm.expect(pm.globals.get(\"MethodOverride_username\")).to.be.equal(pm.response.json().username);\r",
-									"})\r",
-									"\r",
-									"pm.test(\"Password is updated from put\", function () {\r",
-									"    pm.expect(pm.globals.get(\"MethodOverride_password\")).to.be.equal(pm.response.json().password);\r",
-									"})\r",
-									"\r",
-									"pm.test(\"There is a bio from put\", function () {\r",
-									"    pm.expect(pm.globals.get(\"MethodOverride_bio\")).to.be.equal(pm.response.json().bio);\r",
-									"})\r",
-									""
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "http://localhost:3001/api/v1/users/{{MethodOverride_id}}/?_method=GET",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "3001",
-							"path": [
-								"api",
-								"v1",
-								"users",
-								"{{MethodOverride_id}}",
-								""
-							],
-							"query": [
-								{
-									"key": "_method",
-									"value": "GET"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Method Override: Delete by id",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 200\", function () {\r",
-									"    pm.response.to.have.status(200);\r",
-									"});\r",
-									"\r",
-									"pm.test(\"Uses method overriding (_method=DELETE)\", function () {\r",
-									"    pm.expect(pm.request.url.getQueryString()).to.be.equal(\"_method=DELETE\");\r",
-									"});\r",
-									"\r",
-									"pm.test(\"Correct user deleted\", function () {\r",
-									"    pm.expect(pm.variables.get(\"MethodOverride_id\"))\r",
-									"    .to.be.equal(pm.response.json()._id);\r",
-									"})\r",
-									"\r",
-									"pm.globals.unset(\"MethodOverride_id\");\r",
-									"pm.globals.unset(\"MethodOverride_username\");\r",
-									"pm.globals.unset(\"MethodOverride_password\");\r",
-									"pm.globals.unset(\"MethodOverride_bio\");"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [],
-						"url": {
-							"raw": "http://localhost:3001/api/v1/users/{{MethodOverride_id}}/?_method=DELETE",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "3001",
-							"path": [
-								"api",
-								"v1",
-								"users",
-								"{{MethodOverride_id}}",
-								""
-							],
-							"query": [
-								{
-									"key": "_method",
-									"value": "DELETE"
-								}
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Filtering & Sorting",
-			"item": [
-				{
-					"name": "Returns only username (and _id)",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 200\", function () {\r",
-									"    pm.response.to.have.status(200);\r",
-									"});\r",
-									"\r",
-									"var user = pm.response.json().users[0];\r",
-									"pm.test(\"Only username (and _id) returned\", function () {\r",
-									"    pm.expect(user._id).to.exist;\r",
-									"    pm.expect(user.username).to.exist;\r",
-									"    pm.expect(user.password).to.not.exist;\r",
-									"    pm.expect(user.bio).to.not.exist;\r",
-									"    pm.expect(user.following).to.not.exist;\r",
-									"    pm.expect(user.pinnedReview).to.not.exist;\r",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "http://localhost:3001/api/v1/users/?_id={{william_id}}&fields=username",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "3001",
-							"path": [
-								"api",
-								"v1",
-								"users",
-								""
-							],
-							"query": [
-								{
-									"key": "_id",
-									"value": "{{william_id}}"
-								},
-								{
-									"key": "fields",
-									"value": "username"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Sort by ascending username",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 200\", function () {\r",
-									"    pm.response.to.have.status(200);\r",
-									"});\r",
-									"\r",
-									"var user = pm.response.json().users;\r",
-									"pm.test(\"Returned in ascending order\", function () {\r",
-									"    pm.expect(user[0].username).to.be.equal(\"bobson\");\r",
-									"    pm.expect(user[1].username).to.be.equal(\"lenaaa\");\r",
-									"    pm.expect(user[2].username).to.be.equal(\"william\");\r",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "http://localhost:3001/api/v1/users/?fields=username&sort=+username",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "3001",
-							"path": [
-								"api",
-								"v1",
-								"users",
-								""
-							],
-							"query": [
-								{
-									"key": "fields",
-									"value": "username"
-								},
-								{
-									"key": "sort",
-									"value": "+username"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Sort by descending username",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 200\", function () {\r",
-									"    pm.response.to.have.status(200);\r",
-									"});\r",
-									"\r",
-									"var user = pm.response.json().users;\r",
-									"pm.test(\"Returned in descending order\", function () {\r",
-									"    pm.expect(user[2].username).to.be.equal(\"bobson\");\r",
-									"    pm.expect(user[1].username).to.be.equal(\"lenaaa\");\r",
-									"    pm.expect(user[0].username).to.be.equal(\"william\");\r",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "http://localhost:3001/api/v1/users/?fields=username&sort=-username",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "3001",
-							"path": [
-								"api",
-								"v1",
-								"users",
-								""
-							],
-							"query": [
-								{
-									"key": "fields",
-									"value": "username"
-								},
-								{
-									"key": "sort",
-									"value": "-username"
-								}
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
 			"name": "Relationship methods",
 			"item": [
+				{
+					"name": "Login user3 (bobson)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\": \"bobson\",\r\n    \"password\": \"bobs_password\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3001/api/v1/authenticate/login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"api",
+								"v1",
+								"authenticate",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
 				{
 					"name": "Get comments from review",
 					"event": [
@@ -5768,7 +6005,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{ \r\n    \"user\": \"{{william_id}}\",\r\n    \"text\": \"that seems about right\",\r\n    \"opinion\" : \"true\"\r\n}",
+							"raw": "{ \r\n    \"text\": \"that seems about right\",\r\n    \"opinion\" : \"true\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -5796,10 +6033,10 @@
 			]
 		},
 		{
-			"name": "Cascade Deletion",
+			"name": "Method Override",
 			"item": [
 				{
-					"name": "Delete all reviews",
+					"name": "Login as admin",
 					"event": [
 						{
 							"listen": "test",
@@ -5807,17 +6044,27 @@
 								"exec": [
 									"pm.test(\"Status code is 200\", function () {\r",
 									"    pm.response.to.have.status(200);\r",
-									"});"
+									"});\r",
+									""
 								],
 								"type": "text/javascript"
 							}
 						}
 					],
 					"request": {
-						"method": "DELETE",
+						"method": "POST",
 						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\": \"testAdmin\",\r\n    \"password\": \"admin\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
 						"url": {
-							"raw": "http://localhost:3001/api/v1/reviews/",
+							"raw": "http://localhost:3001/api/v1/authenticate/login",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -5826,22 +6073,323 @@
 							"path": [
 								"api",
 								"v1",
-								"reviews",
-								""
+								"authenticate",
+								"login"
 							]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "All comments cascade deleted",
+					"name": "Game: MethodOverride",
 					"event": [
 						{
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test(\"Status code is 404\", function () {\r",
-									"    pm.response.to.have.status(404);\r",
+									"pm.test(\"Status code is 201\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"});\r",
+									"\r",
+									"pm.globals.set(\"MethodOverride_id\", pm.response.json()._id);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"MethodOverride\",\r\n    \"author\": \"_method\",\r\n    \"releaseDate\": \"2024-01-22\",\r\n    \"tag\": [\r\n        \"Simulator\",\r\n        \"Roleplay\",\r\n        \"Third-person\"\r\n    ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3001/api/v1/games",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"api",
+								"v1",
+								"games"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Method Override: Put",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Uses method overriding (_method=PUT)\", function () {\r",
+									"    pm.expect(pm.request.url.getQueryString()).to.be.equal(\"_method=PUT\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Name is updated\", function () {\r",
+									"    pm.expect(JSON.parse(pm.request.body.raw).name)\r",
+									"    .to.be.equal(pm.response.json().name);\r",
+									"})\r",
+									"\r",
+									"pm.globals.set(\"MethodOverride_name\", pm.response.json().name);\r",
+									"pm.globals.set(\"MethodOverride_author\", pm.response.json().author);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"I overwrite methods\",\r\n    \"author\": \"PUT\",\r\n    \"releaseDate\": \"2024-01-22\",\r\n        \"tag\": [\r\n        \"Simulator\",\r\n        \"Roleplay\",\r\n        \"Third-person\"\r\n    ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3001/api/v1/games/{{MethodOverride_id}}?_method=PUT",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"api",
+								"v1",
+								"games",
+								"{{MethodOverride_id}}"
+							],
+							"query": [
+								{
+									"key": "_method",
+									"value": "PUT"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Method Override: Patch",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Uses method overriding (_method=PATCH)\", function () {\r",
+									"    pm.expect(pm.request.url.getQueryString()).to.be.equal(\"_method=PATCH\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Author is updated\", function () {\r",
+									"    pm.expect(JSON.parse(pm.request.body.raw).author)\r",
+									"    .to.be.equal(pm.response.json().author);\r",
+									"})\r",
+									"\r",
+									"pm.globals.set(\"MethodOverride_author\", pm.response.json().author);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"author\": \"PATCH\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3001/api/v1/games/{{MethodOverride_id}}?_method=PATCH",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"api",
+								"v1",
+								"games",
+								"{{MethodOverride_id}}"
+							],
+							"query": [
+								{
+									"key": "_method",
+									"value": "PATCH"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Check updates",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Uses method overriding (_method=GET)\", function () {\r",
+									"    pm.expect(pm.request.url.getQueryString()).to.be.equal(\"_method=GET\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Author is overwritten from the put by the patch\", function () {\r",
+									"    pm.expect(pm.globals.get(\"MethodOverride_author\")).to.be.equal(pm.response.json().author);\r",
+									"})\r",
+									"\r",
+									"pm.test(\"The name is from put\", function () {\r",
+									"    pm.expect(pm.globals.get(\"MethodOverride_name\")).to.be.equal(pm.response.json().name);\r",
+									"})\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3001/api/v1/games/{{MethodOverride_id}}?_method=GET",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"api",
+								"v1",
+								"games",
+								"{{MethodOverride_id}}"
+							],
+							"query": [
+								{
+									"key": "_method",
+									"value": "GET"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Method Override: Delete by id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Uses method overriding (_method=DELETE)\", function () {\r",
+									"    pm.expect(pm.request.url.getQueryString()).to.be.equal(\"_method=DELETE\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Correct user deleted\", function () {\r",
+									"    pm.expect(pm.variables.get(\"MethodOverride_id\"))\r",
+									"    .to.be.equal(pm.response.json()._id);\r",
+									"})\r",
+									"\r",
+									"pm.globals.unset(\"MethodOverride_id\");\r",
+									"pm.globals.unset(\"MethodOverride_username\");\r",
+									"pm.globals.unset(\"MethodOverride_password\");\r",
+									"pm.globals.unset(\"MethodOverride_bio\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3001/api/v1/games/{{MethodOverride_id}}?_method=DELETE",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"api",
+								"v1",
+								"games",
+								"{{MethodOverride_id}}"
+							],
+							"query": [
+								{
+									"key": "_method",
+									"value": "DELETE"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Filtering & Sorting",
+			"item": [
+				{
+					"name": "Returns only username (and _id)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"var user = pm.response.json().users[0];\r",
+									"pm.test(\"Only username (and _id) returned\", function () {\r",
+									"    pm.expect(user._id).to.exist;\r",
+									"    pm.expect(user.username).to.exist;\r",
+									"    pm.expect(user.password).to.not.exist;\r",
+									"    pm.expect(user.bio).to.not.exist;\r",
+									"    pm.expect(user.following).to.not.exist;\r",
+									"    pm.expect(user.pinnedReview).to.not.exist;\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -5852,7 +6400,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:3001/api/v1/comments",
+							"raw": "http://localhost:3001/api/v1/users/?_id={{william_id}}&fields=username",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -5861,12 +6409,134 @@
 							"path": [
 								"api",
 								"v1",
-								"comments"
+								"users",
+								""
+							],
+							"query": [
+								{
+									"key": "_id",
+									"value": "{{william_id}}"
+								},
+								{
+									"key": "fields",
+									"value": "username"
+								}
 							]
 						}
 					},
 					"response": []
 				},
+				{
+					"name": "Sort by ascending username",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"var user = pm.response.json().users;\r",
+									"pm.test(\"Returned in ascending order\", function () {\r",
+									"    pm.expect(user[0].username).to.be.equal(\"bobson\");\r",
+									"    pm.expect(user[1].username).to.be.equal(\"lenaaa\");\r",
+									"    pm.expect(user[2].username).to.be.equal(\"testAdmin\");\r",
+									"    pm.expect(user[3].username).to.be.equal(\"william\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3001/api/v1/users/?fields=username&sort=+username",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"api",
+								"v1",
+								"users",
+								""
+							],
+							"query": [
+								{
+									"key": "fields",
+									"value": "username"
+								},
+								{
+									"key": "sort",
+									"value": "+username"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Sort by descending username",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"var user = pm.response.json().users;\r",
+									"pm.test(\"Returned in descending order\", function () {\r",
+									"    pm.expect(user[3].username).to.be.equal(\"bobson\");\r",
+									"    pm.expect(user[2].username).to.be.equal(\"lenaaa\");\r",
+									"    pm.expect(user[1].username).to.be.equal(\"testAdmin\");\r",
+									"    pm.expect(user[0].username).to.be.equal(\"william\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3001/api/v1/users/?fields=username&sort=-username",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"api",
+								"v1",
+								"users",
+								""
+							],
+							"query": [
+								{
+									"key": "fields",
+									"value": "username"
+								},
+								{
+									"key": "sort",
+									"value": "-username"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Cascade Deletion",
+			"item": [
 				{
 					"name": "Delete all games",
 					"event": [
@@ -5920,7 +6590,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:3001/api/v1/reviews",
+							"raw": "http://localhost:3001/api/v1/reviews/",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -5929,7 +6599,81 @@
 							"path": [
 								"api",
 								"v1",
-								"reviews"
+								"reviews",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "All comments cascade deleted",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404\", function () {\r",
+									"    pm.response.to.have.status(404);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3001/api/v1/comments",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"api",
+								"v1",
+								"comments"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Cleanup",
+			"item": [
+				{
+					"name": "Delete all users",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3001/api/v1/users",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"api",
+								"v1",
+								"users"
 							]
 						}
 					},

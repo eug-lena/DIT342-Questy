@@ -1,16 +1,8 @@
 <template>
-  <div class="col-lg-4 col-md-6 col-sm-12">
+  <div class="col-xl-2 col-md-4 col-sm-6 col-12">
     <div class="gameBox">
-      <div class="gameBoxText overflow-hidden">
-        <h2 id="title">{{ game.name }}</h2>
-        <ul>
-          <li id="tag-list">
-            <i v-for="tag in game.tag.slice(0, 4)" :key="tag">
-              {{ tag }} &nbsp;
-            </i>
-            <i v-if="game.tag.length > 4"> & more </i>
-          </li>
-        </ul>
+      <div class="title overflow-hidden">
+        <h3>{{ game.name }}</h3>
       </div>
       <b-button
         class="moreButton"
@@ -36,24 +28,22 @@ export default {
 
 <style scoped>
 .gameBox {
-  height: 160px;
+  height: 180px;
   display: flex;
   margin-bottom: 10px;
   margin-top: 10px;
   border: 1px solid #ccc;
-  border-radius: 5px;
-  background-color: #f5f1f7;
+  background-color: #eee1ce;
   box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
   position: relative;
 }
 
-.gameBoxText {
-  margin-left: 10px;
+.title {
   margin-top: 10px;
-}
-
-#title {
-  white-space: nowrap;
+  color: Black;
+  width: 100%;
+  text-align: center;
+  word-break: break-word;
 }
 
 #tag-list {

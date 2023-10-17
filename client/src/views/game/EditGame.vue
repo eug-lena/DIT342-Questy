@@ -1,7 +1,7 @@
 <template>
   <div class="w-100 h-100">
     <div class="background" />
-    <div v-if="gameFound" class="content">
+    <div v-if="this.game" class="content">
       <header>
         <h1>Edit game</h1>
       </header>
@@ -59,12 +59,17 @@
         id="edit-game-button"
         variant="info"
         v-on:click="updateGame()"
-        >Edit Game</b-button
+        :disabled="this.posting"
+      >
+        Edit Game</b-button
       >
     </div>
-    <div v-if="!this.gameFound" class="text-center">
-      <h1 id="not-found-text">Game not found</h1>
-      <router-link to="/all-games">Go to All Games</router-link>
+    <div v-else id="not-found-text" class="text-center">
+      <div v-if="!this.loading">
+        <h1>Game not found</h1>
+        <router-link to="/all-games">Go to All Games</router-link>
+      </div>
+      <b-spinner v-else label="Loading..."></b-spinner>
     </div>
   </div>
 </template>
@@ -77,8 +82,7 @@ export default {
   data() {
     return {
       selected: 'A',
-      gameFound: '',
-      game: {},
+      game: '',
       tagOptions: {
         MMO: {
           name: 'MMO'
@@ -122,46 +126,47 @@ export default {
         Roguelike: {
           name: 'Roguelike'
         }
-      }
+      },
+      loading: true,
+      posting: false
     }
   },
   mounted() {
     this.getGame()
   },
   methods: {
-    getGame() {
-      Api.get('v1/games?name=' + this.$route.query.name)
-        .then((response) => {
-          this.gameFound = true
-          this.game = response.data.games[0]
-          for (const tagOption in this.tagOptions) {
-            if (this.game.tag.includes(this.tagOptions[tagOption].name)) {
-              this.tagOptions[tagOption].state = true
-            }
+    async getGame() {
+      const response = await Api.getGameByName(this.$route.params.name)
+      if (response.status === 200) {
+        this.game = response.game
+
+        for (const tagOption in this.tagOptions) {
+          if (this.game.tag.includes(this.tagOptions[tagOption].name)) {
+            this.tagOptions[tagOption].state = true
           }
-          this.game.tag = []
-          console.log(this.game)
-        })
-        .catch((error) => {
-          this.gameFound = false
-          alert(error.response.data.message)
-        })
+        }
+
+        this.game.tag = []
+      }
+      this.loading = false
     },
-    updateGame() {
+    async updateGame() {
+      this.posting = true
       this.getTags()
-      Api.put(this.game.links.self.href, { // HATEOAS link
-        name: this.game.name,
-        author: this.game.author,
-        releaseDate: this.game.releaseDate,
-        tag: this.game.tag
-      })
-        .then(() => {
-          this.$router.push('/all-games')
+      const response = await Api.putByHateoas(
+        this.game.links.self.href,
+        this.game
+      )
+      if (response.status === 201) {
+        this.$router.push({
+          name: 'game',
+          params: { name: this.game.name }
         })
-        .catch((error) => {
-          alert(error.response.data.message)
-          this.tag = []
-        })
+      } else {
+        alert(response.message)
+      }
+      this.game.tag = []
+      this.posting = false
     },
     getTags() {
       for (const tagOption in this.tagOptions) {

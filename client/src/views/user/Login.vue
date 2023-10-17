@@ -1,14 +1,14 @@
 <template>
   <div class="background">
     <div class="content">
-      <div v-if="!this.authenticated" class="sign-in">
+      <div v-if="!this.store.isAuthenticated" class="sign-in">
         <header>
           <h1>Welcome to Questy!</h1>
         </header>
 
         <label for="username" class="sr-only">Username</label>
         <input
-          v-model="username"
+          v-model="user.username"
           type="text"
           id="username"
           name="username"
@@ -22,7 +22,7 @@
 
         <label for="password" class="sr-only">Password</label>
         <input
-          v-model="password"
+          v-model="user.password"
           type="password"
           id="current-password"
           name="password"
@@ -34,13 +34,13 @@
         <br />
 
         <b-button
-          :disabled="this.isDisabled"
+          :disabled="isDisabled"
           type="submit"
           class="loginButton"
           variant="primary"
           @click="login()"
         >
-          <u><b>Sign in</b></u>
+          <u><b>Login</b></u>
         </b-button>
 
         <br />
@@ -48,13 +48,13 @@
         <br />
 
         <b-button
-          :disabled="this.isDisabled"
+          :disabled="isDisabled"
           type="submit"
           class="registerButton"
           variant="primary"
           @click.prevent="register()"
         >
-          <u><b>Create an account</b></u>
+          <u><b>Create account <br> and login</b></u>
         </b-button>
       </div>
 
@@ -62,7 +62,7 @@
         <header>
           <h3>Already logged in as</h3>
           <br />
-          <h1>{{ username }}</h1>
+          <h1>{{ this.store.getUsername }}</h1>
           <br />
         </header>
         <b-row class="justify-content-center">
@@ -71,7 +71,7 @@
               <u><b>Continue</b></u>
             </p>
           </a>
-          <b-button class="m-2" variant="danger" @click.prevent="logout()">
+          <b-button class="m-2" variant="danger" @click.prevent="logout()" :disabled="posting">
             <p>
               <u><b>Logout</b></u>
             </p>
@@ -84,72 +84,45 @@
 
 <script>
 import { Api } from '@/Api'
+import { useUserStore } from '../../store/UserStore'
 
 export default {
   name: 'login',
   data() {
     return {
-      username: '',
-      password: '',
-      authenticated: false
+      user: {
+        username: '',
+        password: ''
+      },
+      store: useUserStore(),
+      posting: false
     }
-  },
-  mounted() {
-    this.isAuthenticated()
   },
   computed: {
     isDisabled: function () {
-      return !this.username || !this.password
+      return !this.user.username || !this.user.password || this.posting
     }
   },
   methods: {
-    login() {
-      Api.post('/v1/authenticate/login', {
-        username: this.username,
-        password: this.password
-      })
-        .then((response) => {
-          this.$router.push('/home')
-        })
-        .catch((error) => {
-          alert(error.response.data.message)
-        })
+    async login() {
+      this.posting = true
+      await Api.Login(this.user)
+      this.posting = false
     },
-    register() {
-      Api.post('/v1/authenticate/register', {
-        username: this.username,
-        password: this.password
-      })
-        .then((response) => {
-          this.$router.push('/home')
-        })
-        .catch((error) => {
-          alert(error.response.data.message)
-        })
-    },
-    isAuthenticated() {
-      Api.get('/v1/authenticate/isAuthenticated')
-        .then((response) => {
-          if (response.data.authenticated === true) {
-            this.authenticated = true
-            this.username = response.data.username
-          } else {
-            this.authenticated = false
-          }
-        })
-        .catch((error) => {
-          alert(error.response.data.message)
-        })
+    async register() {
+      this.posting = true
+      const response = await Api.RegisterAndLogin(this.user)
+      if (response.status === 201) {
+        this.$router.push('/')
+      } else {
+        alert(response.message)
+      }
+      this.posting = false
     },
     logout() {
-      Api.delete('/v1/authenticate/logout')
-        .then((response) => {
-          this.authenticated = false
-          this.username = ''
-        })
-        .catch((error) => {
-          alert(error.response.data.message)
-        })
+      this.posting = true
+      Api.Logout()
+      this.posting = false
     }
   }
 }
@@ -157,7 +130,7 @@ export default {
 
 <style scoped>
 .background {
-  background: url('../assets/background-gif.gif') no-repeat;
+  background: url('../../assets/background-gif.gif') no-repeat;
   background-size: cover;
   position: fixed;
   z-index: 900;

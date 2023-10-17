@@ -9,13 +9,11 @@
       <b-row class="m-0">
         <label for="name" class="sr-only">Name</label>
         <input
-          v-model="name"
+          v-model="game.name"
           type="text"
           id="name"
-          name="name"
           class="textbox col-12"
           placeholder="Game Name"
-          autocomplete="name"
           required
           autofocus
         />
@@ -24,13 +22,11 @@
       <b-row class="m-0">
         <label for="author" class="sr-only">Author</label>
         <input
-          v-model="author"
+          v-model="game.author"
           type="text"
           id="author"
-          name="author"
           class="textbox col-12"
           placeholder="Author"
-          autocomplete="author"
           required
         />
       </b-row>
@@ -46,16 +42,26 @@
           </label>
         </b-row>
       </div>
-      <p id="releasedate">Select release date:</p>
+      <p id="releaseDate">Select release date:</p>
       <b-form-datepicker
         id="datepicker"
-        v-model="releaseDate"
-        class=""
+        v-model="game.releaseDate"
       ></b-form-datepicker>
       <br />
       <br />
       <br />
-      <b-button id="add-game-button" variant="primary" v-on:click="postGame()">
+      <b-button
+        id="add-game-button"
+        variant="primary"
+        v-on:click="postGame()"
+        :disabled="
+          this.posting ||
+          !this.game.name ||
+          !this.game.author ||
+          !this.game.releaseDate ||
+          !this.isAnyTagSelected
+        "
+      >
         Add Game
       </b-button>
     </div>
@@ -70,10 +76,12 @@ export default {
   data() {
     return {
       selected: 'A',
-      name: '',
-      author: '',
-      releaseDate: '',
-      tag: [],
+      game: {
+        name: '',
+        author: '',
+        releaseDate: '',
+        tag: []
+      },
       tagOptions: {
         MMO: {
           name: 'MMO'
@@ -120,30 +128,40 @@ export default {
         Platformer: {
           name: 'Platformer'
         }
+      },
+      posting: false
+    }
+  },
+  computed: {
+    isAnyTagSelected() {
+      for (const tagOption in this.tagOptions) {
+        if (this.tagOptions[tagOption].state) {
+          return true
+        }
       }
+      return false
     }
   },
   methods: {
-    postGame() {
+    async postGame() {
+      this.posting = true
       this.getTags()
-      Api.post('/v1/games', {
-        name: this.name,
-        author: this.author,
-        releaseDate: this.releaseDate,
-        tag: this.tag
-      })
-        .then(() => {
-          this.$router.push('/all-games')
+      const response = await Api.postGame(this.game)
+      if (response.status === 201) {
+        this.$router.push({
+          name: 'game',
+          params: { name: this.game.name }
         })
-        .catch((error) => {
-          alert(error.response.data.message)
-          this.tag = []
-        })
+      } else {
+        alert(response.message)
+      }
+      this.game.tag = []
+      this.posting = false
     },
     getTags() {
       for (const tagOption in this.tagOptions) {
         if (this.tagOptions[tagOption].state) {
-          this.tag.push(this.tagOptions[tagOption].name)
+          this.game.tag.push(this.tagOptions[tagOption].name)
         }
       }
     }
@@ -180,7 +198,7 @@ header {
   height: 5vh;
 }
 
-#releasedate {
+#releaseDate {
   margin-top: 10px;
   margin-bottom: 10px;
   color: black !important;

@@ -4676,7 +4676,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{ \r\n    \"review\" : \"{{review1_id}}\",\r\n    \"text\": \"i don't like your opinion\",\r\n    \"opinion\" : \"false\"\r\n}",
+									"raw": "{ \r\n    \"review\" : \"{{review1_id}}\",\r\n    \"text\": \"i don't like your opinion\",\r\n    \"opinion\" : false\r\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -5220,7 +5220,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{ \r\n    \"user\": \"{{bobson_id}}\",\r\n    \"review\" : \"{{review1_id}}\",\r\n    \"text\": \"i don't like your opinion or mby i do\"\r\n}",
+									"raw": "{ \r\n    \"text\": \"i don't like your opinion or mby i do\",\r\n    \"opinion\": true\r\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -5257,7 +5257,7 @@
 											"\r",
 											"pm.test(\"Opinion is updated\", function () {\r",
 											"    pm.expect(JSON.parse(pm.request.body.raw).opinion)\r",
-											"    .to.be.equal(pm.response.json().opinion.toString());\r",
+											"    .to.be.equal(pm.response.json().opinion);\r",
 											"})"
 										],
 										"type": "text/javascript"
@@ -5269,7 +5269,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\r\n    \"opinion\": \"false\"\r\n}",
+									"raw": "{\r\n    \"opinion\": false\r\n}",
 									"options": {
 										"raw": {
 											"language": "json"

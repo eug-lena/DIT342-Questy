@@ -2,7 +2,9 @@
   <div class="commentBox">
     <b-row class="m-0">
       <div class="user">
-        <p>{{ username }}</p>
+        <router-link :to="`/user?username=${username}`" class="name">{{
+          this.username
+        }}</router-link>
       </div>
       <div id="ifEdited" v-if="comment.isEdited">
         <p class="editedText">(edited)</p>
@@ -26,14 +28,33 @@
       </b-row>
     </div>
     <div class="comment">
-      <textarea
-        class="form-control"
-        id="exampleFormControlTextarea1"
-        rows="3"
-        v-model="editedComment.text"
-        :disabled="!this.editing"
-        :hidden="!this.editing"
-      ></textarea>
+      <div v-if="this.editing">
+        <b-form-group
+          id="exampleFormControlTextarea1"
+          label="Edit comment"
+          label-for="exampleFormControlTextarea1"
+        ></b-form-group>
+
+        <b-row class="m-0"
+          ><b-form-group v-slot="{ ariaDescribedby }">
+            <b-form-radio-group
+              v-model="selected"
+              :options="options"
+              :aria-describedby="ariaDescribedby"
+              plain
+            ></b-form-radio-group>
+          </b-form-group>
+        </b-row>
+
+        <textarea
+          class="form-control"
+          id="exampleFormControlTextarea1"
+          rows="3"
+          v-model="editedComment.text"
+          :disabled="!this.editing"
+          :hidden="!this.editing"
+        ></textarea>
+      </div>
 
       <div v-if="!this.editing">
         <p v-if="this.showMore || comment.text.length <= 200">
@@ -94,6 +115,12 @@ export default {
         text: '',
         opinion: null
       },
+      selected: '',
+      options: [
+        { text: 'Agree', value: true },
+        { text: 'Disagree', value: false },
+        { text: 'Neutral', value: null }
+      ],
       editing: false,
       store: useUserStore()
     }
@@ -114,13 +141,21 @@ export default {
       }
     },
     async updateComment() {
+      this.editedComment.opinion = this.selected
+
       if (!this.anyChangesMade()) {
         alert('No changes made')
+        this.editing = false
         return
       }
 
       if (!confirm('Are you sure you want to update this comment?')) {
         return
+      }
+
+      if (this.editedComment.text.length < 1) {
+        // alert('Comment cannot be empty')
+        // return
       }
 
       const request = {}
@@ -186,7 +221,7 @@ export default {
     if (this.comment.user.username) {
       this.username = this.comment.user.username
     }
-
+    this.selected = this.comment.opinion
     this.setEditedCommentToComment()
   }
 }
@@ -197,11 +232,15 @@ img {
   width: 30px;
   height: 30px;
 }
+.name {
+  color: black;
+  font-size: 1em;
+}
 .commentBox {
   border: 1px solid black;
   border-radius: 10px;
   padding: 10px;
-  background-color: #fff;
+  background-color: #f1e2e2;
   word-wrap: break-word;
   margin-top: 50px;
   position: relative;

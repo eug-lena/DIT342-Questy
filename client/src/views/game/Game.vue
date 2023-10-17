@@ -1,56 +1,76 @@
 <template>
-  <div>
-    <div class="background" />
-    <b-row v-if="this.game" class="m-3">
-      <div class="game-content col-12">
-        <h1 id="game-name">{{ this.game.name }}</h1>
-        <h3 id="game-author">Created by: {{ this.game.author }}</h3>
-        <p id="release-date">
-          Release Date: {{ this.game.releaseDate.split('T')[0] }}
-        </p>
-        <b-row class="m-1 tag-row">
-          <h5 class="m-2" v-for="tag in this.game.tag" :key="tag">{{ tag }}</h5>
-        </b-row>
-        <b-button
-          id="deleteButton"
-          class=""
-          variant="danger"
-          v-on:click="deleteGame()"
-          :hidden="!this.store.isAuthenticated"
-          >Delete</b-button
+  <div
+    id="img-container"
+    :style="{
+      '--backgroundImage': 'url(' + this.game.background_image + ')'
+    }"
+  >
+    <div v-if="this.game">
+      <b-row class="m-0" id="game-content-row">
+        <b-col class="game-content-col col-12 col-md-5 col-lg-4 col-xl-3">
+          <h1 id="game-name">{{ this.game.name }}</h1>
+          <h3 id="game-author">Created by: {{ this.game.author }}</h3>
+          <p id="release-date">
+            Release Date: {{ this.game.releaseDate.split('T')[0] }}
+          </p>
+          <b-row class="m-0 tag-row">
+            <h5
+              id="tag-text"
+              class="m-2"
+              v-for="tag in this.game.tag"
+              :key="tag"
+            >
+              {{ tag }}
+            </h5>
+          </b-row>
+          <b-row class="tag-row m-0"
+            ><b-button
+              id="deleteButton"
+              class="m-1"
+              variant="danger"
+              v-on:click="deleteGame()"
+              :hidden="!this.store.isAuthenticated"
+              >Delete</b-button
+            >
+            <b-button
+              id="reviewButton"
+              class="m-1"
+              variant="success"
+              v-on:click="createReview()"
+              :hidden="!this.store.isAuthenticated"
+              >Add review</b-button
+            >
+            <b-button
+              id="editButton"
+              class="m-1"
+              variant="info"
+              v-on:click="editGame()"
+              :hidden="!this.store.isAuthenticated"
+              >Edit</b-button
+            >
+          </b-row>
+        </b-col>
+      </b-row>
+      <b-row class="m-0">
+        <h5
+          id="not-found-text"
+          class="text-center w-100 mt-5"
+          v-if="!this.reviews.length > 0"
         >
-        <b-button
-          id="reviewButton"
-          class="m-3"
-          variant="success"
-          v-on:click="createReview()"
-          :hidden="!this.store.isAuthenticated"
-          >Add review</b-button
-        >
-        <b-button
-          id="editButton"
-          class="3"
-          variant="info"
-          v-on:click="editGame()"
-          :hidden="!this.store.isAuthenticated"
-          >Edit</b-button
-        >
-      </div>
-      <h5 class="text-center w-100 mt-5" v-if="!this.reviews.length > 0">
-        {{
-          this.loading
-            ? 'Loading...'
-            : 'There seem to be no reviews, but you can go ahead and create one!'
-        }}
-      </h5>
-      <b-list-group horizontal>
-        <review-item
-          v-for="review in reviews"
-          :key="review._id"
-          :review="review"
-        ></review-item>
-      </b-list-group>
-    </b-row>
+          {{
+            this.loading
+              ? 'Loading...'
+              : 'There seem to be no reviews, but you can go ahead and create one!'
+          }}
+        </h5>
+        <b-list-group horizontal>
+          <review-item
+            v-for="review in reviews"
+            :key="review._id"
+            :review="review"
+          ></review-item> </b-list-group
+      ></b-row>
+    </div>
     <div v-else class="text-center" id="not-found-box">
       <b-spinner v-if="this.loading" label="Loading..."></b-spinner>
       <div v-else>
@@ -62,10 +82,10 @@
 </template>
 
 <script>
-import ReviewItem from '../../components/ReviewBox.vue'
+import ReviewItem from '@/components/ReviewBox.vue'
 
 import { Api } from '@/Api'
-import { useUserStore } from '../../store/UserStore'
+import { useUserStore } from '@/store/UserStore'
 
 export default {
   name: 'home',
@@ -88,11 +108,22 @@ export default {
     async getGame() {
       const response = await Api.getGameByName(this.$route.query.name)
       if (response.status === 200) {
+        await this.getBackgroundImage(response.game)
         this.game = response.game
         this.getReviews()
       } else {
         this.loading = false
       }
+    },
+    async getBackgroundImage(game) {
+      const response = await Api.Axios.get(
+        `https://api.rawg.io/api/games?key=f03d0f9f77614eae833b143d4ca60103&search=${game.name}`,
+        { withCredentials: false }
+      )
+      if (response.data.results.length === 0) return
+      const backgroundImage = response.data.results[0].background_image
+      // backgroundImage = backgroundImage.replace('media/', 'media/crop/600/400/')
+      game.background_image = backgroundImage
     },
     async getReviews() {
       const response = await Api.getByHateoas(this.game.links.reviews.href)
@@ -133,22 +164,55 @@ export default {
 </script>
 
 <style scoped>
-.game-content {
+#img-container {
+  background-color: rgb(255, 255, 255);
+  background-image: var(--backgroundImage);
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-position: center center;
+  background-size: cover;
+  background-attachment: fixed;
+  min-height: 90vh;
+  width: 100%;
+  top: 0;
+  z-index: -1;
+  padding: 0;
+}
+.game-content-col {
   text-align: center;
   margin-bottom: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
+  border: 5px solid #ccc;
   box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
-  padding: 10px;
+  border-radius: 5px;
+  margin: 15px;
+  min-height: 30vh;
+  background: rgba(0, 0, 0, 0.6);
 }
+
 #game-name {
   margin-top: 10px;
   font-size: 50px;
   word-break: break-word;
+  color: white;
+}
+h5 {
+  word-break: break-word;
+  color: white;
+}
+#game-author {
+  color: white;
+}
+
+#release-date {
+  color: white;
 }
 
 .tag-row {
   justify-content: center;
+}
+
+#tag-text {
+  color: white;
 }
 
 .list-group {
@@ -161,9 +225,42 @@ export default {
   margin-top: 100px;
 }
 
+#not-found-text {
+  -webkit-text-stroke: 1px black;
+  color: white;
+  font-weight: bold;
+  font-size: 30px;
+}
+
 b-list-group {
   width: 100%;
   display: flex;
   flex-wrap: wrap;
+}
+
+@media screen and (max-width: 768px) {
+  #game-content-row {
+    margin: 0;
+    padding: 15px;
+  }
+  .game-content-col {
+    margin: 0px;
+  }
+
+  #game-name {
+    font-size: 35px;
+  }
+
+  #game-author {
+    font-size: 20px;
+  }
+
+  #release-date {
+    font-size: 15px;
+  }
+
+  #tag-text {
+    font-size: 20px;
+  }
 }
 </style>

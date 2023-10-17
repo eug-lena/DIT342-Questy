@@ -5,7 +5,7 @@
         id="userIcon"
         class="card-img"
         alt="user icon"
-        src="../assets/user-icon.png"
+        src="@/assets/user-icon.png"
       />
       {{ followedUser.username }}
     </b-row>

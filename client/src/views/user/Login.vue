@@ -104,9 +104,9 @@ export default {
     }
   },
   methods: {
-    login() {
+    async login() {
       this.posting = true
-      Api.Login(this.user)
+      await Api.Login(this.user)
       this.posting = false
     },
     async register() {

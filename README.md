@@ -67,17 +67,17 @@ The system is a platform where the users can interact, discuss and particularly 
 
 ### Pages
 
-* Login: This page displays a field where the user can enter their credentials to sign in. They are also given the option to be redirected to the “Sign up page” if they do not yet have an account.
-
-* Sign up: The purpose of this page is to give an opportunity for a new user to create an account on the site so they can use it. It displays a field where they can enter their username and password.
+* Login: This page displays a field where the user can enter their credentials to sign in. They are also given the option to *sign up* if they do not yet have an account.
 
 * Home: This page shows a selection of games, reviews, and most recent activity from users they follow or from other users. The user can select certain elements to be redirected to the relevant page.
 
-* Game: This page will display all the information about a specific game (such as its name, release date, and tags) and the reviews it has received by users. The user can create a new review for the game they are currently viewing.
+* All-Games: This page displays all existent games on the website. The user can filter the displayed games by name or tags. For each listed game there is a *more* button the user can press to be redirected to the corresponding game page.
+
+* Game: This page will display all the information about a specific game (such as its name, release date, and tags) and the reviews it has received by users. The user can create a new review, delete or edit the game they are currently viewing.
 
 * Profile: This page displays the specific user’s profile along with their bio, people they follow, and reviews. Each user has their own profile page and other users can follow them on this page. 
 
-* Review: This page displays a specific review written by an user. It allows other users to comment on that specific review.
+* Review: This page displays a specific review written by an user. It allows other users to comment on that specific review and shows all the comments that the owner of the review or other users have written.
 
 ### Entity-Relationship (ER) Diagram
 

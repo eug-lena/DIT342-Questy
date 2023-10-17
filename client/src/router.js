@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import Router from 'vue-router'
+import { Api } from '@/Api'
 
 // Default
 import Home from './views/Home.vue'
@@ -8,7 +9,6 @@ import NotFound from './views/404.vue'
 // User
 import User from './views/user/User.vue'
 import Login from './views/user/Login.vue'
-import Following from './views/user/Following.vue'
 
 // Game
 import Game from './views/game/Game.vue'
@@ -25,7 +25,7 @@ import EditReview from './views/review/EditReview.vue'
 
 Vue.use(Router)
 
-export default new Router({
+const router = new Router({
   mode: 'history',
   base: process.env.BASE_URL,
   routes: [
@@ -80,11 +80,6 @@ export default new Router({
       component: EditReview
     },
     {
-      path: '/following',
-      name: 'following',
-      component: Following
-    },
-    {
       path: '/404',
       component: NotFound,
       name: 'not-found'
@@ -95,3 +90,10 @@ export default new Router({
     }
   ]
 })
+
+router.beforeEach(async (to, from, next) => {
+  await Api.isAuthenticated()
+  next()
+})
+
+export default router

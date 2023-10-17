@@ -42,8 +42,8 @@ export const Api = {
 
   // USER  & AUTHENTICATION
 
-  isAuthenticated: function () {
-    Axios.get('/v1/authenticate/isAuthenticated')
+  isAuthenticated: async function () {
+    await Axios.get('/v1/authenticate/isAuthenticated')
       .then((response) => {
         if (response.data.authenticated === true) {
           updateStore(response.data)
@@ -67,8 +67,8 @@ export const Api = {
       })
   },
 
-  Login: function (user) {
-    Axios.post('/v1/authenticate/login', user)
+  Login: async function (user) {
+    await Axios.post('/v1/authenticate/login', user)
       .then((response) => {
         updateStore(response.data)
         router.push('/')
@@ -90,7 +90,6 @@ export const Api = {
         const status = error.response.status
         const message = error.response.data.message
         returnData = { status, message }
-        alert(error.response.data.message)
       })
     return returnData
   },
@@ -125,7 +124,7 @@ export const Api = {
       .catch((error) => {
         const status = error.response.status
         const message = error.response.data.message
-        returnData = { status, message, user: null }
+        returnData = { status, message }
       })
     return returnData
   },
@@ -141,7 +140,23 @@ export const Api = {
       .catch((error) => {
         const status = error.response.status
         const message = error.response.data.message
-        returnData = { status, message, user: null }
+        returnData = { status, message }
+      })
+    return returnData
+  },
+
+  getUserFollowingReviews: async function (id) {
+    let returnData
+    await Axios.get('/v1/users/' + id + '/followingReviews')
+      .then((response) => {
+        const status = response.status
+        const reviews = response.data
+        returnData = { status, reviews }
+      })
+      .catch((error) => {
+        const status = error.response.status
+        const message = error.response.data.message
+        returnData = { status, message }
       })
     return returnData
   },

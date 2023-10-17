@@ -1,5 +1,6 @@
 <template>
   <div>
+    <div class="background m-0"></div>
     <b-row v-if="this.review" class="m-0">
       <b-col id="reviewBox" class="col-12 col-lg-6">
         <div class="sticky-top">
@@ -36,7 +37,7 @@
               </p>
             </b-row>
 
-            <div id="text" class="card-text">
+            <div v-if="this.review.text" id="text" class="card-text">
               <div class="text">
                 <p v-if="this.showMore">
                   {{ review.text }}
@@ -85,19 +86,17 @@
                 <h4 class="card-title">
                   Do you agree with {{ review.user.username }}'s review?
                 </h4>
-                <div id="agreeDisagree">
-                  <b-row id="opinion"
-                    ><b-form-group v-slot="{ ariaDescribedby }">
-                      <b-form-radio-group
-                        v-model="selected"
-                        :options="options"
-                        :aria-describedby="ariaDescribedby"
-                        name="plain-inline"
-                        plain
-                      ></b-form-radio-group>
-                    </b-form-group>
-                  </b-row>
-                </div>
+                <b-row class="m-0" id="opinion"
+                  ><b-form-group v-slot="{ ariaDescribedby }">
+                    <b-form-radio-group
+                      v-model="selected"
+                      :options="options"
+                      :aria-describedby="ariaDescribedby"
+                      name="plain-inline"
+                      plain
+                    ></b-form-radio-group>
+                  </b-form-group>
+                </b-row>
 
                 <div id="commentBody">
                   <b-form-textarea
@@ -208,11 +207,13 @@ export default {
       )
     },
     handleUpdateComment(comment) {
-      const index = this.comments.findIndex(
-        (element) => element._id.toString() === comment._id.toString()
-      )
-      this.comments[index] = comment
-      console.log(index)
+      this.comments.forEach((element) => {
+        if (element._id === comment._id) {
+          element.text = comment.text
+          element.opinion = comment.opinion
+          element.isEdited = comment.isEdited
+        }
+      })
     },
     editReview() {
       this.$router.push({
@@ -260,6 +261,13 @@ export default {
 </script>
 
 <style scoped>
+.background {
+  position: absolute;
+  min-height: 100vh;
+  top: 0;
+  z-index: -1;
+  background-color: #f6f7f8;
+}
 #addComment {
   border: 1px solid #ccc;
   border-radius: 10px;
@@ -284,11 +292,10 @@ export default {
   border-radius: 10px;
   margin-left: 10px;
   box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
+  background: #d9e1e9;
 }
 #opinion {
-  margin-left: 15px;
-  width: auto;
-  padding: 5px;
+  padding-left: 15px;
 }
 #rating {
   margin-left: 15px;
@@ -301,6 +308,7 @@ export default {
   border: 1px solid black;
   border-radius: 10px;
   width: auto;
+  background: #fff;
   word-wrap: break-word;
   margin-bottom: 15px;
   margin-top: 10px;

@@ -44,6 +44,9 @@ router.get('/', async function (req, res, next) {
 
         // Get all matching documents
         var users = await query;
+        if (users.length === 0) {
+            return res.status(404).json({ "message": "User(s) not found" });
+        }
 
         // Populate following
         if (!req.query.fields || req.query.fields.split(',').includes('following')) {
@@ -52,11 +55,7 @@ router.get('/', async function (req, res, next) {
 
         // Populate pinnedReview
         if (!req.query.fields || req.query.fields.split(',').includes('pinnedReview')) {
-            users = await User.populate(users, { path: 'pinnedReview' });
-        }
-
-        if (users.length === 0) {
-            return res.status(404).json({ "message": "User(s) not found" });
+            users = await User.populate(users, { path: 'pinnedReview', populate: { path: 'game', select: 'name' } });
         }
 
         if (!req.query.fields || req.query.fields.split(',').includes('links')) {
@@ -89,10 +88,15 @@ router.get('/', async function (req, res, next) {
 router.get('/:id', async function (req, res, next) {
     var id = req.params.id;
     try {
-        var user = await User.findById(id).populate('following', 'username').populate('pinnedReview');;
+        // Find user by id
+        var user = await User.findById(id);
         if (user === null) {
             return res.status(404).json({ "message": "User not found" });
         }
+
+        // Populate fields
+        user = await User.populate(user, { path: 'following', select: 'username' });
+        user = await User.populate(user, { path: 'pinnedReview', populate: { path: 'game', select: 'name' } });
 
         // Add links to user
         user = user.toObject();
@@ -107,6 +111,29 @@ router.get('/:id', async function (req, res, next) {
 
         next(err);
     }
+});
+
+router.get('/:id/followingReviews', async function (req, res, next) {
+    var id = req.params.id;
+    try {
+        var user = await User.findById(id);
+        if (user === null) {
+            return res.status(404).json({ "message": "User not found" });
+        }
+
+        let Review = require('../models/review');
+        var reviews = await Review.find({ user: { $in: user.following } }).sort({ _id: -1 }).limit(3).populate('user', 'username').populate('game', 'name');
+
+        return res.status(200).json(reviews);
+    }
+    catch (err) {
+
+        if (err.name === 'CastError') {
+            return res.status(400).json({ "message": "Invalid " + err.path });
+        }
+        next(err);
+    }
+
 });
 
 // ------------ UPDATE ------------
@@ -167,9 +194,17 @@ router.patch('/:id', async function (req, res, next) {
         }
 
         // user.username = (req.body.username || user.username); // Can't change username
-        user.bio = (req.body.bio || user.bio);
-        user.following = (req.body.following || user.following);
-        user.pinnedReview = (req.body.pinnedReview || user.pinnedReview);
+        if (req.body.bio !== undefined) {
+            user.bio = req.body.bio
+        }
+
+        if (req.body.following !== undefined) {
+            user.following = req.body.following
+        }
+
+        if (req.body.pinnedReview !== undefined) {
+            user.pinnedReview = req.body.pinnedReview
+        }
 
         await user.save();
         return res.status(201).json(user);

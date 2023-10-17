@@ -1,81 +1,110 @@
 <template>
-  <b-row class="m-0">
-    <b-col id="left-column" class="col-12 col-lg-6 col-xl-8">
-      <b-row id="username-box" class="m-0 align-items-center">
-        <img
-          id="userIcon"
-          class="card-img"
-          alt="user icon"
-          src="../../assets/user-icon.png"
-        />
+  <div>
+    <b-card v-if="this.user" no-body>
+      <b-tabs card>
+        <b-tab title="Profile" active>
+          <b-row v-if="this.user" class="m-0">
+            <b-col id="left-column" class="col-12 col-lg-6 col-xl-8">
+              <b-row id="username-box" class="m-0 align-items-center">
+                <img
+                  id="userIcon"
+                  class="card-img"
+                  alt="user icon"
+                  src="@/assets/user-icon.png"
+                />
 
-        <h1 class="username">{{ user.username }}</h1>
-      </b-row>
-      <div id="bio" class="mr-auto">
-        <b-card-title>Bio</b-card-title>
-        <b-card>
-          <b-card-body>
-            <b-card-text>
-              <p>{{ user.bio }}</p>
-            </b-card-text>
-          </b-card-body>
-        </b-card>
-      </div>
-      <!-- pinned review -->
-      <div id="review" class="mr-auto">
-        <b-card-title>Pinned Review</b-card-title>
-        <b-card>
-          <b-card-body>
-            <b-card-text v-if="this.user.pinnedReview">
-              <b-card-title>{{ user.pinnedReview.title }}</b-card-title>
-              <b-card-text>{{ user.pinnedReview.text }}</b-card-text>
-              <b-card-text>{{ user.pinnedReview.rating }}</b-card-text>
-              <b-card-text>{{ user.pinnedReview.date }}</b-card-text>
-            </b-card-text>
-            <b-card-text v-else>
-              <p>
-                This user has not set a pinned review.
-              </p>
-            </b-card-text>
-          </b-card-body>
-        </b-card>
-      </div>
-    </b-col>
-    <!-- following -->
-    <b-col id="right-column">
-      <div id="following">
-        <b-card-title>Following</b-card-title>
-        <b-card>
-          <b-card-body>
-            <b-card-text>
-              <followedUser
-                v-for="followedUser in user.following.slice(0, 0)"
-                :key="followedUser._id"
-                :followedUser="followedUser"
-              ></followedUser>
-              <h3 class="text-center" v-if="this.user.following.length < 1">
-                This user does not follow any users.
-              </h3>
-            </b-card-text>
-          </b-card-body>
-        </b-card>
-      </div>
-    </b-col>
-  </b-row>
+                <h1 class="username">{{ user.username }}</h1>
+              </b-row>
+
+              <!-- bio -->
+              <bio-item
+                :key="user._id"
+                :user="user"
+                @updateBio="handleUpdateBio"
+              >
+              </bio-item>
+              <br />
+              <!-- pinned review -->
+              <div id="review" class="mr-auto">
+                <b-card-title>Pinned Review</b-card-title>
+                <b-card>
+                  <b-card-body>
+                    <b-card-text v-if="this.user.pinnedReview">
+                      <b-card-title>{{ user.pinnedReview.game.name }}</b-card-title>
+                      <b-card-title>{{ user.pinnedReview.title }}</b-card-title>
+                      <b-card-text>{{ user.pinnedReview.text }}</b-card-text>
+                      <b-card-text>{{ user.pinnedReview.rating }}</b-card-text>
+                      <b-card-text>{{ user.pinnedReview.date }}</b-card-text>
+                    </b-card-text>
+                    <b-card-text v-else>
+                      <p>This user has not set a pinned review.</p>
+                    </b-card-text>
+                  </b-card-body>
+                </b-card>
+              </div>
+            </b-col>
+
+            <b-col id="right-column">
+              <!-- recent -->
+              <div id="recent">
+                <b-card-title>Recent Activity</b-card-title>
+                <b-card>
+                  <b-card-body>
+                    <b-card-text>
+                      <h3 class="text-center">TODO</h3>
+                    </b-card-text>
+                  </b-card-body>
+                </b-card>
+              </div>
+            </b-col>
+          </b-row>
+          <div id="not-found" v-else>
+            <h1 class="text-center">User not found.</h1>
+          </div>
+        </b-tab>
+        <b-tab title="Following">
+          <!-- following -->
+          <following-item
+            v-if="this.user.following.length > 0"
+            :key="user._id"
+            :following="user.following"
+          ></following-item>
+          <div v-else>
+            <h1 class="text-center">This user is not following anyone.</h1>
+          </div>
+        </b-tab>
+      </b-tabs>
+    </b-card>
+    <div class="text-center mt-5 p-5" v-else>
+      <b-spinner
+        v-if="this.loading"
+        label="Loading..."
+        class="mt-5"
+      ></b-spinner>
+      <h2 v-else class="text-center">User not found.</h2>
+    </div>
+  </div>
 </template>
 
 <script>
 import { Api } from '@/Api'
 
-import followedUser from '@/components/FollowedUser.vue'
+import bioItem from '@/components/User/BioItem.vue'
+import followingItem from '@/components/User/FollowingItem.vue'
+import { useUserStore } from '@/store/UserStore'
 
 export default {
-  components: { followedUser },
-  username: 'user',
-  followedUser,
+  components: { followingItem, bioItem },
   data() {
     return {
-      user: {
+      user: '',
+      filter: {
+        username: ''
+      },
+      editing: false,
+      store: useUserStore(),
+      user2: {
+        _id: '1244234',
         username: 'asaaaaaaadas',
         bio: 'this is a bio',
         following: [
@@ -111,7 +140,8 @@ export default {
           rating: 5,
           date: '2020-01-01'
         }
-      }
+      },
+      loading: true
     }
   },
   mounted() {
@@ -120,11 +150,16 @@ export default {
   methods: {
     async getUser() {
       const response = await Api.getUserByUsername(this.$route.query.username)
+      console.log(response)
       if (response.status === 200) {
         this.user = response.user
       } else if (response.status !== 404) {
         alert(response.message)
       }
+      this.loading = false
+    },
+    handleUpdateBio(data) {
+      this.user.bio = data.bio
     }
   }
 }
@@ -181,8 +216,39 @@ export default {
 
 #following {
   display: inline-block;
+  width: 100%;
 }
 
+#recent {
+  margin-top: 40px;
+  width: 100%;
+}
+
+#not-found {
+  margin-top: 10vh;
+}
+.list-group {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+}
+#followingText {
+  text-align: left;
+  font-size: 50px;
+  font-weight: bold;
+  margin-left: 15px;
+}
+
+#filter-form {
+  margin-left: 15px;
+}
+
+#no-users-text {
+  font-size: 30px;
+  font-weight: bold;
+  margin-top: 30px;
+  margin-left: 50px;
+}
 @media screen and (max-width: 992px) {
   #left-column {
     margin: 0;
@@ -191,5 +257,18 @@ export default {
   .following {
     width: 100%;
   }
+}
+
+@media screen and (max-width: 768px) {
+  .username {
+    font-size: 30px;
+  }
+
+  #userIcon {
+    height: 60px;
+  }
+}
+
+@media screen and (max-width: 576px) {
 }
 </style>

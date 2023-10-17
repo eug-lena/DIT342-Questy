@@ -2,8 +2,10 @@
   <div class="col-md-12 col-lg-6 col-xl-4 mb-3">
     <div class="content">
       <b-row class="user-box w-100">
-        <div id="username" class="mr-auto">
-          <p>{{ this.username }}</p>
+        <div id="username-box" class="mr-auto">
+          <router-link :to="`/user?username=${username}`" class="name">{{
+            this.username
+          }}</router-link>
         </div>
         <div id="date" v-b-tooltip.hover :title="this.review.date">
           <p>{{ this.date }}</p>
@@ -56,10 +58,14 @@ export default {
 </script>
 
 <style scoped>
+.name {
+  color: black;
+  font-size: 1em;
+}
 .content {
   border: 1px solid #ccc;
   border-radius: 5px;
-  background-color: #fff;
+  background-color: #f5f1f7;
   box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
   position: relative;
   min-height: 20vh;
@@ -70,7 +76,7 @@ export default {
   padding: 10px;
 }
 
-#username {
+#username-box {
   border: 1px solid black;
   border-radius: 10px;
   margin: 10px;
@@ -78,6 +84,7 @@ export default {
   padding: 10px;
   height: 50px;
   background-color: #f5f5f5;
+  color: black;
 }
 
 #date {
@@ -93,6 +100,7 @@ export default {
   padding: 10px;
   height: 50px;
   width: auto;
+  background-color: #f5f5f5;
 }
 
 #title {
@@ -112,16 +120,14 @@ export default {
   position: absolute;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 576px) {
   #date {
-    display: none;
+    font-size: 15px;
     height: 0px;
     margin: 0;
     padding: 0;
   }
-}
 
-@media (max-width: 576px) {
   .content {
     min-height: 25vh;
   }

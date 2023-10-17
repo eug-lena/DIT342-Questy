@@ -97,7 +97,17 @@ router.get('/', async function (req, res, next) {
         }
 
         // Get all matching documents
-        var reviews = await query.populate('user', 'username').populate('game', 'name');
+        var reviews = await query;
+
+        // Populate user
+        if (!req.query.fields || req.query.fields.split(',').includes('user')) {
+            reviews = await Review.populate(reviews, { path: 'user', select: 'username' });
+        }
+
+        // Populate game
+        if (!req.query.fields || req.query.fields.split(',').includes('game')) {
+            reviews = await Review.populate(reviews, { path: 'game', select: 'name' });
+        }
 
         if (reviews.length === 0) {
             return res.status(404).json({ "message": "Review(s) not found" });

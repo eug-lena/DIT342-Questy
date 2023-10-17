@@ -59,19 +59,25 @@ export default {
       username: 'asd'
     }
   },
-  beforeCreate() {
-    Api.isAuthenticated()
-  },
-  watch: {
-    $route(to, from) {
-      Api.isAuthenticated()
-    }
-  },
   methods: {
     logout() {
       Api.Logout()
     },
-    goToProfile() {
+    async goToProfile() {
+      const profilePath = '/user?username=' + this.store.getUsername
+      if (this.$router.history.current.fullPath === profilePath) {
+        return
+      }
+
+      if (this.$router.history.current.path === '/user') {
+        await this.$router.push({
+          name: 'user',
+          query: { username: this.store.getUsername }
+        })
+        window.location.reload()
+        return
+      }
+
       this.$router.push({
         name: 'user',
         query: { username: this.store.getUsername }
@@ -92,7 +98,7 @@ export default {
 
 <style scoped>
 .navbar {
-  background-color: rgb(217, 217, 217);
+  background-color: #d89966;
   border-bottom: 1px solid black;
 }
 </style>

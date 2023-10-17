@@ -1,12 +1,13 @@
 <template>
   <div>
+    <div class="bckg m-0" />
     <div>
       <div>
-        <b-row class="m-0 mt-2">
-          <h1 id="gamesText">Games</h1>
+        <b-row id="test" class="m-2 mt-0">
+          <h1 id="gamesText" class="m-2">Games</h1>
           <b-button
             id="add-game-button"
-            class="m-3 ml-3"
+            class="m-4 ml-2"
             variant="primary"
             href="/add-game"
             :hidden="!this.store.isAuthenticated"
@@ -135,6 +136,20 @@ export default {
 </script>
 
 <style scoped>
+#gamesText {
+  font-size: 50px;
+  font-weight: bold;
+}
+#test {
+  margin-top: -15px;
+}
+.bckg {
+  position: absolute;
+  min-height: 100vh;
+  top: 0;
+  z-index: -1;
+  background-color: #f6f7f8;
+}
 h2 {
   font-size: 50px;
   font-weight: bold;
@@ -167,8 +182,8 @@ h2 {
 }
 
 @media screen and (max-width: 576px) {
-.filter-box {
-  max-width: 94%;
-}
+  .filter-box {
+    max-width: 94%;
+  }
 }
 </style>

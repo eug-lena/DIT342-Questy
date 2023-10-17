@@ -43,6 +43,14 @@ router.get('/', async function (req, res, next) {
             query = queryHandler.fieldQuery(req, query);
         }
 
+        if (req.query.limit) {
+            query = query.limit(parseInt(req.query.limit));
+        }
+
+        if (req.query.offset) {
+            query = query.skip(parseInt(req.query.offset));
+        }
+
         // Get all matching documents
         var games = await query;
 

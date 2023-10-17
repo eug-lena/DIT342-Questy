@@ -56,7 +56,12 @@ router.get('/', async function (req, res, next) {
         }
 
         // Get all matching documents
-        var comments = await query.populate('user', 'username');
+        var comments = await query;
+
+        // Populate user
+        if (!req.query.fields || req.query.fields.split(',').includes('user')) {
+            comments = await Comment.populate(comments, { path: 'user', select: 'username' });
+        }
 
         if (comments.length === 0) {
             return res.status(404).json({ "message": "Comment(s) not found" });
@@ -159,8 +164,12 @@ router.patch('/:id', async function (req, res, next) {
             return res.status(404).json({ "message": "Comment not found" });
         }
 
-        comment.text = (req.body.text || comment.text);
-        comment.opinion = (req.body.opinion || comment.opinion);
+        if (req.body.text !== undefined) {
+            comment.text = req.body.text;
+        }
+        if (req.body.opinion === true || req.body.opinion === false || req.body.opinion === null) {
+            comment.opinion = req.body.opinion;
+        }
         comment.isEdited = true;
 
         await comment.save();

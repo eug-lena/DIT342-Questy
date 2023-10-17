@@ -28,6 +28,34 @@ router.post('/', async function (req, res, next) {
     });
 });
 
+// Follow another user by id
+router.post('/:id/follow', async function (req, res, next) {
+    if (!req.isAuthenticated()) {
+        return res.status(401).json({ "message": "You need to login to follow users" });
+    }
+
+    var idToFollow = req.params.id;
+    var id = req.user._id;
+    try {
+        var userToFollow = User.findById(idToFollow);
+        if (userToFollow === null) {
+            return res.status(404).json({ "message": "User not found" });
+        }
+
+        // Model update with $addToSet to prevent duplicates
+        var user = await User.updateOne({ _id: id }, { $addToSet: { following: idToFollow } });
+
+        return res.status(201).json(user);
+    } catch (err) {
+        // CastError is thrown when an invalid id is passed to findById
+        if (err.name === 'CastError') {
+            return res.status(400).json({ "message": "Invalid id" });
+        }
+
+        next(err);
+    }
+});
+
 // ------------ READ ------------
 
 // Get user(s) by query
@@ -149,29 +177,61 @@ router.get('/:id/recentActivity', async function (req, res, next) {
 
         // Find reviews by user and sort by most recent
         let Review = require('../models/review');
-        var reviews = await Review.find({ user: user._id }).sort({ _id: -1 }).limit(3).populate('game', 'name');
+        var reviews = await Review.find({ user: user._id }).sort({ _id: -1 }).limit(8).populate('game', 'name');
 
-        // For each review, add type: 'review', and split date by 'T'
+        // For each review, add type: 'review'
         reviews = reviews.map(review => review.toObject());
         reviews.forEach(function (review) {
             review.type = 'review';
-            var date = new Date(review.date);
-            review.date = date.toISOString().split('T')[0];
         });        
         
         // Find comments by user and sort by most recent
         let Comment = require('../models/comment');
-        var comments = await Comment.find({ user: user._id }).sort({ _id: -1 }).limit(3).populate('review', 'title');
+        var comments = await Comment.find({ user: user._id }).sort({ _id: -1 }).limit(8).populate('review', 'title');
 
         // For each comment, add type: 'comment'
+        comments = comments.map(comment => comment.toObject());
+        comments.forEach(function (comment) {
+            comment.type = 'comment';
+        });
 
         // Combine reviews and comments
         var recentActivity = reviews.concat(comments);
 
+        if (recentActivity.length === 0) {
+            return res.status(200).json(recentActivity);
+        }
+
         // Sort by date
         recentActivity.sort((a, b) => (a.date < b.date) ? 1 : -1);
 
-        return res.status(200).json(recentActivity);
+        // Slice to 5
+        recentActivity = recentActivity.slice(0, 8);
+
+        // Format date to YYYY-MM-DD
+        recentActivity.forEach(function (activity) {
+            activity.date = new Date(activity.date).toISOString().split('T')[0];
+        });
+
+        let recentActivityByDate = [];
+        let date = recentActivity[0].date;
+        let current = { date: date, activities: [] };
+        for (let i = 0; i < recentActivity.length; i++) {
+            if (recentActivity[i].date === date ) {
+                current.activities.push(recentActivity[i]);
+            }
+            else {
+                recentActivityByDate.push(current);
+                date = recentActivity[i].date;
+                current = { date: date, activities: [recentActivity[i]] };
+            }
+
+            if (i === recentActivity.length - 1) {
+                recentActivityByDate.push(current);
+            }
+          }
+
+        return res.status(200).json(recentActivityByDate);
     }
     catch (err) {
         if (err.name === 'CastError') {
@@ -317,6 +377,34 @@ router.delete('/', async function (req, res, next) {
         // CastError is thrown when an invalid id is passed
         if (err.name === 'CastError') {
             return res.status(400).json({ "message": "Invalid " + err.path });
+        }
+
+        next(err);
+    }
+});
+
+// Un-follow another user by id
+router.delete('/:id/follow', async function (req, res, next) {
+    if (!req.isAuthenticated()) {
+        return res.status(401).json({ "message": "You need to login to unfollow users" });
+    }
+
+    var idToUnfollow = req.params.id;
+    var id = req.user._id;
+    try {
+        var userToUnfollow = User.findById(idToUnfollow);
+        if (userToUnfollow === null) {
+            return res.status(404).json({ "message": "User not found" });
+        }
+
+        // Model update with $pull to remove from array
+        var user = await User.updateOne({ _id: id }, { $pull: { following: idToUnfollow } });
+
+        return res.status(200).json(user);
+    } catch (err) {
+        // CastError is thrown when an invalid id is passed to findById
+        if (err.name === 'CastError') {
+            return res.status(400).json({ "message": "Invalid id" });
         }
 
         next(err);

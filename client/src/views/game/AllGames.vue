@@ -10,10 +10,19 @@
             class="m-4 ml-2"
             variant="primary"
             href="/add-game"
-            :hidden="!this.store.isAuthenticated"
+            :hidden="!this.store.isAdmin"
           >
             Add Game
           </b-button>
+
+          <b-button
+            id="delete-all-button"
+            class="m-4"
+            variant="danger"
+            v-on:click="deleteAllGames()"
+            :hidden="!this.store.isAdmin"
+            >Delete All</b-button
+          >
         </b-row>
 
         <div class="text-center" v-if="!this.games.length > 0">
@@ -130,6 +139,17 @@ export default {
           })
         )
       })
+    },
+    async deleteAllGames() {
+      if (!confirm('Are you sure you want to delete all games?')) return
+      if (!confirm('Are you really sure?')) return
+
+      const response = await Api.deleteGames()
+      if (response.status === 200) {
+        this.games = []
+      } else {
+        alert(response.message)
+      }
     }
   }
 }
@@ -157,6 +177,10 @@ h2 {
 
 #add-game-button {
   background-color: #698f69 !important;
+}
+
+#delete-all-button {
+  background-color: #d9534f !important;
 }
 
 #filter-form {

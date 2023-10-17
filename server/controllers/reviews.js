@@ -18,10 +18,6 @@ router.post('/', async function (req, res, next) {
     try {
         let Game = require('../models/game');
         var game = await Game.findById(req.body.game);
-        console.log(game);
-
-        console.log(game.releaseDate);
-        console.log(Date.now());
         if (game === null) {
             return res.status(404).json({ "message": "Game not found" });
         }

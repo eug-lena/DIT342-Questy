@@ -7,13 +7,15 @@ export const useUserStore = defineStore('UserStore', {
     return {
       authenticated: '',
       username: '',
-      userID: ''
+      userID: '',
+      admin: ''
     }
   },
   getters: {
     isAuthenticated: (state) => state.authenticated,
     getUsername: (state) => state.username,
-    getUserID: (state) => state.userID
+    getUserID: (state) => state.userID,
+    isAdmin: (state) => state.admin
   },
   actions: {
     setAuthenticated(authenticated) {
@@ -24,6 +26,9 @@ export const useUserStore = defineStore('UserStore', {
     },
     setUserID(userID) {
       this.userID = userID
+    },
+    setAdmin(isAdmin) {
+      this.admin = isAdmin
     }
   }
 }

@@ -36,7 +36,7 @@
 </template>
 
 <script>
-import followedUser from '@/components/User/FollowedUserItem.vue'
+import followedUser from '@/components/User/Following/FollowedUserItem.vue'
 
 export default {
   name: 'Following',

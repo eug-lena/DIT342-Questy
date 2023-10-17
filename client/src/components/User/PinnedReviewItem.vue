@@ -1,19 +1,45 @@
 <template>
   <div>
     <div id="review" class="mr-auto">
-      <b-card-title>Pinned Review</b-card-title>
       <b-card>
+        <b-card-title>
+          <a :href="'/game/' + pinnedReview.game.name">{{
+            pinnedReview.game.name
+          }}</a></b-card-title
+        >
+        <hr />
         <b-card-body>
-          <b-card-text v-if="this.user.pinnedReview">
-            <b-card-title>{{ user.pinnedReview.game }}</b-card-title>
-            <b-card-title>{{ user.pinnedReview.title }}</b-card-title>
-            <b-card-text>{{ user.pinnedReview.text }}</b-card-text>
-            <b-card-text>{{ user.pinnedReview.rating }}</b-card-text>
-            <b-card-text>{{ user.pinnedReview.date }}</b-card-text>
+          <b-card-text>
+            <b-card-title>{{ pinnedReview.title }}</b-card-title>
+            <hr />
+            <b-row class="m-0">
+              <img
+                :src="
+                  require('@/assets/health-bar-' + pinnedReview.rating + '.png')
+                "
+                :alt="pinnedReview.rating + ' stars'"
+                height="35px"
+                width="auto"
+              />
+              <b-card-text class="ml-auto">{{
+                pinnedReview.date.slice(0, 19).replace('T', ' ')
+              }}</b-card-text>
+            </b-row>
+            <br />
+            <div v-if="pinnedReview.text" id="text" class="card-text">
+              <div class="text">
+                <p v-if="pinnedReview.text.length < 50">
+                  {{ pinnedReview.text }}
+                </p>
+                <p v-else>{{ pinnedReview.text.slice(0, 50) }}...</p>
+              </div>
+            </div>
           </b-card-text>
-          <b-card-text v-else>
-            <p>This user has not set a pinned review.</p>
-          </b-card-text>
+          <b-row class="m-0 ml-0">
+            <b-button variant="info" @click="showReview()">
+              See the full review!
+            </b-button>
+          </b-row>
         </b-card-body>
       </b-card>
     </div>
@@ -26,13 +52,31 @@ import { useUserStore } from '@/store/UserStore'
 
 export default {
   name: 'pinnedReview',
-  props: ['user'],
+  props: ['pinnedReview'],
   data() {
     return {
-      store: useUserStore()
+      store: useUserStore(),
+      showMore: false
     }
   },
   mounted() {},
-  methods: {}
+  methods: {
+    showReview() {
+      this.$router.push('/review/' + this.pinnedReview._id)
+    }
+  }
 }
 </script>
+
+<style scoped>
+#review {
+  display: flex;
+  position: relative;
+}
+b-card-title {
+  word-break: break-word;
+}
+a {
+  color: #000000;
+}
+</style>

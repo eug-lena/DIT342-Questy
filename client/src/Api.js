@@ -16,6 +16,7 @@ function updateStore(responseData) {
   store.setAuthenticated(true)
   store.setUsername(responseData.username)
   store.setUserID(responseData._id)
+  store.setAdmin(responseData.isAdmin)
 }
 
 function resetStore() {
@@ -23,6 +24,7 @@ function resetStore() {
   store.setAuthenticated(false)
   store.setUsername('')
   store.setUserID('')
+  store.setAdmin(false)
 }
 
 export const Api = {
@@ -61,6 +63,7 @@ export const Api = {
       .then((response) => {
         resetStore()
         alert(response.data.message)
+        window.location.reload()
       })
       .catch((error) => {
         alert(error.response.data.message)
@@ -165,6 +168,36 @@ export const Api = {
     return returnData
   },
 
+  followUser: async function (id) {
+    const returnData = {}
+    await Axios.post('/v1/users/' + id + '/follow')
+      .then((response) => {
+        returnData.status = response.status
+        returnData.message = response.data.message
+      })
+      .catch((error) => {
+        returnData.status = error.response.status
+        returnData.message = error.response.data.message
+      })
+
+    return returnData
+  },
+
+  unfollowUser: async function (id) {
+    const returnData = {}
+    await Axios.delete('/v1/users/' + id + '/follow')
+      .then((response) => {
+        returnData.status = response.status
+        returnData.message = response.data.message
+      })
+      .catch((error) => {
+        returnData.status = error.response.status
+        returnData.message = error.response.data.message
+      })
+
+    return returnData
+  },
+
   // GAME
 
   postGame: async function (game) {
@@ -226,6 +259,23 @@ export const Api = {
     return returnData
   },
 
+  deleteGames: async function (filter) {
+    const returnData = {}
+    if (filter === undefined || filter === null) {
+      filter = ''
+    }
+    await Axios.delete('/v1/games?' + filter)
+      .then((response) => {
+        returnData.status = response.status
+      })
+      .catch((error) => {
+        returnData.status = error.response.status
+        returnData.message = error.response.data.message
+      })
+
+    return returnData
+  },
+
   // REVIEW
 
   postReview: async function (review) {
@@ -239,6 +289,21 @@ export const Api = {
         returnData.status = error.response.status
         returnData.message = error.response.data.message
       })
+    return returnData
+  },
+
+  async getReviewsByUserID(id) {
+    const returnData = {}
+    await Axios.get('/v1/reviews?user=' + id)
+      .then((response) => {
+        returnData.status = response.status
+        returnData.reviews = response.data.reviews
+      })
+      .catch((error) => {
+        returnData.status = error.response.status
+        returnData.message = error.response.data.message
+      })
+
     return returnData
   },
 

@@ -28,7 +28,7 @@ export default {
 
 <style scoped>
 .gameBox {
-  height: 200px;
+  height: 180px;
   display: flex;
   margin-bottom: 10px;
   margin-top: 10px;

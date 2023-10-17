@@ -137,7 +137,6 @@ export default {
     height: 30px;
     font-size: 20px;
     margin-right: 1px;
-    padding-right: 1px;
   }
 
   #username {

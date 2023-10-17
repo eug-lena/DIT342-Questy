@@ -10,6 +10,10 @@ var linksHandler = require('./linkshandler');
 
 // Create a new game
 router.post('/', async function (req, res, next) {
+    if (!req.isAuthenticated() || !req.user.isAdmin) {
+        return res.status(401).json({ "message": "You are not authorized to post games" });
+    }
+
     var game = new Game(req.body);
     try {
         await game.save();
@@ -112,6 +116,10 @@ router.get('/:id', async function (req, res, next) {
 
 // Replace a game by id
 router.put('/:id', async function (req, res, next) {
+    if (!req.isAuthenticated() || !req.user.isAdmin) {
+        return res.status(401).json({ "message": "You are not authorized to update games" });
+    }
+
     var id = req.params.id;
     try {
         const game = await Game.findById(id);
@@ -147,6 +155,10 @@ router.put('/:id', async function (req, res, next) {
 
 // Update a game by id 
 router.patch('/:id', async function (req, res, next) {
+    if (!req.isAuthenticated() || !req.user.isAdmin) {
+        return res.status(401).json({ "message": "You are not authorized to update games" });
+    }
+
     var id = req.params.id;
     try {
         const game = await Game.findById(id);
@@ -184,6 +196,9 @@ router.patch('/:id', async function (req, res, next) {
 
 // Delete a game by id
 router.delete('/:id', async function (req, res, next) {
+    if (!req.isAuthenticated() || !req.user.isAdmin) {
+        return res.status(401).json({ "message": "You are not authorized to delete games" });
+    }
     var id = req.params.id;
     try {
         var game = await Game.findOneAndDelete({ _id: id });
@@ -202,6 +217,9 @@ router.delete('/:id', async function (req, res, next) {
 
 // Delete game(s) by query
 router.delete('/', async function (req, res, next) {
+    if (!req.isAuthenticated() || !req.user.isAdmin) {
+        return res.status(401).json({ "message": "You are not authorized to delete games" });
+    }
     try {
         // Create query from query parameters
         var query = Game.find(queryHandler.queryCreation(req));

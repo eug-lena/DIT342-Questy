@@ -28,7 +28,7 @@ router.post('/login', function (req, res, next) {
 router.get('/isAuthenticated', function (req, res) {
     try {
         if (req.isAuthenticated()) {
-            return res.json({ "authenticated": true, "username": req.user.username, "_id": req.user._id });
+            return res.json({ "authenticated": true, "username": req.user.username, "_id": req.user._id, "isAdmin": req.user.isAdmin });
         } else {
             return res.json({ "authenticated": false });
         }

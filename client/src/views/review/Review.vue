@@ -6,7 +6,12 @@
         <div class="sticky-top">
           <!-- Review box -->
           <h1>
-            {{ review.user.username }}'s review for {{ review.game.name }}
+            <a :href="'/user/' + this.review.user.username">
+              {{ review.user.username }}</a
+            >'s review for
+            <a :href="'/game/' + this.review.game.name">
+              {{ review.game.name }}</a
+            >
           </h1>
 
           <div id="review" class="card-body">
@@ -42,13 +47,13 @@
                 <p v-if="this.showMore">
                   {{ review.text }}
                 </p>
-                <p v-else-if="review.text.length > 200">
-                  {{ review.text.slice(0, 200) }}...
+                <p v-else-if="review.text.length > 100">
+                  {{ review.text.slice(0, 100) }}...
                 </p>
-                <p v-else>{{ review.text.slice(0, 200) }}</p>
+                <p v-else>{{ review.text.slice(0, 100) }}</p>
                 <b-button
                   :pressed="this.showMore"
-                  v-if="review.text.length > 200"
+                  v-if="review.text.length > 100"
                   v-on:click="showText()"
                   variant="link"
                   class="showMoreBtn"
@@ -181,8 +186,7 @@ export default {
       const response = await Api.getReviewById(this.$route.params.id)
       if (response.status === 200) {
         this.review = response.review
-        this.review.date = this.review.date.slice(0, 19)
-        this.review.date = this.review.date.replace('T', ' ')
+        this.review.date = this.review.date.slice(0, 19).replace('T', ' ')
         if (!this.review.user) {
           this.review.user = { username: 'Deleted User' }
         }
@@ -325,6 +329,9 @@ h5 {
 h1 {
   word-wrap: break-word;
   margin-left: 15px;
+}
+a {
+  color: black;
 }
 #not-found-box {
   margin-top: 100px;

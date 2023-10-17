@@ -2,7 +2,7 @@
   <div class="commentBox">
     <b-row class="m-0">
       <div class="user">
-        <router-link :to="`/user?username=${username}`" class="name">{{
+        <router-link :to="`/user/${username}`" class="name">{{
           this.username
         }}</router-link>
       </div>
@@ -215,8 +215,7 @@ export default {
     }
   },
   mounted() {
-    this.date = this.comment.date.slice(0, 19)
-    this.date = this.date.replace('T', ' ')
+    this.date = this.comment.date.slice(0, 19).replace('T', ' ')
     if (this.comment.user.username) {
       this.username = this.comment.user.username
     }

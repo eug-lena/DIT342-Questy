@@ -22,8 +22,10 @@
         ></game-item>
       </b-list-group>
     </div>
-    <div>
-      <h3>Check out these recent reviews from people you follow</h3>
+    <div v-if="followingReviews.length > 0">
+      <h3 class="m-3">
+        Check out these recent reviews from people you follow!
+      </h3>
       <b-list-group id="list-group" horizontal>
         <review-item
           v-for="review in this.followingReviews"
@@ -67,7 +69,9 @@ export default {
   mounted() {
     this.getGamesByReleaseDate()
     this.getGamesByPostedDate()
-    this.getReviewsFromFollowers()
+    if (this.store.isAuthenticated) {
+      this.getReviewsFromFollowers()
+    }
   },
   methods: {
     async getReviewsFromFollowers() {

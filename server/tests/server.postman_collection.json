@@ -1,10 +1,10 @@
 {
 	"info": {
-		"_postman_id": "3a8fbf1c-0996-4892-9036-246c297a871e",
+		"_postman_id": "7025e6cc-2d68-4d44-aa7c-45290bc9240a",
 		"name": "GameReview - Postman Test Script",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "29744231",
-		"_collection_link": "https://winter-desert-178755.postman.co/workspace/New-Team-Workspace~c6c3752b-41d8-46c5-86c6-7e02ec2a4854/collection/29744231-3a8fbf1c-0996-4892-9036-246c297a871e?action=share&source=collection_link&creator=29744231"
+		"_collection_link": "https://winter-desert-178755.postman.co/workspace/New-Team-Workspace~c6c3752b-41d8-46c5-86c6-7e02ec2a4854/collection/29744231-7025e6cc-2d68-4d44-aa7c-45290bc9240a?action=share&source=collection_link&creator=29744231"
 	},
 	"item": [
 		{
@@ -386,8 +386,8 @@
 											"    pm.response.to.have.status(200);\r",
 											"});\r",
 											"\r",
-											"pm.test(\"Returns all (3) users\", function () {\r",
-											"    pm.expect(pm.response.json().users.length).to.be.equal(3);\r",
+											"pm.test(\"Returns all (4) users\", function () {\r",
+											"    pm.expect(pm.response.json().users.length).to.be.equal(4);\r",
 											"});"
 										],
 										"type": "text/javascript"
@@ -1324,6 +1324,51 @@
 					"name": "Post",
 					"item": [
 						{
+							"name": "Login as admin",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"username\": \"testAdmin\",\r\n    \"password\": \"admin\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:3001/api/v1/authenticate/login",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3001",
+									"path": [
+										"api",
+										"v1",
+										"authenticate",
+										"login"
+									]
+								}
+							},
+							"response": []
+						},
+						{
 							"name": "Game 1: Maze",
 							"event": [
 								{
@@ -1365,7 +1410,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\r\n    \"name\": \"Maze\",\r\n    \"author\": \"Team 27\",\r\n    \"releaseDate\": \"2004-01-22\",\r\n    \"tag\": [\r\n        \"Simulator\",\r\n        \"Roleplay\",\r\n        \"Third-person\"\r\n    ]\r\n}",
+									"raw": "{\r\n    \"name\": \"Maze\",\r\n    \"author\": \"Team 27\",\r\n    \"releaseDate\": \"2020-01-22\",\r\n    \"tag\": [\r\n        \"Simulator\",\r\n        \"Roleplay\",\r\n        \"Third-person\"\r\n    ]\r\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -2673,6 +2718,42 @@
 								}
 							},
 							"response": []
+						},
+						{
+							"name": "Logout as Admin",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:3001/api/v1/authenticate/logout",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "3001",
+									"path": [
+										"api",
+										"v1",
+										"authenticate",
+										"logout"
+									]
+								}
+							},
+							"response": []
 						}
 					]
 				}
@@ -3117,8 +3198,8 @@
 									"listen": "test",
 									"script": {
 										"exec": [
-											"pm.test(\"Status code is 400\", function () {\r",
-											"    pm.response.to.have.status(400);\r",
+											"pm.test(\"Status code is 404\", function () {\r",
+											"    pm.response.to.have.status(404);\r",
 											"});"
 										],
 										"type": "text/javascript"
@@ -5744,8 +5825,261 @@
 			]
 		},
 		{
+			"name": "Relationship methods",
+			"item": [
+				{
+					"name": "Login user3 (bobson)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\": \"bobson\",\r\n    \"password\": \"bobs_password\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3001/api/v1/authenticate/login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"api",
+								"v1",
+								"authenticate",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get comments from review",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Get all (2) comments from review2\", function () {\r",
+									"    pm.expect(pm.response.json().comments.length).to.be.equal(2);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3001/api/v1/reviews/{{review2_id}}/comments",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"api",
+								"v1",
+								"reviews",
+								"{{review2_id}}",
+								"comments"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get comments from review by id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3001/api/v1/reviews/{{review2_id}}/comments/{{comment1_id}}",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"api",
+								"v1",
+								"reviews",
+								"{{review2_id}}",
+								"comments",
+								"{{comment1_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete comment from review by id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3001/api/v1/reviews/{{review2_id}}/comments/{{comment1_id}}",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"api",
+								"v1",
+								"reviews",
+								"{{review2_id}}",
+								"comments",
+								"{{comment1_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Post comment from review by id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{ \r\n    \"text\": \"that seems about right\",\r\n    \"opinion\" : \"true\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3001/api/v1/reviews/{{review2_id}}/comments",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"api",
+								"v1",
+								"reviews",
+								"{{review2_id}}",
+								"comments"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
 			"name": "Method Override",
 			"item": [
+				{
+					"name": "Login as admin",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\": \"testAdmin\",\r\n    \"password\": \"admin\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3001/api/v1/authenticate/login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"api",
+								"v1",
+								"authenticate",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
 				{
 					"name": "Game: MethodOverride",
 					"event": [
@@ -6107,7 +6441,8 @@
 									"pm.test(\"Returned in ascending order\", function () {\r",
 									"    pm.expect(user[0].username).to.be.equal(\"bobson\");\r",
 									"    pm.expect(user[1].username).to.be.equal(\"lenaaa\");\r",
-									"    pm.expect(user[2].username).to.be.equal(\"william\");\r",
+									"    pm.expect(user[2].username).to.be.equal(\"testAdmin\");\r",
+									"    pm.expect(user[3].username).to.be.equal(\"william\");\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -6157,8 +6492,9 @@
 									"\r",
 									"var user = pm.response.json().users;\r",
 									"pm.test(\"Returned in descending order\", function () {\r",
-									"    pm.expect(user[2].username).to.be.equal(\"bobson\");\r",
-									"    pm.expect(user[1].username).to.be.equal(\"lenaaa\");\r",
+									"    pm.expect(user[3].username).to.be.equal(\"bobson\");\r",
+									"    pm.expect(user[2].username).to.be.equal(\"lenaaa\");\r",
+									"    pm.expect(user[1].username).to.be.equal(\"testAdmin\");\r",
 									"    pm.expect(user[0].username).to.be.equal(\"william\");\r",
 									"});"
 								],
@@ -6191,214 +6527,6 @@
 									"key": "sort",
 									"value": "-username"
 								}
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Relationship methods",
-			"item": [
-				{
-					"name": "Login user3 (bobson)",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 200\", function () {\r",
-									"    pm.response.to.have.status(200);\r",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"username\": \"bobson\",\r\n    \"password\": \"bobs_password\"\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "http://localhost:3001/api/v1/authenticate/login",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "3001",
-							"path": [
-								"api",
-								"v1",
-								"authenticate",
-								"login"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get comments from review",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 200\", function () {\r",
-									"    pm.response.to.have.status(200);\r",
-									"});\r",
-									"\r",
-									"pm.test(\"Get all (2) comments from review2\", function () {\r",
-									"    pm.expect(pm.response.json().comments.length).to.be.equal(2);\r",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "http://localhost:3001/api/v1/reviews/{{review2_id}}/comments",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "3001",
-							"path": [
-								"api",
-								"v1",
-								"reviews",
-								"{{review2_id}}",
-								"comments"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get comments from review by id",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 200\", function () {\r",
-									"    pm.response.to.have.status(200);\r",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "http://localhost:3001/api/v1/reviews/{{review2_id}}/comments/{{comment1_id}}",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "3001",
-							"path": [
-								"api",
-								"v1",
-								"reviews",
-								"{{review2_id}}",
-								"comments",
-								"{{comment1_id}}"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Delete comment from review by id",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 200\", function () {\r",
-									"    pm.response.to.have.status(200);\r",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "DELETE",
-						"header": [],
-						"url": {
-							"raw": "http://localhost:3001/api/v1/reviews/{{review2_id}}/comments/{{comment1_id}}",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "3001",
-							"path": [
-								"api",
-								"v1",
-								"reviews",
-								"{{review2_id}}",
-								"comments",
-								"{{comment1_id}}"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Post comment from review by id",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 201\", function () {\r",
-									"    pm.response.to.have.status(201);\r",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{ \r\n    \"text\": \"that seems about right\",\r\n    \"opinion\" : \"true\"\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "http://localhost:3001/api/v1/reviews/{{review2_id}}/comments",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "3001",
-							"path": [
-								"api",
-								"v1",
-								"reviews",
-								"{{review2_id}}",
-								"comments"
 							]
 						}
 					},

@@ -33,6 +33,14 @@
                   >
                     Follow
                   </b-button>
+                  <b-button
+                    variant="danger"
+                    v-else-if="this.store.isAuthenticated"
+                    :disabled="this.posting"
+                    @click="deleteProfile()"
+                  >
+                    Delete Profile
+                  </b-button>
                 </div>
               </b-row>
 
@@ -48,33 +56,26 @@
 
               <!-- pinned review -->
               <div id="review" class="mr-auto">
-                <b-card-title>Pinned Review</b-card-title>
-                <b-card>
-                  <b-card-body>
-                    <b-card-text v-if="this.user.pinnedReview">
-                      <b-card-title>{{
-                        user.pinnedReview.game.name
-                      }}</b-card-title>
-                      <b-card-title>{{ user.pinnedReview.title }}</b-card-title>
-                      <b-card-text>{{ user.pinnedReview.text }}</b-card-text>
-                      <b-card-text>{{ user.pinnedReview.rating }}</b-card-text>
-                      <b-card-text>{{ user.pinnedReview.date }}</b-card-text>
-                    </b-card-text>
-                    <b-card-text v-else>
-                      <p>This user has not set a pinned review.</p>
-                    </b-card-text>
-                  </b-card-body>
-                </b-card>
+                <b-row class="m-0">
+                  <b-card-title>Pinned Review</b-card-title>
+                </b-row>
+                <b-card-text v-if="this.user.pinnedReview">
+                  <pinned-review-item
+                    :key="user._id"
+                    :pinnedReview="user.pinnedReview"
+                  ></pinned-review-item>
+                </b-card-text>
+                <b-card-text v-else>
+                  <p>This user has not set a pinned review.</p>
+                </b-card-text>
               </div>
             </b-col>
 
             <b-col id="right-column">
-
               <!-- recent -->
-              <recent-activity-item> </recent-activity-item>
-
+              <recent-activity-item :key="user._id" :user="user">
+              </recent-activity-item>
             </b-col>
-
           </b-row>
 
         </b-tab>
@@ -88,6 +89,39 @@
           ></following-item>
           <div v-else>
             <h1 class="text-center">This user is not following anyone.</h1>
+          </div>
+        </b-tab>
+
+        <!-- reviews -->
+        <b-tab title="Reviews">
+          <b-list-group horizontal>
+            <review-item
+              class="m-0 col-4"
+              v-for="review in reviews.slice(
+                (currentPage - 1) * perPage,
+                (currentPage - 1) * perPage + perPage
+              )"
+              :key="review._id"
+              :review="review"
+              @updatePinnedReview="handleUpdatePinnedReview"
+            ></review-item>
+          </b-list-group>
+
+          <div v-if="this.reviews.length > 6" class="pagination">
+            <div class="overflow-auto">
+              <b-pagination
+                v-model="currentPage"
+                :total-rows="this.reviews.length"
+                :per-page="perPage"
+                first-number
+                last-number
+                align="end"
+                aria-controls="my-table"
+              ></b-pagination>
+            </div>
+          </div>
+          <div v-if="this.reviews.length < 1">
+            <h1 class="text-center">This user has not written any reviews.</h1>
           </div>
         </b-tab>
       </b-tabs>
@@ -111,12 +145,21 @@ import bioItem from '@/components/User/BioItem.vue'
 import followingItem from '@/components/User/FollowingItem.vue'
 import recentActivityItem from '@/components/User/RecentActivityItem.vue'
 import { useUserStore } from '@/store/UserStore'
+import reviewItem from '@/components/User/ReviewItem.vue'
+import pinnedReviewItem from '@/components/User/PinnedReviewItem.vue'
 
 export default {
-  components: { followingItem, bioItem, recentActivityItem },
+  components: {
+    followingItem,
+    bioItem,
+    recentActivityItem,
+    reviewItem,
+    pinnedReviewItem
+  },
   data() {
     return {
       user: '',
+      reviews: '',
       filter: {
         username: ''
       },
@@ -124,58 +167,30 @@ export default {
       editing: false,
       posting: false,
       store: useUserStore(),
-      user1: {
-        _id: '1244234',
-        username: 'asaaaaaaadas',
-        bio: 'this is a bio',
-        following: [
-          { username: 'wwwwwwwwwwwwwwwwww', _id: '1' },
-          { username: 'wwwwww', _id: '2' },
-          { username: 'wwwwwwwwwwww', _id: '3' },
-          { username: 'iiiiii', _id: '4' },
-          { username: 'joe', _id: '5' },
-          { username: 'jim', _id: '6' },
-          { username: 'bob', _id: '7' },
-          { username: 'joe', _id: '8' },
-          { username: 'jim', _id: '9' },
-          { username: 'bob', _id: '10' },
-          { username: 'joe', _id: '11' },
-          { username: 'jim', _id: '12' },
-          { username: 'wwwwwwwwwwwwwwwwww', _id: '13' },
-          { username: 'wwwwww', _id: '14' },
-          { username: 'wwwwwwwwwwww', _id: '15' },
-          { username: 'iiiiii', _id: '16' },
-          { username: 'joe', _id: '17' },
-          { username: 'jim', _id: '789' },
-          { username: 'bob', _id: '123' },
-          { username: 'joe', _id: '1234' },
-          { username: 'jim', _id: '23' },
-          { username: 'bob', _id: '12123' },
-          { username: 'joe', _id: '654' },
-          { username: 'jim', _id: '153' }
-        ],
-        pinnedReview: {
-          game: { name: 'world of warcraft' },
-          title: 'this is a review',
-          text: 'this is the content of the review',
-          rating: 5,
-          date: '2020-01-01'
-        }
-      },
-      loading: true
+      loading: true,
+      perPage: 6,
+      currentPage: 1
     }
   },
   async mounted() {
     await this.getUser()
     this.loading = false
-    console.log(this.user)
   },
   methods: {
+    async getUserReviews() {
+      const response = await Api.getReviewsByUserID(this.user._id)
+      if (response.status === 200) {
+        this.reviews = response.reviews
+      } else if (response.status !== 404) {
+        alert(response.message)
+      }
+    },
     async getUser() {
       const response = await Api.getUserByUsername(this.$route.params.username)
       if (response.status === 200) {
         this.user = response.user
         await this.isFollowingUser()
+        await this.getUserReviews()
       } else if (response.status !== 404) {
         alert(response.message)
       }
@@ -202,18 +217,83 @@ export default {
       }
     },
 
-    follow() {},
+    follow() {
+      this.posting = true
+      Api.followUser(this.user._id)
+        .then((response) => {
+          if (response.status === 201) {
+            this.following = true
+          } else {
+            alert(response.message)
+          }
+        })
+        .catch((error) => {
+          alert(error)
+        })
+        .finally(() => {
+          this.posting = false
+        })
+    },
 
-    unfollow() {},
+    unfollow() {
+      this.posting = true
+      Api.unfollowUser(this.user._id)
+        .then((response) => {
+          if (response.status === 200) {
+            this.following = false
+          } else {
+            alert(response.message)
+          }
+        })
+        .catch((error) => {
+          alert(error)
+        })
+        .finally(() => {
+          this.posting = false
+        })
+    },
+
+    async deleteProfile() {
+      if (
+        !confirm(
+          'Are you sure you want to delete your profile? This action cannot be undone.'
+        )
+      ) {
+        return
+      }
+
+      const response = await Api.deleteByHateoas(this.user.links.self.href)
+      if (response.status === 200) {
+        this.$router.push('/')
+      } else {
+        alert(response.message)
+      }
+    },
 
     handleUpdateBio(data) {
       this.user.bio = data.bio
+    },
+    async handleUpdatePinnedReview(data) {
+      const response = await Api.getReviewById(data.pinnedReview)
+      if (response.status) {
+        this.user.pinnedReview = response.review
+      } else {
+        alert(response.message)
+      }
     }
   }
 }
 </script>
 
 <style scoped>
+.pagination {
+  margin-left: 10px;
+  margin-bottom: 50px;
+}
+
+.list-group {
+  flex-wrap: wrap;
+}
 #left-column {
   border: 1px solid black;
   box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
@@ -241,18 +321,6 @@ export default {
   font: normal normal bold 36px/87px Arial;
 }
 
-#bio {
-  border-radius: 4px;
-  padding: 5px;
-  margin: 10px;
-}
-
-#review {
-  border-radius: 4px;
-  padding: 5px;
-  margin: 10px;
-}
-
 #right-column {
   border: 1px solid black;
   box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
@@ -262,28 +330,8 @@ export default {
   min-height: 70vh;
 }
 
-#following {
-  display: inline-block;
-  width: 100%;
-}
-
 #not-found {
   margin-top: 10vh;
-}
-.list-group {
-  width: 100%;
-  display: flex;
-  flex-wrap: wrap;
-}
-#followingText {
-  text-align: left;
-  font-size: 50px;
-  font-weight: bold;
-  margin-left: 15px;
-}
-
-#filter-form {
-  margin-left: 15px;
 }
 
 #no-users-text {
@@ -292,6 +340,7 @@ export default {
   margin-top: 30px;
   margin-left: 50px;
 }
+
 @media screen and (max-width: 992px) {
   #left-column {
     margin: 0;

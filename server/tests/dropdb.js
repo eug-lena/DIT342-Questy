@@ -16,7 +16,18 @@ mongoose.connect(mongoURI).catch(function (err) {
         process.exit(1);
     }
 });
-mongoose.connection.dropDatabase().then(function () {
+mongoose.connection.dropDatabase().then(async function () {
+    let User = require('../models/user');
+    let user = new User({
+        username: 'testAdmin'
+    });
+
+    await user.setPassword('admin');
+    await user.save();
+    await User.updateOne({ username: 'testAdmin' }, { $set: { isAdmin: true } });
+
+    console.log(await User.findOne({ username: 'testAdmin' }));
+
     console.log(`Dropped database: ${mongoURI}`);
     process.exit(0);
 });

@@ -7,7 +7,9 @@
         alt="user icon"
         src="@/assets/user-icon.png"
       />
-      <a :href="'/user/' + this.followedUser.username">{{ followedUser.username }}</a>
+      <a :href="'/user/' + this.followedUser.username">{{
+        followedUser.username
+      }}</a>
     </b-row>
   </div>
 </template>
@@ -23,6 +25,10 @@ export default {
 </script>
 
 <style scoped>
+a {
+  color: black;
+  text-decoration: none;
+}
 .userBox {
   display: inline-block;
   width: auto;

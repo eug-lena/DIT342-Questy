@@ -7,7 +7,7 @@
   >
     <div v-if="this.game">
       <b-row class="m-0" id="game-content-row">
-        <b-col class="game-content-col col-12 col-md-5 col-lg-4 col-xl-3">
+        <b-col class="game-content-col col-12 col-md-5 col-lg-4 col-xl-4">
           <h1 id="game-name">{{ this.game.name }}</h1>
           <h3 id="game-author">Created by: {{ this.game.author }}</h3>
           <p id="release-date">
@@ -29,7 +29,7 @@
               class="m-1"
               variant="danger"
               v-on:click="deleteGame()"
-              :hidden="!this.store.isAuthenticated"
+              :hidden="!this.store.isAdmin"
               >Delete</b-button
             >
             <b-button
@@ -47,7 +47,7 @@
               class="m-1"
               variant="info"
               v-on:click="editGame()"
-              :hidden="!this.store.isAuthenticated"
+              :hidden="!this.store.isAdmin"
               >Edit</b-button
             >
           </b-row>

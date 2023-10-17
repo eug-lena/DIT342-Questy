@@ -18,7 +18,7 @@ router.post('/', async function (req, res, next) {
     try {
         let Game = require('../models/game');
         var game = await Game.findById(req.body.game);
-        console.log(game); 
+        console.log(game);
 
         console.log(game.releaseDate);
         console.log(Date.now());
@@ -40,6 +40,16 @@ router.post('/', async function (req, res, next) {
         return res.status(201).json(review);
 
     } catch (err) {
+        // CastError is thrown when an invalid id is passed to save
+        if (err.name === 'CastError') {
+            return res.status(400).json({ "message": "Invalid " + err.path });
+        }
+
+        // TypeError is thrown when an invalid id is passed to findById
+        if (err.name === 'TypeError') {
+            return res.status(400).json({ "message": "Invalid game id" });
+        }
+
         // MongoServerError with code 11000 is thrown when a duplicate key is found
         if (err.name === 'MongoServerError' && err.code === 11000) {
             return res.status(400).json({ "message": "A review by this user already exist for this game" });

@@ -1365,7 +1365,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\r\n    \"name\": \"Maze\",\r\n    \"author\": \"Team 27\",\r\n    \"releaseDate\": \"2024-01-22\",\r\n    \"tag\": [\r\n        \"Simulator\",\r\n        \"Roleplay\",\r\n        \"Third-person\"\r\n    ]\r\n}",
+									"raw": "{\r\n    \"name\": \"Maze\",\r\n    \"author\": \"Team 27\",\r\n    \"releaseDate\": \"2004-01-22\",\r\n    \"tag\": [\r\n        \"Simulator\",\r\n        \"Roleplay\",\r\n        \"Third-person\"\r\n    ]\r\n}",
 									"options": {
 										"raw": {
 											"language": "json"

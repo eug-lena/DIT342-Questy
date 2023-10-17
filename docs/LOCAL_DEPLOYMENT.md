@@ -10,11 +10,11 @@ These steps describe how you can deploy your app locally in production mode if y
 
 > Make sure you have all dependencies installed for the server and client (using `npm install`).
 
-1. Change into the root directory `cd group-00-web`
+1. Change into the root directory `cd group-27-web`
 2. Set the environment variable `NODE_ENV` for the server:
     * macOS/Linux: `export NODE_ENV=production` (check with `echo $NODE_ENV`)
     * Windows: `set NODE_ENV "production"` (check with `echo %NODE_ENV%`)
-3. Set the environment variable `MONGODB_URI` for the server (change the database name "animals" according to your project):
+3. Set the environment variable `MONGODB_URI` for the server:
     * macOS/Linux: `export MONGODB_URI=mongodb://127.0.0.1:27017/gameReviewDB`
     * Windows: `set MONGODB_URI "mongodb://127.0.0.1:27017/gameReviewDB"`
 4. Set the environment variable `VUE_APP_API_ENDPOINT` for the client production build:
@@ -24,9 +24,9 @@ These steps describe how you can deploy your app locally in production mode if y
 6. Run the application with `npm run start --prefix server`
 
 ```none
-➜  group-00-web git:(master) ✗ npm run start --prefix server
+➜  group-27-web git:(master) ✗ npm run start --prefix server
 3:03:38 PM web.1 |  Express server listening on port 3000, in production mode
 3:03:38 PM web.1 |  Backend: http://127.0.0.1:3000/api/
 3:03:38 PM web.1 |  Frontend (production): http://127.0.0.1:3000/
-3:03:38 PM web.1 |  Connected to MongoDB with URI: mongodb://127.0.0.1:27017/animals-production
+3:03:38 PM web.1 |  Connected to MongoDB with URI: mongodb://127.0.0.1:27017/game-review
 ```

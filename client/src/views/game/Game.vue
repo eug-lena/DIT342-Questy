@@ -38,6 +38,8 @@
               variant="success"
               v-on:click="createReview()"
               :hidden="!this.store.isAuthenticated"
+              :disabled="this.game.releaseDate > this.getCurrentDate()"
+              v-b-tooltip.hover title="This game has not been released yet!"
               >Add review</b-button
             >
             <b-button
@@ -98,7 +100,8 @@ export default {
       reviews: '',
       error: '',
       store: useUserStore(),
-      loading: true
+      loading: true,
+      currentDate: ''
     }
   },
   mounted() {
@@ -157,6 +160,13 @@ export default {
         name: 'edit-game',
         params: { name: this.game.name }
       })
+    },
+    getCurrentDate() {
+      const date = new Date()
+      const day = date.getDate()
+      const month = date.getMonth() + 1
+      const year = date.getFullYear()
+      return `${year}-${month}-${day}`
     }
   }
 }

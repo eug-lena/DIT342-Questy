@@ -15,9 +15,22 @@ router.post('/', async function (req, res, next) {
     if (!req.isAuthenticated()) {
         return res.status(401).json({ "message": "You need to login to post comments" });
     }
-
-    var review = new Review(req.body);
     try {
+        let Game = require('../models/game');
+        var game = await Game.findById(req.body.game);
+        console.log(game);
+
+        console.log(game.releaseDate);
+        console.log(Date.now());
+        if (game === null) {
+            return res.status(404).json({ "message": "Game not found" });
+        }
+
+        if (game.releaseDate > Date.now()) {
+            return res.status(400).json({ "message": "You can't review a game that hasn't been released yet" });
+        }
+
+        var review = new Review(req.body);
         // To ensure that date, isEdited and user are set correctly
         review.user = req.user._id;
         review.date = Date.now();
@@ -27,6 +40,16 @@ router.post('/', async function (req, res, next) {
         return res.status(201).json(review);
 
     } catch (err) {
+        // CastError is thrown when an invalid id is passed to save
+        if (err.name === 'CastError') {
+            return res.status(400).json({ "message": "Invalid " + err.path });
+        }
+
+        // TypeError is thrown when an invalid id is passed to findById
+        if (err.name === 'TypeError') {
+            return res.status(400).json({ "message": "Invalid game id" });
+        }
+
         // MongoServerError with code 11000 is thrown when a duplicate key is found
         if (err.name === 'MongoServerError' && err.code === 11000) {
             return res.status(400).json({ "message": "A review by this user already exist for this game" });

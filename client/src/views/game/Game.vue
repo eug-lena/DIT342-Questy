@@ -106,7 +106,7 @@ export default {
   },
   methods: {
     async getGame() {
-      const response = await Api.getGameByName(this.$route.query.name)
+      const response = await Api.getGameByName(this.$route.params.name)
       if (response.status === 200) {
         await this.getBackgroundImage(response.game)
         this.game = response.game
@@ -127,7 +127,6 @@ export default {
     },
     async getReviews() {
       const response = await Api.getByHateoas(this.game.links.reviews.href)
-      console.log(response)
       if (response.status === 200) {
         this.reviews = response.data.reviews
       } else {
@@ -150,13 +149,13 @@ export default {
     createReview() {
       this.$router.push({
         name: 'add-review',
-        query: { name: this.game.name }
+        params: { gamename: this.game.name }
       })
     },
     editGame() {
       this.$router.push({
         name: 'edit-game',
-        query: { name: this.game.name }
+        params: { name: this.game.name }
       })
     }
   }

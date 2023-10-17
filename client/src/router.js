@@ -45,7 +45,7 @@ const router = new Router({
       component: AllGames
     },
     {
-      path: '/user',
+      path: '/user/:username',
       name: 'user',
       component: User
     },
@@ -55,27 +55,27 @@ const router = new Router({
       component: AddGame
     },
     {
-      path: '/review',
+      path: '/review/:id',
       name: 'review',
       component: Review
     },
     {
-      path: '/game',
+      path: '/game/:name',
       name: 'game',
       component: Game
     },
     {
-      path: '/edit-game',
+      path: '/edit-game/:name',
       name: 'edit-game',
       component: EditGame
     },
     {
-      path: '/add-review',
+      path: '/add-review/:gamename',
       name: 'add-review',
       component: AddReview
     },
     {
-      path: '/edit-review',
+      path: '/edit-review/:id',
       name: 'edit-review',
       component: EditReview
     },

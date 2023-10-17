@@ -64,15 +64,15 @@ export default {
       Api.Logout()
     },
     async goToProfile() {
-      const profilePath = '/user?username=' + this.store.getUsername
+      const profilePath = '/user/' + this.store.getUsername
       if (this.$router.history.current.fullPath === profilePath) {
         return
       }
 
-      if (this.$router.history.current.path === '/user') {
+      if (this.$router.history.current.name === 'user') {
         await this.$router.push({
           name: 'user',
-          query: { username: this.store.getUsername }
+          params: { username: this.store.getUsername }
         })
         window.location.reload()
         return
@@ -80,7 +80,7 @@ export default {
 
       this.$router.push({
         name: 'user',
-        query: { username: this.store.getUsername }
+        params: { username: this.store.getUsername }
       })
     }
   }

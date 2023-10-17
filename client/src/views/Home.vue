@@ -77,7 +77,6 @@ export default {
       } else if (response.status !== 404) {
         alert(response.message)
       }
-      console.log(this.followingReviews)
       this.loading = false
     },
     async getGamesByReleaseDate() {

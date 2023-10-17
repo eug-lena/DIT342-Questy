@@ -7,7 +7,7 @@
         alt="user icon"
         src="@/assets/user-icon.png"
       />
-      {{ followedUser.username }}
+      <a :href="'/user/' + this.followedUser.username">{{ followedUser.username }}</a>
     </b-row>
   </div>
 </template>

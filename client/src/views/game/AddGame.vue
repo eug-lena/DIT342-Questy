@@ -150,7 +150,7 @@ export default {
       if (response.status === 201) {
         this.$router.push({
           name: 'game',
-          query: { name: this.game.name }
+          params: { name: this.game.name }
         })
       } else {
         alert(response.message)

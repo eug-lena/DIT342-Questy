@@ -87,7 +87,7 @@ export default {
         this.review.user = this.store.getUserID
         const response = await Api.postReview(this.review)
         if (response.status === 201) {
-          this.$router.push('/review?id=' + response.review._id)
+          this.$router.push('/review/' + response.review._id)
         } else {
           alert(response.message)
         }
@@ -97,7 +97,7 @@ export default {
       this.posting = false
     },
     async getGame() {
-      const response = await Api.getGameByName(this.$route.query.name)
+      const response = await Api.getGameByName(this.$route.params.gamename)
       if (response.status === 200) {
         this.game = response.game
         this.review.game = this.game._id

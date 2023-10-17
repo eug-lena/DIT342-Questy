@@ -136,7 +136,7 @@ export default {
   },
   methods: {
     async getGame() {
-      const response = await Api.getGameByName(this.$route.query.name)
+      const response = await Api.getGameByName(this.$route.params.name)
       if (response.status === 200) {
         this.game = response.game
 
@@ -160,7 +160,7 @@ export default {
       if (response.status === 201) {
         this.$router.push({
           name: 'game',
-          query: { name: this.game.name }
+          params: { name: this.game.name }
         })
       } else {
         alert(response.message)

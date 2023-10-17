@@ -82,7 +82,7 @@ export default {
   },
   methods: {
     async getReview() {
-      const response = await Api.getReviewById(this.$route.query.id)
+      const response = await Api.getReviewById(this.$route.params.id)
       if (response.status === 200) {
         this.review = response.review
       } else {
@@ -97,7 +97,7 @@ export default {
         this.review
       )
       if (response.status === 201) {
-        this.$router.push({ name: 'review', query: { id: this.review._id } })
+        this.$router.push({ name: 'review', params: { id: this.review._id } })
       } else {
         alert(response.message)
       }
@@ -115,7 +115,7 @@ export default {
         if (response.status === 200) {
           this.$router.push({
             name: 'game',
-            query: { name: this.review.game.name }
+            params: { name: this.review.game.name }
           })
         } else {
           alert(response.message)

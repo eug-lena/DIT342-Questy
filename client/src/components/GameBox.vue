@@ -28,8 +28,7 @@ export default {
   props: ['game'],
   methods: {
     gotoGame(name) {
-      this.$router.push({ name: 'game', query: { name } })
-      console.log(this.game)
+      this.$router.push({ name: 'game', params: { name } })
     }
   }
 }

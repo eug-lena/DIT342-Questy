@@ -18,11 +18,11 @@
                 <p id="rating">Rating:</p>
                 <img
                   :src="
-                    require('../../assets/health-bar-' +
+                    require('@/assets/health-bar-' +
                       this.review.rating +
                       '.png')
                   "
-                  alt="3 stars"
+                  :alt="this.review.rating + ' stars'"
                   height="35px"
                   width="auto"
                 />
@@ -178,7 +178,7 @@ export default {
   },
   methods: {
     async getReview() {
-      const response = await Api.getReviewById(this.$route.query.id)
+      const response = await Api.getReviewById(this.$route.params.id)
       if (response.status === 200) {
         this.review = response.review
         this.review.date = this.review.date.slice(0, 19)
@@ -218,7 +218,7 @@ export default {
     editReview() {
       this.$router.push({
         name: 'edit-review',
-        query: { id: this.review._id }
+        params: { id: this.review._id }
       })
     },
     booleanOpinion() {

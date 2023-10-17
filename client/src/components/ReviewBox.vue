@@ -3,7 +3,7 @@
     <div class="content">
       <b-row class="user-box w-100">
         <div id="username-box" class="mr-auto">
-          <router-link :to="`/user?username=${username}`" class="name">{{
+          <router-link :to="`/user/${username}`" class="name">{{
             this.username
           }}</router-link>
         </div>
@@ -50,7 +50,7 @@ export default {
     goToReview() {
       this.$router.push({
         name: 'review',
-        query: { id: this.review._id }
+        params: { id: this.review._id }
       })
     }
   }

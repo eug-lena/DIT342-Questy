@@ -181,7 +181,6 @@ export default {
         request
       )
       if (response.status === 201) {
-        console.log(response.data)
         this.$emit('updateComment', response.data)
         this.editing = false
       } else {
